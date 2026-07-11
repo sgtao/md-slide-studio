@@ -6,6 +6,13 @@ Markdown原稿（スライドMD）から **HTMLスライド／PDF／PNG** を生
 レイアウト定義を利用
   - React + TypeScript に移植し、MD→HTML のLLM変換をパーサー＋コンポーネントに置換
 
+## Demo
+
+[Demo Site](https://sgtao.github.io/md-slide-studio/)
+
+![image](./public/assets/Screen-MD-Slide-studio.png)
+
+
 ## 特徴
 
 - **エディタ＋プレビュー2ペイン**: MDを編集すると右のスライドに即時反映（300msデバウンス）
@@ -39,7 +46,19 @@ npm run build    # 本番ビルド（dist/）
 Vite の `base: './'`（相対パス）でビルドするため、リポジトリ名に関わらず動作します。
 
 ## スライドMD仕様（要約）
+- スライド区切りは行全体が `---` の行（frontmatter・コードフェンス内は除外）
+- `==テキスト==` はアクセント色の強調
+- `fit` オプションで内容過多スライドを自動縮小、`layout:` で two-col / title-xl / compact
+- 図解は ```` ```diagram ````（type: flow / layer / cycle）または
+  mermaidサブセット（`graph LR/TD` の直線・循環のみ）
+- 制約: 枚数3〜12 / 1スライド1グラフ / 最終スライドは sources 推奨 /
+  生の `<script>` `<style>` は無視される
 
+完全な仕様は移植元スキルの [`references/markdown-format.md`](docs/references/markdown-format.md) を参照。
+
+LLMに原稿を書かせるプロンプト例は [`docs/prompts/draft-slide-md.md`](docs/prompts/draft-slide-md.md)。
+
+### Sample Markdown
 ```markdown
 ---
 title: デッキタイトル
@@ -64,24 +83,16 @@ unit: "%"
 data:
   - { label: React, value: 45 }
 source: { name: 出典名, url: https://... }
-```
+\```
+
 ---
 <!-- slide: sources -->
 ## 出典・参考リンク
-- [記事タイトル](https://...) — 補足
+- [記事タイトル] — 補足
+
 ```
 
-- スライド区切りは行全体が `---` の行（frontmatter・コードフェンス内は除外）
-- `==テキスト==` はアクセント色の強調
-- `fit` オプションで内容過多スライドを自動縮小、`layout:` で two-col / title-xl / compact
-- 図解は ```` ```diagram ````（type: flow / layer / cycle）または
-  mermaidサブセット（`graph LR/TD` の直線・循環のみ）
-- 制約: 枚数3〜12 / 1スライド1グラフ / 最終スライドは sources 推奨 /
-  生の `<script>` `<style>` は無視される
-
-完全な仕様は移植元スキルの `references/markdown-format.md` を参照。
-LLMに原稿を書かせるプロンプト例は [`docs/prompts/draft-slide-md.md`](docs/prompts/draft-slide-md.md)。
-
+----
 ## アーキテクチャ
 
 ```
