@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Markdown原稿からスライドHTML／PDF／PNGを生成するWebアプリ（websearch-slide-ja スキルのReact移植）",
+  "description": "Markdown原稿からスライドHTML／PDF／PNGを生成するWebアプリ",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

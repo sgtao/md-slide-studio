@@ -115,5 +115,5 @@ source: { name: 計測メモ（例）, url: https://example.com }
 ---
 <!-- slide: sources -->
 ## 出典・参考リンク
-- [websearch-slide-ja スキル](https://github.com/) — 本アプリの移植元スキル（スライドMD仕様 v0.7）
-- [MD Slide Studio リポジトリ](https://github.com/) — ソースコード・Issue はこちら
+- [websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja) — 本アプリの移植元スキル（スライドMD仕様 v0.7）
+- [MD Slide Studio リポジトリ](https://github.com/sgtao/md-slide-studio) — ソースコード・Issue はこちら

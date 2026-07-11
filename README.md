@@ -1,9 +1,10 @@
 # MD Slide Studio
 
 Markdown原稿（スライドMD）から **HTMLスライド／PDF／PNG** を生成するWebアプリ。
-[websearch-slide-ja](https://github.com/) スキル（v0.7系）のスライドMD仕様・デザイントークン・
-レイアウト定義を React + TypeScript に移植し、LLM変換だった MD→HTML を
-**決定論的なパーサー＋コンポーネント**に置き換えたものです。
+
+- 参考：[websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja) スキル（v0.7系）のスライドMD仕様・デザイントークン・
+レイアウト定義を利用
+  - React + TypeScript に移植し、MD→HTML のLLM変換をパーサー＋コンポーネントに置換
 
 ## 特徴
 
