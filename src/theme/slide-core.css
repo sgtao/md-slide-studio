@@ -1,0 +1,65 @@
+/* slide-core.css
+ * 16:9固定サイズのスライドビューポートと、
+ * hero モード時のスケーリング・レイアウト。
+ * theme-vars.css の読み込み後に適用すること。
+ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+/* ─── スケーラー（hero時: 絶対中央配置） ─── */
+.slide-scaler {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* JS: transform: translate(-50%, -50%) scale(ratio) */
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+  width: 960px;
+  height: 540px;
+}
+
+/* ─── スライド本体（960×540px 固定） ─── */
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 960px;
+  height: 540px;
+  background: var(--bg-slide);
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ─── スライド内コンテンツラッパ ─── */
+/* list時にJS側でscale変換するためのラッパ。hero時はそのまま表示。 */
+.slide-inner {
+  width: 100%;
+  height: 100%;
+  padding: 52px 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+

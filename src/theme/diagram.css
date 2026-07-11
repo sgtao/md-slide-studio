@@ -1,0 +1,79 @@
+/* ============================================================
+ * diagram.css  —  インラインSVG図解スタイル
+ * 統合順の正は SKILL.md（参照ファイルガイド／Step 4）を参照。
+ * 原則: 色はすべて CSS変数経由（SVG属性への直書き #色 は禁止）。外部参照ゼロ。
+ *       アクセントは常に --accent（chart-1 と同思想）。
+ * ============================================================ */
+
+/* 図の外枠（slide-chart と同列の配置コンテナ） */
+.slide-diagram {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.diagram-svg {
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+  overflow: visible;
+}
+
+/* ノード（矩形 / 円 共通） */
+.diagram-node {
+  fill: var(--bg-surface);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+/* 強調ノード（1図につき主役を1つ程度） */
+.diagram-node-accent {
+  fill: var(--accent-dim);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+/* ノード内テキスト */
+.diagram-label {
+  fill: var(--text-primary);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* 補足テキスト（小） */
+.diagram-sublabel {
+  fill: var(--text-secondary);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* 接続線・矢印 */
+.diagram-edge {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+/* 矢印の頭（marker 内の path に付与） */
+.diagram-arrowhead {
+  fill: var(--accent);
+}
+
+/* 図の出典 */
+.diagram-source {
+  fill: var(--text-secondary);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+}
+
+/* 印刷時もコントラストを保つ（色はテーマ変数任せ） */
+@media print {
+  .diagram-svg { max-height: none; }
+}
+

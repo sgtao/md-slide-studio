@@ -1,0 +1,258 @@
+/* nav-controls.css
+ * 右上コントロールクラスタ（テーマ・ビュー切替・エクスポートボタン）、
+ * 左右ナビ矢印、プログレスバー、スライド番号。
+ *
+ * Phase 3 改修:
+ *   - .export-menu (ドロップダウンの親コンテナ) を追加
+ *   - .export-dropdown (ドロップダウン本体) を追加
+ *   - .kbd (キーボードショートカット表示) を追加
+ */
+
+/* ─── 右上コントロールクラスタ ─── */
+.control-cluster {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.control-cluster button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.control-cluster button:hover {
+  background: rgba(0,0,0,0.8);
+}
+
+[data-theme="dark"] .control-cluster button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ─── エクスポートメニュー（Phase 3 追加） ─── */
+/* .control-cluster 内の他のボタンと同じ形状を保ちつつ、
+   ドロップダウンメニューを抱える親コンテナ。 */
+.export-menu {
+  position: relative;
+  display: inline-block;
+}
+
+/* ─── エクスポートドロップダウン（Phase 3 追加） ─── */
+/* #export-toggle ボタンの下に表示されるメニューパネル。
+   hidden 属性で開閉する。 */
+.export-dropdown {
+  position: absolute;
+  top: 44px; /* control-cluster のボタン高さ 36px + gap 8px */
+  right: 0;
+  background: var(--bg-slide);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  padding: 6px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 150;
+}
+
+.export-dropdown[hidden] {
+  display: none;
+}
+
+/* ─── ドロップダウン内のボタン（Phase 3 追加） ─── */
+/* control-cluster の他のボタンとは異なるスタイル（横長・左寄せテキスト）。
+   !important は使わず、より具体的なセレクタで上書きする。 */
+.control-cluster .export-dropdown button {
+  width: 100%;
+  height: auto;
+  background: transparent;
+  color: var(--text-primary);
+  border: none;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.control-cluster .export-dropdown button:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+[data-theme="dark"] .control-cluster .export-dropdown button:hover {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ─── キーボードショートカット表示（Phase 3 追加） ─── */
+/* ドロップダウン内のボタン右端に表示される [P] [Shift+S] などの小バッジ。 */
+.export-dropdown .kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.control-cluster .export-dropdown button:hover .kbd {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── 左右ナビ矢印 ─── */
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 80px;
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  border: none;
+  border-radius: 4px;
+  font-size: 32px;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-arrow:hover { opacity: 0.85; }
+.nav-arrow.nav-prev { left: 8px; }
+.nav-arrow.nav-next { right: 8px; }
+.nav-arrow[hidden]  { display: none; }
+
+/* ─── プログレスバー（最上部） ─── */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+  z-index: 200;
+}
+
+/* ─── スライド番号（右下） ─── */
+#slide-counter {
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+  z-index: 10;
+}
+
+/* ─── カラーパレットメニュー ─── */
+/* export-menu と同じドロップダウン規約（hidden 属性で開閉・外側クリックで閉じる）。 */
+.palette-menu {
+  position: relative;
+  display: inline-block;
+}
+.palette-dropdown {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  background: var(--bg-slide);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  padding: 6px;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 150;
+}
+.palette-dropdown[hidden] {
+  display: none;
+}
+.control-cluster .palette-dropdown button {
+  width: 100%;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  transition: background 0.15s;
+}
+/* 絵文字アイコン */
+.control-cluster .palette-dropdown .palette-ico {
+  flex-shrink: 0;
+  width: 1.3em;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1;
+}
+/* 各項目の文字色＝そのパレット固有色（アクティブパレット非依存の固定色）。
+ * 注: 下記の色は theme-vars.css のパレット accent 値と重複管理。
+ *     パレットの色を変える場合は両ファイルを更新すること（意図的な例外）。 */
+.control-cluster .palette-dropdown button.pal-ocean    { color: #2563EB; }
+.control-cluster .palette-dropdown button.pal-forest   { color: #059669; }
+.control-cluster .palette-dropdown button.pal-sunset   { color: #EA580C; }
+.control-cluster .palette-dropdown button.pal-plum     { color: #7C3AED; }
+.control-cluster .palette-dropdown button.pal-graphite { color: #334155; }
+[data-theme="dark"] .control-cluster .palette-dropdown button.pal-ocean    { color: #58A6FF; }
+[data-theme="dark"] .control-cluster .palette-dropdown button.pal-forest   { color: #34D399; }
+[data-theme="dark"] .control-cluster .palette-dropdown button.pal-sunset   { color: #FB923C; }
+[data-theme="dark"] .control-cluster .palette-dropdown button.pal-plum     { color: #A78BFA; }
+[data-theme="dark"] .control-cluster .palette-dropdown button.pal-graphite { color: #94A3B8; }
+/* ホバーは背景のみ変更（固有色を保持するため color は指定しない） */
+.control-cluster .palette-dropdown button:hover {
+  background: var(--accent-light);
+}
+[data-theme="dark"] .control-cluster .palette-dropdown button:hover {
+  background: var(--accent-dim);
+}
+.control-cluster .palette-dropdown button.is-active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+}
+/* スワッチ（各パレットの accent 見本）。
+   UI 備品のため直接色指定を許容（スライド内 SVG の色直書き禁止ルールとは別扱い）。 */
+.palette-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.swatch-ocean    { background: #2563EB; }
+.swatch-forest   { background: #059669; }
+.swatch-sunset   { background: #EA580C; }
+.swatch-plum     { background: #7C3AED; }
+.swatch-graphite { background: #334155; }
+

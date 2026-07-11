@@ -1,0 +1,151 @@
+/* list-view.css
+ * 一覧表示モード（body[data-view="list"]）のスタイル。
+ * hero モードのスタイルを上書きするため、!important を多用している。
+ * slide-core.css の後に読み込むこと。
+ */
+
+/* ─── html・body: スクロール有効化 ─── */
+/* hero時は overflow:hidden のため、両方に !important で上書きが必要 */
+html[data-view="list"],
+body[data-view="list"] {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+  min-height: 100vh;
+}
+
+/* ─── スケーラー: 縦並びフレックスに変換 ─── */
+body[data-view="list"] .slide-scaler {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 100%;
+  height: auto;
+  transform: none !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 72px 5vw 64px;
+}
+
+/* ─── スライド枠: レスポンシブ幅 + 16:9比率維持 ─── */
+body[data-view="list"] .slide {
+  position: relative;
+  inset: auto;
+  width: min(90vw, 960px);
+  height: auto;
+  aspect-ratio: 16 / 9;
+  padding: 0 !important;
+  overflow: hidden;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+body[data-view="list"] .slide:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 70px rgba(0,0,0,0.4);
+}
+
+/* ─── 内部コンテンツラッパ: 960×540px 固定 + scale変換 ─── */
+/* JS側で slide.clientWidth / 960 を ratio として scale() を設定する */
+body[data-view="list"] .slide-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 960px;
+  height: 540px;
+  padding: 52px 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform-origin: top left;
+  box-sizing: border-box;
+}
+
+/* ─── スライド番号バッジ（右上） ─── */
+body[data-view="list"] .slide::after {
+  content: attr(data-num);
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  padding: 3px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  z-index: 5;
+}
+
+/* ─── ナビ矢印・カウンター・プログレスバーを非表示 ─── */
+body[data-view="list"] .nav-arrow,
+body[data-view="list"] #slide-counter,
+body[data-view="list"] #progress-bar {
+  display: none;
+}
+
+/* ─── チャート: list モードでもスライド枠からはみ出さないようにする ─── */
+/* .chart-svg は overflow:visible だが、親 .slide-chart で抑制する */
+body[data-view="list"] .slide-inner .slide-chart {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+ * 高さ可変スライド — .slide-fit（Phase 5 追加）
+ * ==========================================================================
+ *
+ * 一覧テーブル・長いリストなど、960×540px に収まらないコンテンツ用。
+ * hero モードでは通常の 960×540 固定を維持（下部は非表示）。
+ * list モードでのみ高さをコンテンツに追従させる。
+ *
+ * 使い方: <section class="slide slide-fit" id="sN">
+ *
+ * 注意:
+ *   - hero モードの slide-core.css は変更不要（height:540px + overflow:hidden が防御）
+ *   - このクラスは「参照用の一覧表」に限定し、メインコンテンツには使わない
+ *   - print.css の @media print でも同様の高さ可変が必要なため、
+ *     print.css 側にも .slide-fit 対応ルールを追加すること
+ * ========================================================================== */
+
+/* ─── スライド枠: aspect-ratio を解除して高さ可変に ─── */
+body[data-view="list"] .slide.slide-fit {
+  height: fit-content;
+  aspect-ratio: auto;
+  min-height: 200px;
+  overflow: visible;
+}
+
+/* ─── 内部コンテンツラッパ: absolute → relative に変更 ─── */
+/* 通常スライドは absolute + scale() で 960×540 を縮小表示するが、
+   slide-fit では relative + 親幅追従にしてコンテンツ全体を表示する。
+   scaleListSlides() の transform: scale() も無効化する。 */
+body[data-view="list"] .slide.slide-fit .slide-inner {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 200px;
+  transform: none !important;
+  /* padding は通常スライドと同じ値を維持 */
+  padding: 32px 48px;
+}
+
+/* ─── slide-fit 内のテーブル: 横スクロール対応 ─── */
+/* テーブル幅がスライド幅を超える場合にも対応 */
+body[data-view="list"] .slide.slide-fit table {
+  width: 100%;
+  font-size: 0.82rem;
+  border-collapse: collapse;
+}
+
+body[data-view="list"] .slide.slide-fit td,
+body[data-view="list"] .slide.slide-fit th {
+  padding: 4px 8px;
+}
+

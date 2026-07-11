@@ -1,0 +1,86 @@
+/* figure.css
+ * スライド内の画像フィギュア（.slide-figure）スタイル。
+ * 統合順の正は SKILL.md（参照ファイルガイド／Step 4）を参照。
+ */
+
+/* ─── フィギュアコンテナ ─── */
+.slide-figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+/* ─── 画像本体 ─── */
+.slide-figure img {
+    max-width: 100%;
+    max-height: 200px;
+    /* スライド高さ 540px に対して余白を確保 */
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    display: block;
+}
+
+/* ─── 出典キャプション ─── */
+.slide-figure figcaption {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.4;
+}
+
+.slide-figure figcaption a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.slide-figure figcaption a:hover {
+    text-decoration: underline;
+}
+
+/* ─── フォールバックプレースホルダー ─── */
+.slide-figure-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    max-height: 200px;
+    min-height: 80px;
+    border-radius: 6px;
+    border: 1px dashed var(--border);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    padding: 12px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.slide-figure-fallback .fallback-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.slide-figure-fallback a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.7rem;
+}
+
+/* ─── 画像右配置（リスト系スライドとの併用） ─── */
+.slide-with-figure {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.slide-with-figure .slide-figure {
+    width: 220px;
+    flex-shrink: 0;
+}

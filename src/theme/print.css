@@ -1,0 +1,268 @@
+/* print.css
+ * 印刷・PDF エクスポート用スタイル。
+ * 統合順の正は SKILL.md（参照ファイルガイド／Step 4）を参照。
+ * （必ず最後に読み込む。他の CSS を @media print で上書きするため）
+ *
+ * 設計原則:
+ *   1. hero / list どちらのモードから印刷しても 1 ページ = 1 スライドになる。
+ *      → @media print 内で hero モードの opacity/position/transform をすべて上書き。
+ *      → exportPDF() 経由でも Ctrl+P 直接押下でも同じ結果になる「二重防御」。
+ *   2. 印刷時はライトテーマ強制（インク節約・コントラスト確保）。
+ *   3. コントロール類・ナビ矢印・プログレスバーは非表示。
+ *   4. 用紙サイズは 16:9（1280×720px）固定、余白ゼロでスライドを全面表示。
+ *   5. .slide-fit スライドは印刷時も高さ可変（Phase 5 追加）。
+ */
+
+/* ==========================================================================
+ * 1. 画面表示時のエクスポート準備状態
+ *    exportPDF() が body に .exporting-pdf を付与する。
+ *    Ctrl+P 直接押下ルートでは付与されないため、@media print 側でも保険を入れる。
+ * ========================================================================== */
+body.exporting-pdf .slide {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* ==========================================================================
+ * 2. 印刷時のスタイル（@media print）
+ *    Ctrl+P 直接押下ルートでも 1 ページ = 1 スライドが成立するよう、
+ *    hero モードの CSS をここですべて上書きする。
+ * ========================================================================== */
+@media print {
+
+    /* ─── 2-1. ライトテーマ強制（CSS 変数の上書き） ─── */
+    /* :root と [data-theme="dark"] の両方を上書きする必要がある。
+       [data-theme="dark"] の方が特異度が高いため明示的に再定義。 */
+    :root,
+    [data-theme="dark"] {
+        --bg-body:        #FFFFFF;
+        --bg-slide:       #FFFFFF;
+        --bg-surface:     #F8F9FA;
+        --text-primary:   #000000;
+        --text-secondary: #4B5563;
+        --accent:         #2563EB;
+        --accent-light:   #EFF6FF;
+        --accent-dim:     #DBEAFE;
+        --border:         #D1D5DB;
+        /* チャート系列色はライトテーマの値を維持 */
+        --chart-1:        var(--accent);
+        --chart-2:        #10B981;
+        --chart-3:        #F59E0B;
+        --chart-4:        #EF4444;
+        --chart-5:        #8B5CF6;
+        --chart-grid:     var(--border);
+        --chart-label:    var(--text-secondary);
+    }
+
+    /* ─── 2-1b. パレット別 accent（v0.6.0）: 印刷時はライト値を強制 ─── */
+    /* 2-1 の上書きは Ocean（既定）の accent を含むため、他パレット選択時は
+       各パレットの「ライトテーマ値」をここで再指定する（インク節約・コントラスト確保）。
+       特異度 (0,2,1) > 2-1 の (0,1,0) および theme-vars.css のパレットルール (0,2,0)。 */
+    html[data-palette="forest"],
+    html[data-palette="forest"][data-theme="dark"] {
+        --accent:       #059669;
+        --accent-light: #ECFDF5;
+        --accent-dim:   #D1FAE5;
+    }
+    html[data-palette="sunset"],
+    html[data-palette="sunset"][data-theme="dark"] {
+        --accent:       #EA580C;
+        --accent-light: #FFF7ED;
+        --accent-dim:   #FFEDD5;
+    }
+    html[data-palette="plum"],
+    html[data-palette="plum"][data-theme="dark"] {
+        --accent:       #7C3AED;
+        --accent-light: #F5F3FF;
+        --accent-dim:   #EDE9FE;
+    }
+    html[data-palette="graphite"],
+    html[data-palette="graphite"][data-theme="dark"] {
+        --accent:       #334155;
+        --accent-light: #F1F5F9;
+        --accent-dim:   #E2E8F0;
+    }
+    /* ocean は 2-1 の既定値がそのまま適用される（再指定不要） */
+    /* ─── 2-2. ページ設定（1280×720 landscape、余白ゼロ） ─── */
+    @page {
+        size: 1280px 720px landscape;
+        margin: 0;
+    }
+
+    /* ─── 2-3. html / body のスクロール制御を解除 ─── */
+    /* hero モード時の overflow: hidden、list モード時の overflow: auto を
+       どちらも visible に戻し、印刷エンジンに任せる。 */
+    html,
+    body,
+    html[data-view="list"],
+    body[data-view="list"] {
+        overflow: visible !important;
+        height: auto !important;
+        min-height: 0 !important;
+        background: #FFFFFF !important;
+    }
+
+    /* ─── 2-4. 非表示要素 ─── */
+    /* インタラクション系の UI は印刷物に含めない。 */
+    .control-cluster,
+    .export-menu,
+    .export-dropdown,
+    .nav-arrow,
+    #progress-bar,
+    #slide-counter {
+        display: none !important;
+    }
+
+    /* list モードのスライド番号バッジも非表示 */
+    body[data-view="list"] .slide::after {
+        display: none !important;
+    }
+
+    /* ─── 2-5. スケーラーを通常配置に戻す ─── */
+    /* hero モードの position: fixed + transform: scale() と、
+       list モードの flex 縦並びの両方を解除し、
+       単純な block 要素として印刷フローに乗せる。 */
+    .slide-scaler {
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: auto !important;
+        height: auto !important;
+        display: block !important;
+        padding: 0 !important;
+        gap: 0 !important;
+    }
+
+    /* ─── 2-6. スライド本体：1 ページ = 1 スライド ─── */
+    /* hero モードの absolute 配置・opacity: 0 を完全に解除し、
+       list モードの aspect-ratio・min/max width も解除する。 */
+    .slide,
+    body[data-view="list"] .slide {
+        position: relative !important;
+        inset: auto !important;
+        top: auto !important;
+        left: auto !important;
+        width: 1280px !important;
+        height: 720px !important;
+        max-width: none !important;
+        aspect-ratio: auto !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        cursor: default !important;
+        background: var(--bg-slide) !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+
+        /* 1 スライド = 1 ページの強制 */
+        page-break-after: always;
+        break-after: page;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* 最終スライドの後ろに空白ページを作らない */
+    .slide:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    /* hover トランジションを切る（印刷で意味がない） */
+    .slide:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* ─── 2-6b. slide-fit：印刷時も高さ可変（Phase 5 追加） ─── */
+    /* 一覧テーブル等の長いコンテンツを持つスライドは、
+       印刷時にも高さを可変にして全件を出力する。
+       page-break-inside: avoid を解除し、ページ跨ぎを許容する。 */
+    .slide.slide-fit,
+    body[data-view="list"] .slide.slide-fit {
+        height: auto !important;
+        min-height: 720px;
+        overflow: visible !important;
+        page-break-inside: auto;
+        break-inside: auto;
+    }
+
+    .slide.slide-fit .slide-inner,
+    body[data-view="list"] .slide.slide-fit .slide-inner {
+        height: auto !important;
+        min-height: 720px;
+    }
+
+    /* ─── 2-7. 内部コンテンツ：1280×720 にスケールアップ ─── */
+    /* 元の 960×540 から 1280×720 への拡大は transform でなく padding 調整で吸収。
+       transform: scale() を使うと印刷時に位置ずれが起きやすいため避ける。 */
+    .slide-inner,
+    body[data-view="list"] .slide-inner {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 1280px !important;
+        height: 720px !important;
+        padding: 70px 96px !important;
+        transform: none !important;
+        transform-origin: top left !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+    }
+
+    /* ─── 2-8. テキストの可読性確保 ─── */
+    /* リンク色を保持（PDF でクリック可能にするブラウザもある） */
+    a {
+        color: var(--accent) !important;
+        text-decoration: underline !important;
+    }
+
+    /* ─── 2-9. 画像・グラフのサイズ調整 ─── */
+    /* 印刷時は高さ制約を緩めて画質を担保 */
+    .slide-figure img {
+        max-height: 280px !important;
+    }
+    .slide-figure-fallback {
+        max-height: 280px !important;
+    }
+    .slide-chart {
+        max-height: 440px !important;
+    }
+    .chart-svg {
+        max-height: 440px !important;
+    }
+
+
+    /* ─── feature-showcase の右ダーク面は印刷でもダーク維持 ─── */
+    /* ライト強制の例外。構造の視認性を優先する。 */
+    .feature-right {
+        background: var(--bg-surface-dark) !important;
+    }
+    .feature-right,
+    .feature-right .feat-desc {
+        color: var(--text-on-dark) !important;
+    }
+    .feature-right .feature-num,
+    .feature-right .feat-label {
+        color: var(--accent) !important;
+    }
+
+    /* ─── 2-10. 色の印刷を強制（重要） ─── */
+    /* ブラウザのデフォルトは「背景色・画像を印刷しない」設定の場合があるため、
+       全要素で color-adjust を exact に。アクセントカラーやチャートが
+       白黒にならないよう保証する。 */
+    *,
+    *::before,
+    *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+}
+
