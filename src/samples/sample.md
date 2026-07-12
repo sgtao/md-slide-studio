@@ -11,12 +11,13 @@ badges: [v0.1.0, React + TypeScript, websearch-slide-ja 移植]
 ## このアプリでできること
 - **即時プレビュー**：左のエディタでMDを編集すると、右のスライドが即座に更新される
 - **14種のスライドtype**：タイトル・箇条書き・表・グラフ・図解・画像などを宣言的に記述
-- **決定論的な変換**：LLM変換と違い、同じMDからは常に同じスライドが生成される
-- **エクスポート**：PDF（P）・PNG（Shift+S）・ZIP（Shift+P）・MD保存に対応
+- **テーマ切替**：🌙でライト／ダーク、🎨で5色パレットを即座に切替
+- **エクスポート**：📥メニューからPDF / PNG / ZIPをダウンロード
+- **AI原稿支援**：🤖ボタンでLLM用プロンプトを生成し、下書きをAIに任せることも可能
 > このスライド自体がエディタ内のMDから生成されています。編集して試してください。
 ---
 <!-- slide: summary -->
-## 使い方 3ステップ
+## 使い方（3ステップ）
 1. **原稿を書く**：左ペインにスライドMDを書く（AIプロンプト🤖でLLMに下書きさせてもOK）
 1. **確認する**：右ペインで確認。🎨でパレット、🌙でテーマを切替
 1. **書き出す**：📥メニューからPDF / PNG / ZIPをエクスポート
@@ -63,8 +64,8 @@ source: { name: サンプルデータ, url: https://example.com }
 ## 変換パイプライン
 ```diagram
 type: flow
-nodes: [スライドMD, パーサー, React AST, レンダラ, PDF / PNG]
-labels: ["", parseSlideMarkdown, 型付きSlide[], SVG含む, エクスポート]
+nodes: ["スライドMD", "パーサー", "React AST", "レンダラ", "PDF / PNG"]
+labels: ["", "parseSlideMarkdown", "型付きSlide[]", "SVG含む", "エクスポート"]
 ```
 ---
 <!-- slide: diagram-cycle -->
@@ -106,14 +107,13 @@ type: comparison-donut
 labels: { before: Before, after: After }
 center: { before: 605GB, after: 380GB }
 data:
-  - { label: Google Drive, before: 326, after: 128, class: 1 }
-  - { label: 動画素材, before: 98, after: 80, class: 4 }
-  - { label: デスクトップ, before: 61, after: 61, class: 3 }
+  - { label: Drive, before: 326, after: 128, class: 1 }
   - { label: 空き, before: 321, after: 546, class: neutral }
-source: { name: 計測メモ（例）, url: https://example.com }
+source: { name: 計測メモ }
 ```
 ---
 <!-- slide: sources -->
 ## 出典・参考リンク
-- [websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja) — 本アプリの移植元スキル（スライドMD仕様 v0.7）
-- [MD Slide Studio リポジトリ](https://github.com/sgtao/md-slide-studio) — ソースコード・Issue はこちら
+- [websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja) — 元スキル（v0.7系）
+- [React 公式ドキュメント](https://react.dev) — コンポーネント設計の参照
+- [Vite 公式ドキュメント](https://vite.dev) — ビルド・開発サーバー設定
