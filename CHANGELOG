@@ -3,6 +3,33 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.1.2] - 2026-07-12
+
+### 修正｜初回リリース動作確認の不備修正・機能補強
+
+- **`sample.md` slide 7（diagram-flow）のYAMLパースエラーを修正**：
+  labels配列内の`型付きSlide[]`の角括弧がYAMLフロー記法と衝突し、起動時に警告が出ていた。
+  全labels値をダブルクォートで囲むことで解消。nodesも同様にクォート統一
+- **ControlClusterが編集モードで隠れる問題を修正**：
+  `.control-cluster`が`position: fixed; top: 12px`でヘッダー（約48px）の裏に潜り込んでいた。
+  `html[data-mode='edit']`時に`top: 56px`へ下げることで、ヘッダーと重ならずアイコンが常時見えるようにした
+- **エディタにMD保存ボタンを追加**：
+  エディタペイン下部のステータスバー右端に「💾 MD保存」ボタンを配置。
+  `exportMarkdown()`のファイル名を`MD-YYMMDDhhmmss_Slide-<title>.md`のタイムスタンプ形式に変更
+  （titleが空の場合は`MD-YYMMDDhhmmss_Slide.md`）
+
+### ファイル構成の変更
+
+```
+変更:
+  src/samples/sample.md        # slide 7: YAML labels/nodesのクォート修正
+  src/theme/nav-controls.css   # 編集モード時のControlCluster位置補正を追記
+  src/theme/app.css            # MD保存ボタン(.status-save-btn)のスタイルを追記
+  src/export/exporters.ts      # exportMarkdownのファイル名をタイムスタンプ形式に変更
+  src/App.tsx                  # エディタステータスバーにMD保存ボタンを追加
+```
+
+---
 
 ## [v0.1.1] - 2026-07-12
 
