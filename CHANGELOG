@@ -4,6 +4,49 @@
 
 ---
 
+## [v0.1.1] - 2026-07-12
+
+### 改善｜Lint / Formatter導入とE2Eテスト基盤の整備
+
+`src`配下の品質保証をVitest単体テストのみに依存していた状態から、ESLint（型認識ルール込み）・
+Prettier・Playwright（E2E）を追加し、静的解析と実操作確認の両面をカバーできる体制にした。
+
+- **ESLint導入**：`typescript-eslint`の`recommendedTypeChecked`＋`eslint-plugin-react-hooks`／
+  `eslint-plugin-react-refresh`を適用。`src/parser/**`はYAML由来の値の型付けが未整理のため、
+  `no-base-to-string`／`no-unsafe-assignment`を暫定的に`off`とし、TODOコメントで保留理由を明記
+- **Prettier導入**：ESLintと役割分離し、整形はPrettier側に一本化（`eslint-config-prettier`で競合回避）
+- **E2Eテスト基盤（Playwright）導入**：devサーバー自動起動・基本操作3項目のテストを追加
+  1. 初期表示：`sample.md` 読み込み＋titleスライド描画
+  2. titleスライドの内容描画（h1 / subtitle / badges）
+  3. エディタ編集のプレビュー即時反映（デバウンス込み）
+- **Vitest設定を変更**：`e2e/**`を除外し、単体テストとE2Eテストの実行範囲を分離
+### 修正｜Lint導入で顕在化した実バグ2件
+
+- **`App.tsx`：エフェクト内での直接`setState`を解消**（`react-hooks/set-state-in-effect`）
+  スライド枚数変化時の現在位置クランプを、`useEffect`内での`setCurrent`呼び出しから、
+  描画時に都度計算する導出値（`clampedCurrent`）に変更。カスケードレンダリングの原因を排除
+- **`App.tsx`：Promiseを返す関数をイベントハンドラに直接渡していた箇所を修正**
+  （`@typescript-eslint/no-misused-promises`）
+  `PromptModal`内のコピー用ボタン（`onClick={copy}`）を`onClick={() => { void copy(); }}`に変更し、
+  非同期処理の結果がハンドラ内で握りつぶされないことを明示
+### ファイル構成の変更
+
+```
+新規:
+  eslint.config.js
+  .prettierrc.json
+  .prettierignore
+  playwright.config.ts
+  e2e/basic.spec.ts
+
+変更:
+  package.json        # eslint / prettier / playwright 関連の依存関係・スクリプト追加
+  vite.config.ts       # Vitest test.exclude に e2e/** を追加
+  src/App.tsx           # set-state-in-effect 解消、PromptModalのPromiseハンドラ修正
+```
+
+---
+
 ## [0.1.0] - 初回リリース
 
 ### Added
@@ -26,3 +69,5 @@
 ### Source
 - [websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja)（v0.7系）
   - スライドMD仕様・デザイントークン・レイアウト定義を移植・React化
+
+---
