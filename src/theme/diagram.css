@@ -74,6 +74,7 @@
 
 /* 印刷時もコントラストを保つ（色はテーマ変数任せ） */
 @media print {
-  .diagram-svg { max-height: none; }
+  .diagram-svg {
+    max-height: none;
+  }
 }
-

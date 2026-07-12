@@ -15,67 +15,67 @@
  */
 
 :root {
-  --bg-body:        #F0F2F5;
-  --bg-slide:       #FFFFFF;
-  --bg-surface:     #F8F9FA;
-  --text-primary:   #1A1A1A;
-  --text-secondary: #6B7280;
-  --accent:         #2563EB;
-  --accent-light:   #EFF6FF;
-  --accent-dim:     #DBEAFE;
-  --border:         #E5E7EB;
-  --nav-bg:         rgba(0,0,0,0.6);
-  --nav-text:       #FFFFFF;
-  --progress-track: rgba(255,255,255,0.2);
+  --bg-body: #f0f2f5;
+  --bg-slide: #ffffff;
+  --bg-surface: #f8f9fa;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --accent: #2563eb;
+  --accent-light: #eff6ff;
+  --accent-dim: #dbeafe;
+  --border: #e5e7eb;
+  --nav-bg: rgba(0, 0, 0, 0.6);
+  --nav-text: #ffffff;
+  --progress-track: rgba(255, 255, 255, 0.2);
 
   /* ─── チャート系列色（ライト） ───
    * --chart-1 は --accent と一致させ、単系列グラフでアクセントと揃える。
    * 2〜5 系列は Tailwind 系の調和色を採用。
    */
-  --chart-1:     var(--accent);
-  --chart-2:     #10B981;
-  --chart-3:     #F59E0B;
-  --chart-4:     #EF4444;
-  --chart-5:     #8B5CF6;
-  --chart-grid:  var(--border);
+  --chart-1: var(--accent);
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
+  --chart-grid: var(--border);
   --chart-label: var(--text-secondary);
 
   /* feature-showcase 用（ライト時のみ使用・ダーク時は上書き） */
-  --bg-surface-dark: #161B22;
-  --text-on-dark:    #E6EDF3;
-  --text-on-dark-2:  #8B949E;
+  --bg-surface-dark: #161b22;
+  --text-on-dark: #e6edf3;
+  --text-on-dark-2: #8b949e;
 }
 
-[data-theme="dark"] {
-  --bg-body:        #0D1117;
-  --bg-slide:       #161B22;
-  --bg-surface:     #21262D;
-  --text-primary:   #E6EDF3;
-  --text-secondary: #8B949E;
-  --accent:         #58A6FF;
-  --accent-light:   #1C2D3F;
-  --accent-dim:     #1F3A57;
-  --border:         #30363D;
-  --nav-bg:         rgba(255,255,255,0.1);
-  --nav-text:       #E6EDF3;
-  --progress-track: rgba(255,255,255,0.1);
+[data-theme='dark'] {
+  --bg-body: #0d1117;
+  --bg-slide: #161b22;
+  --bg-surface: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --accent: #58a6ff;
+  --accent-light: #1c2d3f;
+  --accent-dim: #1f3a57;
+  --border: #30363d;
+  --nav-bg: rgba(255, 255, 255, 0.1);
+  --nav-text: #e6edf3;
+  --progress-track: rgba(255, 255, 255, 0.1);
 
   /* ─── チャート系列色（ダーク） ───
    * GitHub Primer 系の彩度を抑えた色を採用。
    * --accent (#58A6FF) との調和を優先。
    */
-  --chart-1:     var(--accent);
-  --chart-2:     #3FB950;
-  --chart-3:     #D29922;
-  --chart-4:     #F85149;
-  --chart-5:     #A371F7;
-  --chart-grid:  var(--border);
+  --chart-1: var(--accent);
+  --chart-2: #3fb950;
+  --chart-3: #d29922;
+  --chart-4: #f85149;
+  --chart-5: #a371f7;
+  --chart-grid: var(--border);
   --chart-label: var(--text-secondary);
 
   /* feature-showcase 用（ライト時のみ使用・ダーク時は上書き） */
-  --bg-surface-dark: #161B22;
-  --text-on-dark:    #E6EDF3;
-  --text-on-dark-2:  #8B949E;
+  --bg-surface-dark: #161b22;
+  --text-on-dark: #e6edf3;
+  --text-on-dark-2: #8b949e;
 }
 
 /* ==========================================================================
@@ -88,62 +88,61 @@
  * ========================================================================== */
 
 /* ─── 🌊 Ocean（既定と同値・明示指定用） ─── */
-[data-palette="ocean"] {
-  --accent:       #2563EB;
-  --accent-light: #EFF6FF;
-  --accent-dim:   #DBEAFE;
+[data-palette='ocean'] {
+  --accent: #2563eb;
+  --accent-light: #eff6ff;
+  --accent-dim: #dbeafe;
 }
-[data-palette="ocean"][data-theme="dark"] {
-  --accent:       #58A6FF;
-  --accent-light: #1C2D3F;
-  --accent-dim:   #1F3A57;
+[data-palette='ocean'][data-theme='dark'] {
+  --accent: #58a6ff;
+  --accent-light: #1c2d3f;
+  --accent-dim: #1f3a57;
 }
 
 /* ─── 🌲 Forest（成長・サステナ） ─── */
-[data-palette="forest"] {
-  --accent:       #059669;
-  --accent-light: #ECFDF5;
-  --accent-dim:   #D1FAE5;
+[data-palette='forest'] {
+  --accent: #059669;
+  --accent-light: #ecfdf5;
+  --accent-dim: #d1fae5;
 }
-[data-palette="forest"][data-theme="dark"] {
-  --accent:       #34D399;
-  --accent-light: #14291E;
-  --accent-dim:   #1B3D2B;
+[data-palette='forest'][data-theme='dark'] {
+  --accent: #34d399;
+  --accent-light: #14291e;
+  --accent-dim: #1b3d2b;
 }
 
 /* ─── 🌅 Sunset（情熱・提案） ─── */
-[data-palette="sunset"] {
-  --accent:       #EA580C;
-  --accent-light: #FFF7ED;
-  --accent-dim:   #FFEDD5;
+[data-palette='sunset'] {
+  --accent: #ea580c;
+  --accent-light: #fff7ed;
+  --accent-dim: #ffedd5;
 }
-[data-palette="sunset"][data-theme="dark"] {
-  --accent:       #FB923C;
-  --accent-light: #2F1D0E;
-  --accent-dim:   #45290F;
+[data-palette='sunset'][data-theme='dark'] {
+  --accent: #fb923c;
+  --accent-light: #2f1d0e;
+  --accent-dim: #45290f;
 }
 
 /* ─── 🍇 Plum（創造・AI系） ─── */
-[data-palette="plum"] {
-  --accent:       #7C3AED;
-  --accent-light: #F5F3FF;
-  --accent-dim:   #EDE9FE;
+[data-palette='plum'] {
+  --accent: #7c3aed;
+  --accent-light: #f5f3ff;
+  --accent-dim: #ede9fe;
 }
-[data-palette="plum"][data-theme="dark"] {
-  --accent:       #A78BFA;
-  --accent-light: #221A38;
-  --accent-dim:   #322659;
+[data-palette='plum'][data-theme='dark'] {
+  --accent: #a78bfa;
+  --accent-light: #221a38;
+  --accent-dim: #322659;
 }
 
 /* ─── ⬛ Graphite（ミニマル・モノトーン） ─── */
-[data-palette="graphite"] {
-  --accent:       #334155;
-  --accent-light: #F1F5F9;
-  --accent-dim:   #E2E8F0;
+[data-palette='graphite'] {
+  --accent: #334155;
+  --accent-light: #f1f5f9;
+  --accent-dim: #e2e8f0;
 }
-[data-palette="graphite"][data-theme="dark"] {
-  --accent:       #94A3B8;
+[data-palette='graphite'][data-theme='dark'] {
+  --accent: #94a3b8;
   --accent-light: #202834;
-  --accent-dim:   #2B3648;
+  --accent-dim: #2b3648;
 }
-

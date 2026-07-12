@@ -8,15 +8,26 @@ import type { ChartBlock, ComparisonChartBlock } from '../../parser/types';
 
 const VB = { w: 720, h: 360 };
 
-function ChartFrame({ title, source, children }: {
+function ChartFrame({
+  title,
+  source,
+  children,
+}: {
   title: string;
   source: { name: string; url?: string };
   children: React.ReactNode;
 }) {
   return (
-    <svg viewBox={`0 0 ${VB.w} ${VB.h}`} xmlns="http://www.w3.org/2000/svg" className="chart-svg" role="img">
+    <svg
+      viewBox={`0 0 ${VB.w} ${VB.h}`}
+      xmlns="http://www.w3.org/2000/svg"
+      className="chart-svg"
+      role="img"
+    >
       <title>{title}</title>
-      <text x={VB.w / 2} y={28} className="chart-title" textAnchor="middle">{title}</text>
+      <text x={VB.w / 2} y={28} className="chart-title" textAnchor="middle">
+        {title}
+      </text>
       {children}
       <text x={VB.w - 10} y={VB.h - 8} className="chart-source" textAnchor="end">
         出典: {source.name}
@@ -44,10 +55,20 @@ export function BarChartSvg({ chart }: { chart: ChartBlock }) {
         const w = Math.max(2, (d.value / max) * 480);
         return (
           <g key={i}>
-            <text x={x0 - 12} y={y + barH / 2 + 4} className="chart-label" textAnchor="end">{d.label}</text>
-            <rect x={x0} y={y} width={w} height={barH} rx={3} className={`chart-series-${(i % 5) + 1}`} />
+            <text x={x0 - 12} y={y + barH / 2 + 4} className="chart-label" textAnchor="end">
+              {d.label}
+            </text>
+            <rect
+              x={x0}
+              y={y}
+              width={w}
+              height={barH}
+              rx={3}
+              className={`chart-series-${(i % 5) + 1}`}
+            />
             <text x={x0 + w + 8} y={y + barH / 2 + 4} className="chart-value">
-              {formatValue(d.value)}{chart.unit ?? ''}
+              {formatValue(d.value)}
+              {chart.unit ?? ''}
             </text>
           </g>
         );
@@ -55,7 +76,15 @@ export function BarChartSvg({ chart }: { chart: ChartBlock }) {
       <text x={VB.w / 2} y={340} className="chart-axis-label" textAnchor="middle">
         {chart.unit ? `値（${chart.unit}）` : '値'}
       </text>
-      <text className="chart-axis-label" transform="rotate(-90 24 190)" x={24} y={190} textAnchor="middle">項目</text>
+      <text
+        className="chart-axis-label"
+        transform="rotate(-90 24 190)"
+        x={24}
+        y={190}
+        textAnchor="middle"
+      >
+        項目
+      </text>
     </ChartFrame>
   );
 }
@@ -74,25 +103,45 @@ export function LineChartSvg({ chart }: { chart: ChartBlock }) {
     y: 290 - ((v - min) / range) * 220,
   });
   const points = data.map((d, i) => pt(i, d.value));
-  const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const path = points
+    .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+    .join(' ');
   return (
     <ChartFrame title={chart.title} source={chart.source}>
       {/* グリッド */}
       {[0, 0.5, 1].map((t) => (
-        <line key={t} x1={160} x2={640} y1={290 - t * 220} y2={290 - t * 220} className="chart-grid-line" />
+        <line
+          key={t}
+          x1={160}
+          x2={640}
+          y1={290 - t * 220}
+          y2={290 - t * 220}
+          className="chart-grid-line"
+        />
       ))}
       <path d={path} className="chart-line-1" fill="none" />
       {points.map((p, i) => (
         <g key={i}>
           <circle cx={p.x} cy={p.y} r={5} className="chart-series-1" />
           <text x={p.x} y={p.y - 12} className="chart-value" textAnchor="middle">
-            {formatValue(data[i].value)}{chart.unit ?? ''}
+            {formatValue(data[i].value)}
+            {chart.unit ?? ''}
           </text>
-          <text x={p.x} y={312} className="chart-label" textAnchor="middle">{data[i].label}</text>
+          <text x={p.x} y={312} className="chart-label" textAnchor="middle">
+            {data[i].label}
+          </text>
         </g>
       ))}
-      <text x={VB.w / 2} y={344} className="chart-axis-label" textAnchor="middle">時点</text>
-      <text className="chart-axis-label" transform="rotate(-90 24 190)" x={24} y={190} textAnchor="middle">
+      <text x={VB.w / 2} y={344} className="chart-axis-label" textAnchor="middle">
+        時点
+      </text>
+      <text
+        className="chart-axis-label"
+        transform="rotate(-90 24 190)"
+        x={24}
+        y={190}
+        textAnchor="middle"
+      >
         {chart.unit ? `値（${chart.unit}）` : '値'}
       </text>
     </ChartFrame>
@@ -104,8 +153,12 @@ export function LineChartSvg({ chart }: { chart: ChartBlock }) {
 // ---------------------------------------------------------------------------
 
 export function donutSegmentPath(
-  cx: number, cy: number, rOuter: number, rInner: number,
-  startAngle: number, endAngle: number,
+  cx: number,
+  cy: number,
+  rOuter: number,
+  rInner: number,
+  startAngle: number,
+  endAngle: number,
 ): string {
   // 12時方向起点・時計回り。角度はラジアン（0 = 12時）
   const large = endAngle - startAngle > Math.PI ? 1 : 0;
@@ -128,7 +181,10 @@ export function donutSegmentPath(
 
 function donutSegments(
   data: { value: number; className: string; label: string }[],
-  cx: number, cy: number, rOuter: number, rInner: number,
+  cx: number,
+  cy: number,
+  rOuter: number,
+  rInner: number,
 ) {
   const total = data.reduce((s, d) => s + Math.max(0, d.value), 0) || 1;
   let angle = 0;
@@ -148,29 +204,49 @@ function donutSegments(
 }
 
 export function DonutChartSvg({ chart }: { chart: ChartBlock }) {
-  const cx = 260, cy = 180, rO = 110, rI = 60;
+  const cx = 260,
+    cy = 180,
+    rO = 110,
+    rI = 60;
   const segs = donutSegments(
-    chart.data.map((d, i) => ({ value: d.value, className: `chart-series-${(i % 5) + 1}`, label: d.label })),
-    cx, cy, rO, rI,
+    chart.data.map((d, i) => ({
+      value: d.value,
+      className: `chart-series-${(i % 5) + 1}`,
+      label: d.label,
+    })),
+    cx,
+    cy,
+    rO,
+    rI,
   );
   const total = chart.data.reduce((s, d) => s + d.value, 0);
   return (
     <ChartFrame title={chart.title} source={chart.source}>
-      {segs.map((s) => <path key={s.key} d={s.path} className={s.className} />)}
+      {segs.map((s) => (
+        <path key={s.key} d={s.path} className={s.className} />
+      ))}
       {/* 数値ラベル（セグメント外側） */}
       {segs.map((s) => {
         const lx = cx + (rO + 22) * Math.sin(s.mid);
         const ly = cy - (rO + 22) * Math.cos(s.mid);
         return (
           <text key={`v${s.key}`} x={lx} y={ly + 4} className="chart-value" textAnchor="middle">
-            {formatValue(s.value)}{chart.unit ?? ''}
+            {formatValue(s.value)}
+            {chart.unit ?? ''}
           </text>
         );
       })}
       {/* 凡例（右側） */}
       {chart.data.map((d, i) => (
         <g key={`l${i}`}>
-          <rect x={470} y={90 + i * 34} width={14} height={14} rx={3} className={`chart-series-${(i % 5) + 1}`} />
+          <rect
+            x={470}
+            y={90 + i * 34}
+            width={14}
+            height={14}
+            rx={3}
+            className={`chart-series-${(i % 5) + 1}`}
+          />
           <text x={492} y={102 + i * 34} className="chart-legend">
             {d.label}（{total ? Math.round((d.value / total) * 100) : 0}%）
           </text>
@@ -189,27 +265,55 @@ export function ComparisonDonutSvg({ chart }: { chart: ComparisonChartBlock }) {
   const cls = (c: string) => (c === 'neutral' ? 'chart-neutral' : `chart-series-${c}`);
   const before = donutSegments(
     chart.data.map((d) => ({ value: d.before, className: cls(d.class), label: d.label })),
-    190, 175, 100, 55,
+    190,
+    175,
+    100,
+    55,
   );
   const after = donutSegments(
     chart.data.map((d) => ({ value: d.after, className: cls(d.class), label: d.label })),
-    530, 175, 100, 55,
+    530,
+    175,
+    100,
+    55,
   );
   const legendCols = chart.data.slice(0, 4);
   return (
     <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" className="chart-svg" role="img">
-      <title>{chart.labels.before} / {chart.labels.after} 比較</title>
+      <title>
+        {chart.labels.before} / {chart.labels.after} 比較
+      </title>
       <defs>
-        <marker id="ba-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <marker
+          id="ba-arrow"
+          viewBox="0 0 10 10"
+          refX="9"
+          refY="5"
+          markerWidth="7"
+          markerHeight="7"
+          orient="auto"
+        >
           <path d="M0,0 L10,5 L0,10 z" className="chart-arrowhead" />
         </marker>
       </defs>
-      <text x={190} y={30} className="chart-title" textAnchor="middle">{chart.labels.before}</text>
-      <text x={530} y={30} className="chart-title" textAnchor="middle">{chart.labels.after}</text>
-      {before.map((s) => <path key={`b${s.key}`} d={s.path} className={s.className} />)}
-      {after.map((s) => <path key={`a${s.key}`} d={s.path} className={s.className} />)}
-      <text x={190} y={170} className="chart-center-big" textAnchor="middle">{chart.center.before}</text>
-      <text x={530} y={170} className="chart-center-big" textAnchor="middle">{chart.center.after}</text>
+      <text x={190} y={30} className="chart-title" textAnchor="middle">
+        {chart.labels.before}
+      </text>
+      <text x={530} y={30} className="chart-title" textAnchor="middle">
+        {chart.labels.after}
+      </text>
+      {before.map((s) => (
+        <path key={`b${s.key}`} d={s.path} className={s.className} />
+      ))}
+      {after.map((s) => (
+        <path key={`a${s.key}`} d={s.path} className={s.className} />
+      ))}
+      <text x={190} y={170} className="chart-center-big" textAnchor="middle">
+        {chart.center.before}
+      </text>
+      <text x={530} y={170} className="chart-center-big" textAnchor="middle">
+        {chart.center.after}
+      </text>
       <path d="M300,175 L410,175" className="chart-ba-arrow" markerEnd="url(#ba-arrow)" />
       {/* 凡例テーブル（2列 × 2行） */}
       {legendCols.map((d, i) => {
@@ -226,13 +330,17 @@ export function ComparisonDonutSvg({ chart }: { chart: ComparisonChartBlock }) {
           </g>
         );
       })}
-      <text x={710} y={352} className="chart-source" textAnchor="end">出典: {chart.source.name}</text>
+      <text x={710} y={352} className="chart-source" textAnchor="end">
+        出典: {chart.source.name}
+      </text>
     </svg>
   );
 }
 
 export function formatValue(v: number): string {
-  if (Math.abs(v) >= 100000000) return `${(v / 100000000).toLocaleString('ja-JP', { maximumFractionDigits: 1 })}億`;
-  if (Math.abs(v) >= 10000) return `${(v / 10000).toLocaleString('ja-JP', { maximumFractionDigits: 1 })}万`;
+  if (Math.abs(v) >= 100000000)
+    return `${(v / 100000000).toLocaleString('ja-JP', { maximumFractionDigits: 1 })}億`;
+  if (Math.abs(v) >= 10000)
+    return `${(v / 10000).toLocaleString('ja-JP', { maximumFractionDigits: 1 })}万`;
   return v.toLocaleString('ja-JP');
 }

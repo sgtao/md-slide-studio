@@ -3,8 +3,17 @@
  * DOM構造・クラス名は元スキルの生成HTMLと互換（CSSをそのまま流用するため）。
  */
 import type {
-  ChartSlide, ComparisonChartSlide, DiagramSlide, FeatureShowcaseSlide,
-  FigureSlide, PointsSlide, Slide, SourcesSlide, SummarySlide, TableSlide, TitleSlide,
+  ChartSlide,
+  ComparisonChartSlide,
+  DiagramSlide,
+  FeatureShowcaseSlide,
+  FigureSlide,
+  PointsSlide,
+  Slide,
+  SourcesSlide,
+  SummarySlide,
+  TableSlide,
+  TitleSlide,
 } from '../../parser/types';
 import { renderInline, safeUrl } from '../../parser/inline';
 import { BarChartSvg, ComparisonDonutSvg, DonutChartSvg, LineChartSvg } from '../charts/Charts';
@@ -36,7 +45,11 @@ function TitleView({ slide }: { slide: TitleSlide }) {
       {slide.subtitle && <p className="subtitle">{renderInline(slide.subtitle)}</p>}
       {slide.badges.length > 0 && (
         <div className="badges">
-          {slide.badges.map((b, i) => <span key={i} className="badge">{b}</span>)}
+          {slide.badges.map((b, i) => (
+            <span key={i} className="badge">
+              {b}
+            </span>
+          ))}
         </div>
       )}
     </div>
@@ -59,10 +72,21 @@ function PointsView({ slide }: { slide: PointsSlide }) {
       <ul className={listClass('points', slide.layout)}>
         {slide.items.map((item, i) => (
           <li key={i}>
-            {item.lead && <><strong>{item.lead}</strong>：</>}
+            {item.lead && (
+              <>
+                <strong>{item.lead}</strong>：
+              </>
+            )}
             {renderInline(item.text)}
             {item.children.map((c, j) => (
-              <span key={j} className="sub">{c.lead && <><strong>{c.lead}</strong>：</>}{renderInline(c.text)}</span>
+              <span key={j} className="sub">
+                {c.lead && (
+                  <>
+                    <strong>{c.lead}</strong>：
+                  </>
+                )}
+                {renderInline(c.text)}
+              </span>
             ))}
           </li>
         ))}
@@ -79,10 +103,16 @@ function SummaryView({ slide }: { slide: SummarySlide }) {
       <ol className={listClass('summary-list', slide.layout)}>
         {slide.items.map((item, i) => (
           <li key={i}>
-            {item.lead && <><strong>{item.lead}</strong>：</>}
+            {item.lead && (
+              <>
+                <strong>{item.lead}</strong>：
+              </>
+            )}
             {renderInline(item.text)}
             {item.children.map((c, j) => (
-              <span key={j} className="sub">{renderInline(c.text)}</span>
+              <span key={j} className="sub">
+                {renderInline(c.text)}
+              </span>
             ))}
           </li>
         ))}
@@ -101,14 +131,22 @@ function TableView({ slide }: { slide: TableSlide }) {
       <table className={`cmp-table${slide.layout === 'compact' ? ' layout-compact' : ''}`}>
         {slide.header.length > 0 && (
           <thead>
-            <tr>{slide.header.map((h, i) => <th key={i}>{renderInline(h)}</th>)}</tr>
+            <tr>
+              {slide.header.map((h, i) => (
+                <th key={i}>{renderInline(h)}</th>
+              ))}
+            </tr>
           </thead>
         )}
         <tbody>
           {slide.rows.map((row, i) => (
             <tr key={i}>
               {row.map((cell, j) =>
-                j === 0 ? <th key={j}>{renderInline(cell)}</th> : <td key={j}>{renderInline(cell)}</td>,
+                j === 0 ? (
+                  <th key={j}>{renderInline(cell)}</th>
+                ) : (
+                  <td key={j}>{renderInline(cell)}</td>
+                ),
               )}
             </tr>
           ))}
@@ -149,7 +187,10 @@ function ComparisonChartView({ slide }: { slide: ComparisonChartSlide }) {
       <div className="slide-with-description">
         <div className="cmp-left">
           {left.big && (
-            <div className="cmp-big">{left.big}{left.bigUnit && <small>{left.bigUnit}</small>}</div>
+            <div className="cmp-big">
+              {left.big}
+              {left.bigUnit && <small>{left.bigUnit}</small>}
+            </div>
           )}
           {left.heading && <h2>{renderInline(left.heading)}</h2>}
           <div className="cmp-divider" />
@@ -167,7 +208,9 @@ function ComparisonChartView({ slide }: { slide: ComparisonChartSlide }) {
         </div>
         <div className="cmp-right">
           {chart ? (
-            <div className="slide-chart comparison"><ComparisonDonutSvg chart={chart} /></div>
+            <div className="slide-chart comparison">
+              <ComparisonDonutSvg chart={chart} />
+            </div>
           ) : (
             <p className="note">（comparison-donut ブロックが未定義のため表示できません）</p>
           )}
@@ -186,12 +229,21 @@ function DiagramView({ slide, index }: { slide: DiagramSlide; index: number }) {
       <SlideHeading text={slide.heading} />
       {d ? (
         <div className="slide-diagram">
-          {d.type === 'flow' && <FlowDiagramSvg diagram={d} slideIndex={index} source={slide.sourceText} />}
-          {d.type === 'layer' && <LayerDiagramSvg diagram={d} slideIndex={index} source={slide.sourceText} />}
-          {d.type === 'cycle' && <CycleDiagramSvg diagram={d} slideIndex={index} source={slide.sourceText} />}
+          {d.type === 'flow' && (
+            <FlowDiagramSvg diagram={d} slideIndex={index} source={slide.sourceText} />
+          )}
+          {d.type === 'layer' && (
+            <LayerDiagramSvg diagram={d} slideIndex={index} source={slide.sourceText} />
+          )}
+          {d.type === 'cycle' && (
+            <CycleDiagramSvg diagram={d} slideIndex={index} source={slide.sourceText} />
+          )}
         </div>
       ) : (
-        <p className="note">（diagram / mermaid ブロックを解析できませんでした。表・テキストでの代替を検討してください）</p>
+        <p className="note">
+          （diagram / mermaid
+          ブロックを解析できませんでした。表・テキストでの代替を検討してください）
+        </p>
       )}
       <Note text={slide.note} />
     </div>
@@ -213,7 +265,7 @@ function FigureView({ slide }: { slide: FigureSlide }) {
               // createFallback() 相当: 読み込み失敗時にプレースホルダへ差し替え
               const el = e.currentTarget;
               el.style.display = 'none';
-              const fb = el.parentElement?.querySelector(".slide-figure-fallback");
+              const fb = el.parentElement?.querySelector('.slide-figure-fallback');
               if (fb) (fb as HTMLElement).style.display = 'flex';
             }}
           />
@@ -224,7 +276,10 @@ function FigureView({ slide }: { slide: FigureSlide }) {
         </div>
         {slide.source && (
           <figcaption>
-            出典: <a href={safeUrl(slide.source.url)} target="_blank" rel="noreferrer">{slide.source.label}</a>
+            出典:{' '}
+            <a href={safeUrl(slide.source.url)} target="_blank" rel="noreferrer">
+              {slide.source.label}
+            </a>
           </figcaption>
         )}
       </figure>
@@ -275,7 +330,9 @@ function SourcesView({ slide }: { slide: SourcesSlide }) {
       <ul className="links">
         {slide.links.map((l, i) => (
           <li key={i}>
-            <a href={safeUrl(l.url)} target="_blank" rel="noreferrer">{l.label}</a>
+            <a href={safeUrl(l.url)} target="_blank" rel="noreferrer">
+              {l.label}
+            </a>
             {l.note && <span className="src-note"> — {l.note}</span>}
           </li>
         ))}
@@ -288,22 +345,30 @@ function SourcesView({ slide }: { slide: SourcesSlide }) {
 
 export function SlideRenderer({ slide, index }: { slide: Slide; index: number }) {
   switch (slide.type) {
-    case 'title': return <TitleView slide={slide} />;
-    case 'points': return <PointsView slide={slide} />;
-    case 'summary': return <SummaryView slide={slide} />;
-    case 'table': return <TableView slide={slide} />;
+    case 'title':
+      return <TitleView slide={slide} />;
+    case 'points':
+      return <PointsView slide={slide} />;
+    case 'summary':
+      return <SummaryView slide={slide} />;
+    case 'table':
+      return <TableView slide={slide} />;
     case 'chart-bar':
     case 'chart-line':
     case 'chart-donut':
       return <ChartView slide={slide} />;
-    case 'comparison-chart': return <ComparisonChartView slide={slide} />;
+    case 'comparison-chart':
+      return <ComparisonChartView slide={slide} />;
     case 'diagram-flow':
     case 'diagram-layer':
     case 'diagram-cycle':
       return <DiagramView slide={slide} index={index} />;
-    case 'figure': return <FigureView slide={slide} />;
-    case 'feature-showcase': return <FeatureShowcaseView slide={slide} />;
-    case 'sources': return <SourcesView slide={slide} />;
+    case 'figure':
+      return <FigureView slide={slide} />;
+    case 'feature-showcase':
+      return <FeatureShowcaseView slide={slide} />;
+    case 'sources':
+      return <SourcesView slide={slide} />;
   }
 }
 

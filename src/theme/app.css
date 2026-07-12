@@ -5,12 +5,18 @@
  */
 
 /* ─── エディタモードでは html/body のスクロール制御をアプリ側が持つ ─── */
-html[data-mode="edit"], html[data-mode="edit"] body {
+html[data-mode='edit'],
+html[data-mode='edit'] body {
   overflow: hidden !important;
   height: 100% !important;
 }
 
-#root { width: 100%; height: 100%; display: flex; flex-direction: column; }
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
 /* ─── ヘッダー ─── */
 .app-header {
@@ -28,7 +34,9 @@ html[data-mode="edit"], html[data-mode="edit"] body {
   font-size: 0.95rem;
   letter-spacing: 0.02em;
 }
-.app-header .app-logo .hl { color: var(--accent); }
+.app-header .app-logo .hl {
+  color: var(--accent);
+}
 .app-header .deck-title {
   font-size: 0.8rem;
   color: var(--text-secondary);
@@ -49,13 +57,19 @@ html[data-mode="edit"], html[data-mode="edit"] body {
   cursor: pointer;
   white-space: nowrap;
 }
-.app-header button:hover { border-color: var(--accent); color: var(--accent); }
+.app-header button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 .app-header button.primary {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
-.app-header button.primary:hover { opacity: 0.88; color: #fff; }
+.app-header button.primary:hover {
+  opacity: 0.88;
+  color: #fff;
+}
 
 /* ─── 2ペインレイアウト ─── */
 .workspace {
@@ -106,8 +120,12 @@ html[data-mode="edit"], html[data-mode="edit"] body {
   font-size: 0.72rem;
   line-height: 1.6;
 }
-.warnings-panel .warn-item { color: var(--text-secondary); }
-.warnings-panel .warn-item::before { content: "⚠ "; }
+.warnings-panel .warn-item {
+  color: var(--text-secondary);
+}
+.warnings-panel .warn-item::before {
+  content: '⚠ ';
+}
 
 /* ─── プレビューペイン ─── */
 .preview-pane {
@@ -124,18 +142,24 @@ html[data-mode="edit"], html[data-mode="edit"] body {
   inset: 0;
 }
 /* コンテナ埋め込みのため fixed → absolute に変更（元CSSの上書き） */
-.deck-container .slide-scaler { position: absolute; }
-.deck-container #progress-bar { position: absolute; }
+.deck-container .slide-scaler {
+  position: absolute;
+}
+.deck-container #progress-bar {
+  position: absolute;
+}
 
 /* list ビューはコンテナ内スクロールに変換 */
-.deck-container[data-view="list"] {
+.deck-container[data-view='list'] {
   overflow-y: auto;
   overflow-x: hidden;
 }
-.deck-container[data-view="list"] .slide-scaler {
+.deck-container[data-view='list'] .slide-scaler {
   position: relative;
-  top: auto; left: auto;
-  width: 100%; height: auto;
+  top: auto;
+  left: auto;
+  width: 100%;
+  height: auto;
   transform: none !important;
   display: flex;
   flex-direction: column;
@@ -143,7 +167,7 @@ html[data-mode="edit"], html[data-mode="edit"] body {
   gap: 32px;
   padding: 56px 4vw 64px;
 }
-.deck-container[data-view="list"] .slide {
+.deck-container[data-view='list'] .slide {
   position: relative;
   inset: auto;
   width: min(90%, 960px);
@@ -154,23 +178,23 @@ html[data-mode="edit"], html[data-mode="edit"] body {
   pointer-events: auto;
   cursor: pointer;
 }
-.deck-container[data-view="list"] .slide .slide-inner {
+.deck-container[data-view='list'] .slide .slide-inner {
   transform-origin: top left;
   width: 960px;
   height: 540px;
 }
 /* slide-fit: list時は高さ可変（元 list-view.css の思想を踏襲） */
-.deck-container[data-view="list"] .slide.slide-fit {
+.deck-container[data-view='list'] .slide.slide-fit {
   aspect-ratio: auto;
   height: auto;
 }
-.deck-container[data-view="list"] .slide.slide-fit .slide-inner {
+.deck-container[data-view='list'] .slide.slide-fit .slide-inner {
   position: relative;
   height: auto;
   min-height: 540px;
 }
 /* スライド番号バッジ（listビュー） */
-.deck-container[data-view="list"] .slide::after {
+.deck-container[data-view='list'] .slide::after {
   content: attr(data-num);
   position: absolute;
   right: 10px;
@@ -270,17 +294,44 @@ html[data-mode="edit"], html[data-mode="edit"] body {
   color: var(--text-primary);
   cursor: pointer;
 }
-.modal-foot button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.modal-foot button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 
 /* ─── present モードではヘッダーを最小化 ─── */
-html[data-mode="present"] .app-header { position: fixed; top: 0; left: 0; right: 0; background: transparent; border-bottom: none; pointer-events: none; }
-html[data-mode="present"] .app-header > * { pointer-events: auto; }
-html[data-mode="present"] .app-header .deck-title,
-html[data-mode="present"] .app-header .app-logo { display: none; }
+html[data-mode='present'] .app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
+  border-bottom: none;
+  pointer-events: none;
+}
+html[data-mode='present'] .app-header > * {
+  pointer-events: auto;
+}
+html[data-mode='present'] .app-header .deck-title,
+html[data-mode='present'] .app-header .app-logo {
+  display: none;
+}
 
 /* 印刷時はアプリUIを隠す */
 @media print {
-  .app-header, .editor-pane, .control-cluster, .warnings-panel { display: none !important; }
-  .workspace { display: block; }
-  .preview-pane, .deck-container { position: static !important; overflow: visible !important; }
+  .app-header,
+  .editor-pane,
+  .control-cluster,
+  .warnings-panel {
+    display: none !important;
+  }
+  .workspace {
+    display: block;
+  }
+  .preview-pane,
+  .deck-container {
+    position: static !important;
+    overflow: visible !important;
+  }
 }

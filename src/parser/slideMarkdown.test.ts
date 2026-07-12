@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { parseSlideMarkdown, parseDirective, parseMermaidSubset } from './slideMarkdown';
-import type { ChartSlide, ComparisonChartSlide, DiagramSlide, PointsSlide, SourcesSlide, TableSlide, TitleSlide } from './types';
+import type {
+  ChartSlide,
+  ComparisonChartSlide,
+  DiagramSlide,
+  PointsSlide,
+  SourcesSlide,
+  TableSlide,
+  TitleSlide,
+} from './types';
 
 const fm = (body: string, palette = 'ocean') =>
   `---\ntitle: テスト\npalette: ${palette}\n---\n${body}`;
@@ -54,7 +62,9 @@ describe('directive', () => {
 
 describe('title', () => {
   it('heading / subtitle / badges を読む', () => {
-    const deck = parseSlideMarkdown(fm('<!-- slide: title -->\n# ==大==見出し\nsubtitle: サブ\nbadges: [A, B]'));
+    const deck = parseSlideMarkdown(
+      fm('<!-- slide: title -->\n# ==大==見出し\nsubtitle: サブ\nbadges: [A, B]'),
+    );
     const s = deck.slides[0] as TitleSlide;
     expect(s.heading).toBe('==大==見出し');
     expect(s.subtitle).toBe('サブ');
@@ -64,7 +74,9 @@ describe('title', () => {
 
 describe('points / summary', () => {
   it('リード付き箇条書きとノートを読む', () => {
-    const md = fm('<!-- slide: points -->\n## 見出し\n- **普及度**：使用率\n- 無リード項目\n  - 子項目\n> 補足');
+    const md = fm(
+      '<!-- slide: points -->\n## 見出し\n- **普及度**：使用率\n- 無リード項目\n  - 子項目\n> 補足',
+    );
     const s = parseSlideMarkdown(md).slides[0] as PointsSlide;
     expect(s.heading).toBe('見出し');
     expect(s.items[0].lead).toBe('普及度');
@@ -79,7 +91,10 @@ describe('table', () => {
     const md = fm('<!-- slide: table -->\n## 比較\n| a | b |\n|---|---|\n| 1 | 2 |\n| 3 | 4 |');
     const s = parseSlideMarkdown(md).slides[0] as TableSlide;
     expect(s.header).toEqual(['a', 'b']);
-    expect(s.rows).toEqual([['1', '2'], ['3', '4']]);
+    expect(s.rows).toEqual([
+      ['1', '2'],
+      ['3', '4'],
+    ]);
   });
 });
 
@@ -105,14 +120,20 @@ source: { name: SO Survey, url: https://example.com }
     expect(s.chart?.source.name).toBe('SO Survey');
   });
   it('source 欠落は警告し「出典未記載」とする', () => {
-    const md = fm('<!-- slide: chart-bar -->\n```chart\ntype: bar\ntitle: t\ndata:\n  - { label: a, value: 1 }\n```');
+    const md = fm(
+      '<!-- slide: chart-bar -->\n```chart\ntype: bar\ntitle: t\ndata:\n  - { label: a, value: 1 }\n```',
+    );
     const s = parseSlideMarkdown(md).slides[0] as ChartSlide;
     expect(s.chart?.source.name).toBe('出典未記載');
     expect(s.warnings.some((w) => w.includes('source'))).toBe(true);
   });
   it('6系列以上は5件に切り捨てて警告', () => {
-    const data = Array.from({ length: 7 }, (_, i) => `  - { label: L${i}, value: ${i + 1} }`).join('\n');
-    const md = fm(`<!-- slide: chart-bar -->\n\`\`\`chart\ntype: bar\ntitle: t\ndata:\n${data}\nsource: { name: s }\n\`\`\``);
+    const data = Array.from({ length: 7 }, (_, i) => `  - { label: L${i}, value: ${i + 1} }`).join(
+      '\n',
+    );
+    const md = fm(
+      `<!-- slide: chart-bar -->\n\`\`\`chart\ntype: bar\ntitle: t\ndata:\n${data}\nsource: { name: s }\n\`\`\``,
+    );
     const s = parseSlideMarkdown(md).slides[0] as ChartSlide;
     expect(s.chart?.data).toHaveLength(5);
     expect(s.warnings.some((w) => w.includes('系列'))).toBe(true);
@@ -148,14 +169,18 @@ source: { name: 計測メモ }
 
 describe('diagram', () => {
   it('diagram ブロック（flow）を読む', () => {
-    const md = fm('<!-- slide: diagram-flow -->\n## 流れ\n```diagram\ntype: flow\nnodes: [入力, 前処理, 推論, 出力]\nlabels: ["", 正規化, LLM, ""]\n```');
+    const md = fm(
+      '<!-- slide: diagram-flow -->\n## 流れ\n```diagram\ntype: flow\nnodes: [入力, 前処理, 推論, 出力]\nlabels: ["", 正規化, LLM, ""]\n```',
+    );
     const s = parseSlideMarkdown(md).slides[0] as DiagramSlide;
     expect(s.diagram?.type).toBe('flow');
     expect(s.diagram?.nodes).toEqual(['入力', '前処理', '推論', '出力']);
     expect(s.diagram?.labels?.[1]).toBe('正規化');
   });
   it('flow のノード6以上は5に切り捨てて警告', () => {
-    const md = fm('<!-- slide: diagram-flow -->\n```diagram\ntype: flow\nnodes: [a, b, c, d, e, f]\n```');
+    const md = fm(
+      '<!-- slide: diagram-flow -->\n```diagram\ntype: flow\nnodes: [a, b, c, d, e, f]\n```',
+    );
     const s = parseSlideMarkdown(md).slides[0] as DiagramSlide;
     expect(s.diagram?.nodes).toHaveLength(5);
     expect(s.warnings.some((w) => w.includes('上限'))).toBe(true);
@@ -188,7 +213,9 @@ describe('mermaid サブセット', () => {
 
 describe('figure / sources / feature-showcase', () => {
   it('figure の画像と出典を読み、source 欠落を警告する', () => {
-    const md = fm('<!-- slide: figure -->\n## 図\n![説明](https://example.com/a.png)\nsource: [出典](https://example.com)');
+    const md = fm(
+      '<!-- slide: figure -->\n## 図\n![説明](https://example.com/a.png)\nsource: [出典](https://example.com)',
+    );
     const deck = parseSlideMarkdown(md);
     const s = deck.slides[0];
     expect(s.type).toBe('figure');
@@ -198,7 +225,9 @@ describe('figure / sources / feature-showcase', () => {
     }
   });
   it('sources のリンクと補足を読む', () => {
-    const md = fm('<!-- slide: sources -->\n## 出典\n- [記事A](https://a.example) — 補足あり\n- [記事B](https://b.example)');
+    const md = fm(
+      '<!-- slide: sources -->\n## 出典\n- [記事A](https://a.example) — 補足あり\n- [記事B](https://b.example)',
+    );
     const s = parseSlideMarkdown(md).slides[0] as SourcesSlide;
     expect(s.links).toHaveLength(2);
     expect(s.links[0].note).toBe('補足あり');

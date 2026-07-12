@@ -50,13 +50,39 @@ export function useKeyboardNav(handlers: KeyboardNavHandlers, enabled: boolean) 
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
       if (e.ctrlKey || e.metaKey) return;
 
-      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); handlers.onNavigate(1); return; }
-      if (e.key === 'ArrowLeft') { e.preventDefault(); handlers.onNavigate(-1); return; }
-      if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); return; }
-      if (e.key === 'v' || e.key === 'V') { handlers.onToggleView(); return; }
-      if (e.shiftKey && e.key === 'P') { e.preventDefault(); handlers.onExportZip?.(); return; }
-      if (e.shiftKey && (e.key === 'S' || e.key === 's')) { e.preventDefault(); handlers.onExportPng?.(); return; }
-      if (!e.shiftKey && (e.key === 'p' || e.key === 'P')) { e.preventDefault(); handlers.onExportPdf?.(); return; }
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        handlers.onNavigate(1);
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlers.onNavigate(-1);
+        return;
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+        return;
+      }
+      if (e.key === 'v' || e.key === 'V') {
+        handlers.onToggleView();
+        return;
+      }
+      if (e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        handlers.onExportZip?.();
+        return;
+      }
+      if (e.shiftKey && (e.key === 'S' || e.key === 's')) {
+        e.preventDefault();
+        handlers.onExportPng?.();
+        return;
+      }
+      if (!e.shiftKey && (e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        handlers.onExportPdf?.();
+        return;
+      }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
@@ -77,9 +103,16 @@ export function usePersistentState<T extends string>(key: string, initial: T): [
       return initial;
     }
   });
-  const set = useCallback((v: T) => {
-    setValue(v);
-    try { localStorage.setItem(key, v); } catch { /* private mode 等 */ }
-  }, [key]);
+  const set = useCallback(
+    (v: T) => {
+      setValue(v);
+      try {
+        localStorage.setItem(key, v);
+      } catch {
+        /* private mode 等 */
+      }
+    },
+    [key],
+  );
   return [value, set];
 }

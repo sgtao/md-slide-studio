@@ -25,7 +25,8 @@ interface Props {
 }
 
 export const SlideDeckView = forwardRef<SlideDeckHandle, Props>(function SlideDeckView(
-  { deck, current, view, onSelect, onNavigate }, ref,
+  { deck, current, view, onSelect, onNavigate },
+  ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scalerRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,8 @@ export const SlideDeckView = forwardRef<SlideDeckHandle, Props>(function SlideDe
 
   useImperativeHandle(ref, () => ({
     getActiveSlideEl: () => scalerRef.current?.querySelector<HTMLElement>('.slide.active') ?? null,
-    getAllSlideEls: () => Array.from(scalerRef.current?.querySelectorAll<HTMLElement>('.slide') ?? []),
+    getAllSlideEls: () =>
+      Array.from(scalerRef.current?.querySelectorAll<HTMLElement>('.slide') ?? []),
   }));
 
   // list ビュー: 各 .slide-inner を親スライド幅/960 でスケール（scaleListSlides 移植）
@@ -64,13 +66,23 @@ export const SlideDeckView = forwardRef<SlideDeckHandle, Props>(function SlideDe
         style={view === 'hero' ? { transform: `translate(-50%, -50%) scale(${scale})` } : undefined}
       >
         <button
-          className="nav-arrow nav-prev" id="btn-prev" hidden={view === 'list' || current === 0}
-          onClick={() => onNavigate(-1)} aria-label="前のスライド"
-        >‹</button>
+          className="nav-arrow nav-prev"
+          id="btn-prev"
+          hidden={view === 'list' || current === 0}
+          onClick={() => onNavigate(-1)}
+          aria-label="前のスライド"
+        >
+          ‹
+        </button>
         <button
-          className="nav-arrow nav-next" id="btn-next" hidden={view === 'list' || current === total - 1}
-          onClick={() => onNavigate(1)} aria-label="次のスライド"
-        >›</button>
+          className="nav-arrow nav-next"
+          id="btn-next"
+          hidden={view === 'list' || current === total - 1}
+          onClick={() => onNavigate(1)}
+          aria-label="次のスライド"
+        >
+          ›
+        </button>
 
         {deck.slides.map((slide, i) => (
           <section
@@ -78,14 +90,18 @@ export const SlideDeckView = forwardRef<SlideDeckHandle, Props>(function SlideDe
             id={`s${i + 1}`}
             className={slideSectionClass(slide, i === current)}
             data-num={`${i + 1} / ${total}`}
-            onClick={() => { if (view === 'list') onSelect(i); }}
+            onClick={() => {
+              if (view === 'list') onSelect(i);
+            }}
           >
             <SlideRenderer slide={slide} index={i + 1} />
           </section>
         ))}
 
         {view === 'hero' && total > 0 && (
-          <div id="slide-counter">{current + 1} / {total}</div>
+          <div id="slide-counter">
+            {current + 1} / {total}
+          </div>
         )}
       </div>
     </div>

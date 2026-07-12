@@ -16,7 +16,11 @@ export function renderInline(text: string | undefined): ReactNode {
   return parts.map((part, i) => {
     if (!part) return null;
     if (part.startsWith('==') && part.endsWith('==')) {
-      return <span key={i} className="hl">{part.slice(2, -2)}</span>;
+      return (
+        <span key={i} className="hl">
+          {part.slice(2, -2)}
+        </span>
+      );
     }
     if (part.startsWith('**') && part.endsWith('**')) {
       return <strong key={i}>{part.slice(2, -2)}</strong>;

@@ -6,8 +6,8 @@
 
 /* ─── html・body: スクロール有効化 ─── */
 /* hero時は overflow:hidden のため、両方に !important で上書きが必要 */
-html[data-view="list"],
-body[data-view="list"] {
+html[data-view='list'],
+body[data-view='list'] {
   overflow-y: auto !important;
   overflow-x: hidden !important;
   height: auto !important;
@@ -15,7 +15,7 @@ body[data-view="list"] {
 }
 
 /* ─── スケーラー: 縦並びフレックスに変換 ─── */
-body[data-view="list"] .slide-scaler {
+body[data-view='list'] .slide-scaler {
   position: relative;
   top: auto;
   left: auto;
@@ -30,7 +30,7 @@ body[data-view="list"] .slide-scaler {
 }
 
 /* ─── スライド枠: レスポンシブ幅 + 16:9比率維持 ─── */
-body[data-view="list"] .slide {
+body[data-view='list'] .slide {
   position: relative;
   inset: auto;
   width: min(90vw, 960px);
@@ -43,17 +43,19 @@ body[data-view="list"] .slide {
   pointer-events: auto;
   cursor: pointer;
   flex-shrink: 0;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
 }
 
-body[data-view="list"] .slide:hover {
+body[data-view='list'] .slide:hover {
   transform: translateY(-4px);
-  box-shadow: 0 28px 70px rgba(0,0,0,0.4);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.4);
 }
 
 /* ─── 内部コンテンツラッパ: 960×540px 固定 + scale変換 ─── */
 /* JS側で slide.clientWidth / 960 を ratio として scale() を設定する */
-body[data-view="list"] .slide-inner {
+body[data-view='list'] .slide-inner {
   position: absolute;
   top: 0;
   left: 0;
@@ -68,7 +70,7 @@ body[data-view="list"] .slide-inner {
 }
 
 /* ─── スライド番号バッジ（右上） ─── */
-body[data-view="list"] .slide::after {
+body[data-view='list'] .slide::after {
   content: attr(data-num);
   position: absolute;
   top: 12px;
@@ -84,15 +86,15 @@ body[data-view="list"] .slide::after {
 }
 
 /* ─── ナビ矢印・カウンター・プログレスバーを非表示 ─── */
-body[data-view="list"] .nav-arrow,
-body[data-view="list"] #slide-counter,
-body[data-view="list"] #progress-bar {
+body[data-view='list'] .nav-arrow,
+body[data-view='list'] #slide-counter,
+body[data-view='list'] #progress-bar {
   display: none;
 }
 
 /* ─── チャート: list モードでもスライド枠からはみ出さないようにする ─── */
 /* .chart-svg は overflow:visible だが、親 .slide-chart で抑制する */
-body[data-view="list"] .slide-inner .slide-chart {
+body[data-view='list'] .slide-inner .slide-chart {
   max-width: 100%;
   overflow: hidden;
 }
@@ -115,7 +117,7 @@ body[data-view="list"] .slide-inner .slide-chart {
  * ========================================================================== */
 
 /* ─── スライド枠: aspect-ratio を解除して高さ可変に ─── */
-body[data-view="list"] .slide.slide-fit {
+body[data-view='list'] .slide.slide-fit {
   height: fit-content;
   aspect-ratio: auto;
   min-height: 200px;
@@ -126,7 +128,7 @@ body[data-view="list"] .slide.slide-fit {
 /* 通常スライドは absolute + scale() で 960×540 を縮小表示するが、
    slide-fit では relative + 親幅追従にしてコンテンツ全体を表示する。
    scaleListSlides() の transform: scale() も無効化する。 */
-body[data-view="list"] .slide.slide-fit .slide-inner {
+body[data-view='list'] .slide.slide-fit .slide-inner {
   position: relative;
   width: 100%;
   height: auto;
@@ -138,14 +140,13 @@ body[data-view="list"] .slide.slide-fit .slide-inner {
 
 /* ─── slide-fit 内のテーブル: 横スクロール対応 ─── */
 /* テーブル幅がスライド幅を超える場合にも対応 */
-body[data-view="list"] .slide.slide-fit table {
+body[data-view='list'] .slide.slide-fit table {
   width: 100%;
   font-size: 0.82rem;
   border-collapse: collapse;
 }
 
-body[data-view="list"] .slide.slide-fit td,
-body[data-view="list"] .slide.slide-fit th {
+body[data-view='list'] .slide.slide-fit td,
+body[data-view='list'] .slide.slide-fit th {
   padding: 4px 8px;
 }
-

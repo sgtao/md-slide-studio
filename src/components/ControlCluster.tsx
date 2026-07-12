@@ -51,32 +51,80 @@ export function ControlCluster(props: Props) {
         {props.view === 'hero' ? '☰' : '▭'}
       </button>
       <div className="palette-menu">
-        <button id="palette-toggle" onClick={() => toggle('palette')} title="カラーパレット">🎨</button>
-        <div id="palette-dropdown" className="palette-dropdown" hidden={openMenu !== 'palette'} role="menu">
+        <button id="palette-toggle" onClick={() => toggle('palette')} title="カラーパレット">
+          🎨
+        </button>
+        <div
+          id="palette-dropdown"
+          className="palette-dropdown"
+          hidden={openMenu !== 'palette'}
+          role="menu"
+        >
           {PALETTE_META.map((p) => (
             <button
-              key={p.id} type="button" role="menuitem"
+              key={p.id}
+              type="button"
+              role="menuitem"
               className={`pal-${p.id}${props.palette === p.id ? ' is-active' : ''}`}
-              onClick={() => { props.onSetPalette(p.id); setOpenMenu(null); }}
+              onClick={() => {
+                props.onSetPalette(p.id);
+                setOpenMenu(null);
+              }}
             >
-              <span className="palette-ico">{p.icon}</span>{p.label}
+              <span className="palette-ico">{p.icon}</span>
+              {p.label}
             </button>
           ))}
         </div>
       </div>
       <div className="export-menu">
-        <button id="export-toggle" onClick={() => toggle('export')} title="エクスポート">📥</button>
-        <div id="export-dropdown" className="export-dropdown" hidden={openMenu !== 'export'} role="menu">
-          <button type="button" role="menuitem" onClick={() => { props.onExportPdf(); setOpenMenu(null); }}>
+        <button id="export-toggle" onClick={() => toggle('export')} title="エクスポート">
+          📥
+        </button>
+        <div
+          id="export-dropdown"
+          className="export-dropdown"
+          hidden={openMenu !== 'export'}
+          role="menu"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              props.onExportPdf();
+              setOpenMenu(null);
+            }}
+          >
             📄 PDFとして印刷 <span className="kbd">P</span>
           </button>
-          <button type="button" role="menuitem" onClick={() => { props.onExportPng(); setOpenMenu(null); }}>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              props.onExportPng();
+              setOpenMenu(null);
+            }}
+          >
             🖼️ このスライドをPNG <span className="kbd">Shift+S</span>
           </button>
-          <button type="button" role="menuitem" onClick={() => { props.onExportZip(); setOpenMenu(null); }}>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              props.onExportZip();
+              setOpenMenu(null);
+            }}
+          >
             📦 全スライドをZIP <span className="kbd">Shift+P</span>
           </button>
-          <button type="button" role="menuitem" onClick={() => { props.onExportMd(); setOpenMenu(null); }}>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              props.onExportMd();
+              setOpenMenu(null);
+            }}
+          >
             📝 スライドMDを保存
           </button>
         </div>

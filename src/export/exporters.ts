@@ -19,8 +19,10 @@ export function exportToPdf() {
   html.dataset.view = 'list';
   body.dataset.view = 'list';
   const restore = () => {
-    if (prev.html) html.dataset.view = prev.html; else delete html.dataset.view;
-    if (prev.body) body.dataset.view = prev.body; else delete body.dataset.view;
+    if (prev.html) html.dataset.view = prev.html;
+    else delete html.dataset.view;
+    if (prev.body) body.dataset.view = prev.body;
+    else delete body.dataset.view;
     window.removeEventListener('afterprint', restore);
   };
   window.addEventListener('afterprint', restore);
@@ -51,7 +53,10 @@ function downloadBlob(blob: Blob, filename: string) {
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG生成に失敗しました'))), 'image/png');
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error('PNG生成に失敗しました'))),
+      'image/png',
+    );
   });
 }
 
@@ -63,7 +68,9 @@ export async function exportToPng(slideEl: HTMLElement, deckTitle: string, index
     const canvas = await captureSlide(slideEl);
     downloadBlob(await canvasToBlob(canvas), `${sanitize(deckTitle)}-slide${index + 1}.png`);
   } catch (e) {
-    alert(`PNGエクスポートに失敗しました: ${(e as Error).message}\n（外部画像のCORS制限が原因の場合があります）`);
+    alert(
+      `PNGエクスポートに失敗しました: ${(e as Error).message}\n（外部画像のCORS制限が原因の場合があります）`,
+    );
   }
 }
 
@@ -90,5 +97,8 @@ export async function exportAllToZip(
 
 /** スライドMD（原稿）自体のダウンロード */
 export function exportMarkdown(md: string, deckTitle: string) {
-  downloadBlob(new Blob([md], { type: 'text/markdown;charset=utf-8' }), `${sanitize(deckTitle)}-slides.md`);
+  downloadBlob(
+    new Blob([md], { type: 'text/markdown;charset=utf-8' }),
+    `${sanitize(deckTitle)}-slides.md`,
+  );
 }

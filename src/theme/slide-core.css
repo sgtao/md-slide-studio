@@ -4,13 +4,16 @@
  * theme-vars.css の読み込み後に適用すること。
  */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -39,7 +42,7 @@ html, body {
   height: 540px;
   background: var(--bg-slide);
   border-radius: 8px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
@@ -62,4 +65,3 @@ html, body {
   justify-content: center;
   box-sizing: border-box;
 }
-

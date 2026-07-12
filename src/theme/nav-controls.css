@@ -34,11 +34,11 @@
 }
 
 .control-cluster button:hover {
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
 }
 
-[data-theme="dark"] .control-cluster button:hover {
-  background: rgba(255,255,255,0.2);
+[data-theme='dark'] .control-cluster button:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* ─── エクスポートメニュー（Phase 3 追加） ─── */
@@ -59,7 +59,7 @@
   background: var(--bg-slide);
   border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   padding: 6px;
   min-width: 240px;
   display: flex;
@@ -98,7 +98,7 @@
   color: var(--accent);
 }
 
-[data-theme="dark"] .control-cluster .export-dropdown button:hover {
+[data-theme='dark'] .control-cluster .export-dropdown button:hover {
   background: var(--accent-dim);
   color: var(--accent);
 }
@@ -141,10 +141,18 @@
   align-items: center;
   justify-content: center;
 }
-.nav-arrow:hover { opacity: 0.85; }
-.nav-arrow.nav-prev { left: 8px; }
-.nav-arrow.nav-next { right: 8px; }
-.nav-arrow[hidden]  { display: none; }
+.nav-arrow:hover {
+  opacity: 0.85;
+}
+.nav-arrow.nav-prev {
+  left: 8px;
+}
+.nav-arrow.nav-next {
+  right: 8px;
+}
+.nav-arrow[hidden] {
+  display: none;
+}
 
 /* ─── プログレスバー（最上部） ─── */
 #progress-bar {
@@ -181,7 +189,7 @@
   background: var(--bg-slide);
   border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   padding: 6px;
   min-width: 180px;
   display: flex;
@@ -219,21 +227,41 @@
 /* 各項目の文字色＝そのパレット固有色（アクティブパレット非依存の固定色）。
  * 注: 下記の色は theme-vars.css のパレット accent 値と重複管理。
  *     パレットの色を変える場合は両ファイルを更新すること（意図的な例外）。 */
-.control-cluster .palette-dropdown button.pal-ocean    { color: #2563EB; }
-.control-cluster .palette-dropdown button.pal-forest   { color: #059669; }
-.control-cluster .palette-dropdown button.pal-sunset   { color: #EA580C; }
-.control-cluster .palette-dropdown button.pal-plum     { color: #7C3AED; }
-.control-cluster .palette-dropdown button.pal-graphite { color: #334155; }
-[data-theme="dark"] .control-cluster .palette-dropdown button.pal-ocean    { color: #58A6FF; }
-[data-theme="dark"] .control-cluster .palette-dropdown button.pal-forest   { color: #34D399; }
-[data-theme="dark"] .control-cluster .palette-dropdown button.pal-sunset   { color: #FB923C; }
-[data-theme="dark"] .control-cluster .palette-dropdown button.pal-plum     { color: #A78BFA; }
-[data-theme="dark"] .control-cluster .palette-dropdown button.pal-graphite { color: #94A3B8; }
+.control-cluster .palette-dropdown button.pal-ocean {
+  color: #2563eb;
+}
+.control-cluster .palette-dropdown button.pal-forest {
+  color: #059669;
+}
+.control-cluster .palette-dropdown button.pal-sunset {
+  color: #ea580c;
+}
+.control-cluster .palette-dropdown button.pal-plum {
+  color: #7c3aed;
+}
+.control-cluster .palette-dropdown button.pal-graphite {
+  color: #334155;
+}
+[data-theme='dark'] .control-cluster .palette-dropdown button.pal-ocean {
+  color: #58a6ff;
+}
+[data-theme='dark'] .control-cluster .palette-dropdown button.pal-forest {
+  color: #34d399;
+}
+[data-theme='dark'] .control-cluster .palette-dropdown button.pal-sunset {
+  color: #fb923c;
+}
+[data-theme='dark'] .control-cluster .palette-dropdown button.pal-plum {
+  color: #a78bfa;
+}
+[data-theme='dark'] .control-cluster .palette-dropdown button.pal-graphite {
+  color: #94a3b8;
+}
 /* ホバーは背景のみ変更（固有色を保持するため color は指定しない） */
 .control-cluster .palette-dropdown button:hover {
   background: var(--accent-light);
 }
-[data-theme="dark"] .control-cluster .palette-dropdown button:hover {
+[data-theme='dark'] .control-cluster .palette-dropdown button:hover {
   background: var(--accent-dim);
 }
 .control-cluster .palette-dropdown button.is-active {
@@ -250,9 +278,18 @@
   flex-shrink: 0;
   border: 1px solid var(--border);
 }
-.swatch-ocean    { background: #2563EB; }
-.swatch-forest   { background: #059669; }
-.swatch-sunset   { background: #EA580C; }
-.swatch-plum     { background: #7C3AED; }
-.swatch-graphite { background: #334155; }
-
+.swatch-ocean {
+  background: #2563eb;
+}
+.swatch-forest {
+  background: #059669;
+}
+.swatch-sunset {
+  background: #ea580c;
+}
+.swatch-plum {
+  background: #7c3aed;
+}
+.swatch-graphite {
+  background: #334155;
+}

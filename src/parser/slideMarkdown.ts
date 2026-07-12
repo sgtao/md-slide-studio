@@ -28,10 +28,20 @@ import type {
 
 const PALETTES: Palette[] = ['ocean', 'forest', 'sunset', 'plum', 'graphite'];
 const SLIDE_TYPES: SlideType[] = [
-  'title', 'points', 'summary', 'table',
-  'chart-bar', 'chart-line', 'chart-donut', 'comparison-chart',
-  'diagram-flow', 'diagram-layer', 'diagram-cycle',
-  'figure', 'feature-showcase', 'sources',
+  'title',
+  'points',
+  'summary',
+  'table',
+  'chart-bar',
+  'chart-line',
+  'chart-donut',
+  'comparison-chart',
+  'diagram-flow',
+  'diagram-layer',
+  'diagram-cycle',
+  'figure',
+  'feature-showcase',
+  'sources',
 ];
 const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact'];
 
@@ -43,12 +53,12 @@ export function parseSlideMarkdown(src: string): SlideDeck {
   const deckWarnings: string[] = [];
   const { frontmatter, body } = splitFrontmatter(src, deckWarnings);
   const rawSlides = splitSlides(body);
-  const slides = rawSlides
-    .map((raw) => parseSlide(raw))
-    .filter((s): s is Slide => s !== null);
+  const slides = rawSlides.map((raw) => parseSlide(raw)).filter((s): s is Slide => s !== null);
 
   if (slides.length === 0) {
-    deckWarnings.push('スライドが1枚もありません（<!-- slide: type --> ディレクティブを確認してください）');
+    deckWarnings.push(
+      'スライドが1枚もありません（<!-- slide: type --> ディレクティブを確認してください）',
+    );
   }
   if (slides.length > 12) {
     deckWarnings.push(`スライド枚数が ${slides.length} 枚です（推奨は3〜12枚）`);
@@ -64,7 +74,10 @@ export function parseSlideMarkdown(src: string): SlideDeck {
 // frontmatter
 // ---------------------------------------------------------------------------
 
-function splitFrontmatter(src: string, warnings: string[]): { frontmatter: Frontmatter; body: string } {
+function splitFrontmatter(
+  src: string,
+  warnings: string[],
+): { frontmatter: Frontmatter; body: string } {
   const fallback: Frontmatter = { title: 'Untitled', palette: 'ocean' };
   const m = src.match(/^\uFEFF?---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!m) {
@@ -127,7 +140,10 @@ export function parseDirective(line: string): Directive | null {
   const m = line.match(/^<!--\s*slide:\s*([^>]*?)\s*-->/);
   if (!m) return null;
   const warnings: string[] = [];
-  const parts = m[1].split(',').map((p) => p.trim()).filter(Boolean);
+  const parts = m[1]
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean);
   const typeStr = parts.shift() ?? '';
   let type: SlideType = 'points';
   if ((SLIDE_TYPES as string[]).includes(typeStr)) {
@@ -138,7 +154,10 @@ export function parseDirective(line: string): Directive | null {
   let fit = false;
   let layout: LayoutVariant | undefined;
   for (const p of parts) {
-    if (p === 'fit') { fit = true; continue; }
+    if (p === 'fit') {
+      fit = true;
+      continue;
+    }
     const lm = p.match(/^layout:\s*(\S+)$/);
     if (lm) {
       if ((LAYOUTS as string[]).includes(lm[1])) layout = lm[1] as LayoutVariant;
@@ -171,10 +190,14 @@ function parseSlide(raw: string): Slide | null {
   const base = { fit: d.fit, layout: d.layout, warnings: d.warnings };
 
   switch (d.type) {
-    case 'title': return { ...base, type: 'title', ...parseTitle(body) };
-    case 'points': return { ...base, type: 'points', ...parseListBody(body, 'bullet') };
-    case 'summary': return { ...base, type: 'summary', ...parseListBody(body, 'ordered') };
-    case 'table': return { ...base, type: 'table', ...parseTable(body, d.warnings) };
+    case 'title':
+      return { ...base, type: 'title', ...parseTitle(body) };
+    case 'points':
+      return { ...base, type: 'points', ...parseListBody(body, 'bullet') };
+    case 'summary':
+      return { ...base, type: 'summary', ...parseListBody(body, 'ordered') };
+    case 'table':
+      return { ...base, type: 'table', ...parseTable(body, d.warnings) };
     case 'chart-bar':
     case 'chart-line':
     case 'chart-donut':
@@ -185,10 +208,12 @@ function parseSlide(raw: string): Slide | null {
     case 'diagram-layer':
     case 'diagram-cycle':
       return { ...base, type: d.type, ...parseDiagramSlide(body, d.type, d.warnings) };
-    case 'figure': return { ...base, type: 'figure', ...parseFigure(body, d.warnings) };
+    case 'figure':
+      return { ...base, type: 'figure', ...parseFigure(body, d.warnings) };
     case 'feature-showcase':
       return { ...base, type: 'feature-showcase', ...parseFeatureShowcase(body, d.warnings) };
-    case 'sources': return { ...base, type: 'sources', ...parseSources(body) };
+    case 'sources':
+      return { ...base, type: 'sources', ...parseSources(body) };
   }
 }
 
@@ -210,11 +235,23 @@ function parseTitle(body: string) {
   let badges: string[] = [];
   for (const line of lines) {
     const h = line.match(/^#\s+(.+)$/);
-    if (h) { heading = h[1].trim(); continue; }
+    if (h) {
+      heading = h[1].trim();
+      continue;
+    }
     const s = line.match(/^subtitle:\s*(.+)$/);
-    if (s) { subtitle = s[1].trim(); continue; }
+    if (s) {
+      subtitle = s[1].trim();
+      continue;
+    }
     const b = line.match(/^badges:\s*\[(.*)\]\s*$/);
-    if (b) { badges = b[1].split(',').map((x) => x.trim()).filter(Boolean); continue; }
+    if (b) {
+      badges = b[1]
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean);
+      continue;
+    }
   }
   return { heading, subtitle, badges };
 }
@@ -230,9 +267,15 @@ function parseListBody(body: string, kind: 'bullet' | 'ordered') {
 
   for (const line of lines) {
     const h = line.match(/^##\s+(.+)$/);
-    if (h) { heading = h[1].trim(); continue; }
+    if (h) {
+      heading = h[1].trim();
+      continue;
+    }
     const q = line.match(/^>\s?(.*)$/);
-    if (q) { noteLines.push(q[1]); continue; }
+    if (q) {
+      noteLines.push(q[1]);
+      continue;
+    }
     const m = line.match(re);
     if (m) {
       const depth = Math.floor(m[1].replace(/\t/g, '  ').length / 2);
@@ -265,8 +308,14 @@ function parseTable(body: string, warnings: string[]) {
   const noteLines: string[] = [];
   for (const line of lines) {
     const h = line.match(/^##\s+(.+)$/);
-    if (h) { heading = h[1].trim(); continue; }
-    if (/^\s*\|.*\|\s*$/.test(line)) { tableLines.push(line.trim()); continue; }
+    if (h) {
+      heading = h[1].trim();
+      continue;
+    }
+    if (/^\s*\|.*\|\s*$/.test(line)) {
+      tableLines.push(line.trim());
+      continue;
+    }
     const q = line.match(/^>\s?(.*)$/);
     if (q) noteLines.push(q[1]);
   }
@@ -285,7 +334,11 @@ function parseTable(body: string, warnings: string[]) {
 }
 
 function splitTableRow(line: string): string[] {
-  return line.replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+  return line
+    .replace(/^\|/, '')
+    .replace(/\|$/, '')
+    .split('|')
+    .map((c) => c.trim());
 }
 
 // --- フェンスブロック抽出 ---
@@ -324,14 +377,17 @@ function parseChartSlide(body: string, slideType: string, warnings: string[]) {
   const expected = slideType.replace('chart-', ''); // bar | line | donut
   const type = typeof y.type === 'string' ? y.type : expected;
   if (type !== expected) {
-    warnings.push(`chart type "${type}" とスライド type "${slideType}" が不一致です（chart 側を優先）`);
+    warnings.push(
+      `chart type "${type}" とスライド type "${slideType}" が不一致です（chart 側を優先）`,
+    );
   }
   const data = normalizeChartData(y.data, warnings);
   if (data.length === 0) {
     warnings.push('chart の data が空です');
     return { heading, note, chart: undefined };
   }
-  if (data.length > 5) warnings.push(`chart の系列が ${data.length} 件あります（最大5件・6件目以降は切り捨て）`);
+  if (data.length > 5)
+    warnings.push(`chart の系列が ${data.length} 件あります（最大5件・6件目以降は切り捨て）`);
   const chart: ChartBlock = {
     type: (['bar', 'line', 'donut'].includes(type) ? type : expected) as ChartBlock['type'],
     title: String(y.title ?? heading ?? ''),
@@ -468,15 +524,23 @@ function normalizeDiagram(
   }
   // layer は nodes をネスト配列（層→箱）でも受け付ける
   if (type === 'layer' && Array.isArray(y.nodes) && y.nodes.some((n) => Array.isArray(n))) {
-    const layers = (y.nodes as unknown[]).map((n) => (Array.isArray(n) ? n.map(String) : [String(n)]));
-    if (layers.length > 4) warnings.push(`layer が ${layers.length} 層あります（上限4層・5層目以降は切り捨て）`);
+    const layers = (y.nodes as unknown[]).map((n) =>
+      Array.isArray(n) ? n.map(String) : [String(n)],
+    );
+    if (layers.length > 4)
+      warnings.push(`layer が ${layers.length} 層あります（上限4層・5層目以降は切り捨て）`);
     return { type, nodes: layers.flat(), layers: layers.slice(0, 4) };
   }
   const nodes = Array.isArray(y.nodes) ? y.nodes.map(String) : [];
-  if (nodes.length === 0) { warnings.push('diagram の nodes が空です'); return undefined; }
+  if (nodes.length === 0) {
+    warnings.push('diagram の nodes が空です');
+    return undefined;
+  }
   const limits = { flow: 5, layer: 4, cycle: 4 } as const;
   if (nodes.length > limits[type]) {
-    warnings.push(`${type} のノード数 ${nodes.length} は上限 ${limits[type]} を超えています（超過分は切り捨て）`);
+    warnings.push(
+      `${type} のノード数 ${nodes.length} は上限 ${limits[type]} を超えています（超過分は切り捨て）`,
+    );
   }
   const labels = Array.isArray(y.labels) ? y.labels.map(String) : undefined;
   return { type, nodes: nodes.slice(0, limits[type]), labels };
@@ -487,10 +551,15 @@ function normalizeDiagram(
  * 対応外の記法は null を返し、警告でフォールバックを通知する。
  */
 export function parseMermaidSubset(src: string, warnings: string[]): DiagramBlock | null {
-  const lines = src.split('\n').map((l) => l.trim()).filter(Boolean);
+  const lines = src
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
   const headMatch = lines[0]?.match(/^graph\s+(LR|TD)$/);
   if (!headMatch) {
-    warnings.push('mermaid は graph LR / graph TD の直線フローのみ対応です（表・テキストで代替してください）');
+    warnings.push(
+      'mermaid は graph LR / graph TD の直線フローのみ対応です（表・テキストで代替してください）',
+    );
     return null;
   }
   const dir = headMatch[1];
@@ -508,20 +577,27 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
     const ids: string[] = [];
     for (const part of parts) {
       const m = part.match(/^([A-Za-z0-9_]+)(?:\[([^\]]*)\])?$/);
-      if (!m) { warnings.push(`mermaid の解析不能な行: "${line}"`); return null; }
+      if (!m) {
+        warnings.push(`mermaid の解析不能な行: "${line}"`);
+        return null;
+      }
       ids.push(m[1]);
       if (m[2] != null) labels.set(m[1], m[2]);
     }
     for (let i = 0; i + 1 < ids.length; i++) edges.push([ids[i], ids[i + 1]]);
   }
-  if (edges.length === 0) { warnings.push('mermaid にエッジがありません'); return null; }
+  if (edges.length === 0) {
+    warnings.push('mermaid にエッジがありません');
+    return null;
+  }
 
   // 出次数・入次数を確認し、直線 or 単一循環かを判定
   const outDeg = new Map<string, number>();
   const inDeg = new Map<string, number>();
   const nodesSet = new Set<string>();
   for (const [a, b] of edges) {
-    nodesSet.add(a); nodesSet.add(b);
+    nodesSet.add(a);
+    nodesSet.add(b);
     outDeg.set(a, (outDeg.get(a) ?? 0) + 1);
     inDeg.set(b, (inDeg.get(b) ?? 0) + 1);
   }
@@ -534,7 +610,10 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
   // 始点（入次数0）から辿って順序を確定
   let startId = nodes.find((n) => !inDeg.has(n));
   if (isCycle) startId = edges[0][0];
-  if (!startId) { warnings.push('mermaid のグラフ構造を特定できません'); return null; }
+  if (!startId) {
+    warnings.push('mermaid のグラフ構造を特定できません');
+    return null;
+  }
   const next = new Map(edges);
   const ordered: string[] = [];
   let curId: string | undefined = startId;
@@ -549,14 +628,23 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
   }
   const nodeLabels = ordered.map((id) => labels.get(id) ?? id);
   if (isCycle) {
-    if (nodeLabels.length > 4) { warnings.push('サイクル図はノード4以下のみ対応です'); return null; }
+    if (nodeLabels.length > 4) {
+      warnings.push('サイクル図はノード4以下のみ対応です');
+      return null;
+    }
     return { type: 'cycle', nodes: nodeLabels };
   }
   if (dir === 'LR') {
-    if (nodeLabels.length > 5) { warnings.push('横フロー図はノード5以下のみ対応です'); return null; }
+    if (nodeLabels.length > 5) {
+      warnings.push('横フロー図はノード5以下のみ対応です');
+      return null;
+    }
     return { type: 'flow', nodes: nodeLabels };
   }
-  if (nodeLabels.length > 4) { warnings.push('レイヤー図は4層以下のみ対応です'); return null; }
+  if (nodeLabels.length > 4) {
+    warnings.push('レイヤー図は4層以下のみ対応です');
+    return null;
+  }
   return { type: 'layer', nodes: nodeLabels };
 }
 
@@ -610,7 +698,8 @@ function parseFeatureShowcase(body: string, warnings: string[]) {
     sub: r.sub != null ? String(r.sub) : undefined,
     items,
   };
-  if (!left.heading && !right.heading) warnings.push('feature-showcase の left/right の内容が読み取れません');
+  if (!left.heading && !right.heading)
+    warnings.push('feature-showcase の left/right の内容が読み取れません');
   return { left, right };
 }
 
