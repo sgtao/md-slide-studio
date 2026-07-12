@@ -183,6 +183,9 @@ export default function App() {
               <span>{md.length.toLocaleString()} 文字</span>
               <span>palette: {palette}</span>
               <span>← ↑ MDを編集すると右に即時反映</span>
+              <button className="status-save-btn" onClick={doMd} title="スライドMDをダウンロード">
+                💾 MD保存
+              </button>
             </div>
           </div>
         )}

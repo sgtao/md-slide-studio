@@ -108,6 +108,27 @@ html[data-mode='edit'] body {
   display: flex;
   gap: 12px;
 }
+/* ─── エディタ内 MD保存ボタン（v0.1.2 追加） ─── */
+.status-save-btn {
+  margin-left: auto;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.status-save-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
 
 /* ─── 警告パネル ─── */
 .warnings-panel {

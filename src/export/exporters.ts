@@ -62,6 +62,19 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
 
 const sanitize = (s: string) => s.replace(/[\\/:*?"<>|]/g, '_').slice(0, 60);
 
+/** タイムスタンプ文字列 YYMMDDhhmmss を生成 */
+function timestamp(): string {
+  const now = new Date();
+  return [
+    String(now.getFullYear()).slice(2),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+    String(now.getHours()).padStart(2, '0'),
+    String(now.getMinutes()).padStart(2, '0'),
+    String(now.getSeconds()).padStart(2, '0'),
+  ].join('');
+}
+
 /** 現在スライドをPNGダウンロード */
 export async function exportToPng(slideEl: HTMLElement, deckTitle: string, index: number) {
   try {
@@ -95,10 +108,10 @@ export async function exportAllToZip(
   }
 }
 
-/** スライドMD（原稿）自体のダウンロード */
+/** スライドMD（原稿）自体のダウンロード（タイムスタンプ付きファイル名） */
 export function exportMarkdown(md: string, deckTitle: string) {
-  downloadBlob(
-    new Blob([md], { type: 'text/markdown;charset=utf-8' }),
-    `${sanitize(deckTitle)}-slides.md`,
-  );
+  const ts = timestamp();
+  const safeName = sanitize(deckTitle);
+  const filename = safeName ? `MD-${ts}_Slide-${safeName}.md` : `MD-${ts}_Slide.md`;
+  downloadBlob(new Blob([md], { type: 'text/markdown;charset=utf-8' }), filename);
 }
