@@ -1,0 +1,28 @@
+# Changelog
+
+このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
+
+---
+
+## [0.1.0] - 初回リリース
+
+### Added
+- Markdown原稿（スライドMD）から HTMLスライド／PDF／PNG を生成するReact + TypeScript製Webアプリ
+- 全14スライドtype対応：`title` / `points` / `summary` / `table` / `chart-bar` / `chart-line` /
+  `chart-donut` / `comparison-chart` / `diagram-flow` / `diagram-layer` / `diagram-cycle` /
+  `figure` / `feature-showcase` / `sources`
+- エディタ＋プレビュー2ペイン構成（MD編集→300msデバウンスで即時反映）
+- 決定論的レンダリング：LLMを介さないパーサー（`slideMarkdown.ts`）＋Reactコンポーネントによる変換
+- グラフ・図解の自己完結SVG生成（外部チャートライブラリ不使用）
+- テーマ・パレット機能：ライト/ダーク × 5パレット（ocean / forest / sunset / plum / graphite）、
+  CSS変数によるトークン管理
+- キーボードショートカット（スライド送り・PDF/PNG/ZIP出力）、テキスト入力中はショートカット無効化
+- 設定（テーマ・パレット等）の localStorage 永続化（`usePersistentState`）
+- エクスポート機能：PDF（印刷経由）／現在スライドPNG／全スライドZIP／スライドMD保存
+- AI原稿支援：LLM向け原稿作成プロンプトの生成・コピー機能（`draftAssistPrompt.ts`）
+- パーサー単体テスト（Vitest、28件）：frontmatter・スライド区切り・各type・mermaidサブセット等
+- GitHub Pages への CI/CD デプロイ設定（`.github/workflows/deploy.yml`）
+
+### Source
+- [websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja)（v0.7系）
+  - スライドMD仕様・デザイントークン・レイアウト定義を移植・React化
