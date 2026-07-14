@@ -3,6 +3,56 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.1] - 2026-07-XX
+
+### 追加｜タイムライン図（diagram-timeline）
+
+水平軸 ＋ Start 円 ＋ 上下交互マイルストーンで時系列を表現する新スライドタイプを追加。
+既存の diagram-flow / layer / cycle と同じく、固定座標テーブルによる決定論的 SVG 描画。
+
+- `<!-- slide: diagram-timeline -->` ＋ ` ```diagram ` ブロック（YAML）で記述。
+  `type: timeline` ＋ `start:` ＋ `milestones:（label / when の配列）`
+- マイルストーンは 2〜6 個。7 個以上は先頭 6 個を描画し警告
+- ラベル配置は偶数 index が上・奇数 index が下に自動交互配置（計算なし・座標テーブル参照）
+- ラベル 8 文字超は既存の `<tspan>` 2 行分割ルールを適用
+- marker id はスライド番号スコープ（既存の再発防止ルールを踏襲）
+- mermaid `timeline` 記法への対応は対象外（方言が多くサブセット原則と相性が悪いため）
+
+### 追加｜チャートの side-list レイアウト（layout: side-list）
+
+「1 スライド 1 グラフ」制約を維持したまま、グラフ左 60% ＋ テキストパネル右 40%
+の 2 カラム表示を実現するレイアウトバリアントを追加。
+
+- `<!-- slide: chart-bar, layout: side-list -->` のようにディレクティブへ指定。
+  適用対象は chart-bar / chart-line / chart-donut（comparison-chart は対象外）
+- ```` ```chart ```` ブロックの**後続**に `### 見出し` ＋ リストがあれば `sidePanel` として取り込む。
+  `layout: side-list` 未指定時は後続ブロックを無視（警告なし）
+- `**リード**：説明` 形式・ネスト 2 段まで対応（points と同じ parsePointItem を再利用）
+
+### 変更｜sample.md の再編（12 枚上限の維持）
+
+- `diagram-timeline`（ロードマップ 6 マイルストーン）を新規追加
+- `chart-bar` を side-list レイアウトで復活（前提条件テキストパネル付き）
+- 枚数上限（推奨 12 枚）を維持するため `summary` スライドを削除
+
+### ファイル構成の変更
+
+```
+新規:
+  src/parser/timeline.test.ts
+  src/theme/timeline-sidelist.css
+変更:
+  src/parser/types.ts
+  src/parser/slideMarkdown.ts
+  src/components/diagrams/Diagrams.tsx
+  src/components/slides/SlideRenderer.tsx
+  src/main.tsx
+  src/samples/sample.md
+  e2e/basic.spec.ts
+```
+スライド枚数カウント（12枚）: title / points / table / chart-bar(side-list) / chart-donut / steps(cards) / steps(dark) / diagram-timeline / diagram-flow / feature-showcase / comparison-chart / sources
+
+---
 ## [v0.2.0] - 2026-07-14
 
 ### 追加｜カード型ステップフロー（steps type）
