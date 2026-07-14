@@ -20,6 +20,7 @@ interface Props {
   onToggleTheme: () => void;
   onToggleView: () => void;
   onSetPalette: (p: Palette) => void;
+  onExportHtml: () => void;
   onExportPdf: () => void;
   onExportPng: () => void;
   onExportZip: () => void;
@@ -87,6 +88,16 @@ export function ControlCluster(props: Props) {
           hidden={openMenu !== 'export'}
           role="menu"
         >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              props.onExportHtml();
+              setOpenMenu(null);
+            }}
+          >
+            🌐 HTMLとして保存
+          </button>
           <button
             type="button"
             role="menuitem"

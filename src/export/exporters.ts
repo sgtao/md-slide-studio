@@ -115,3 +115,96 @@ export function exportMarkdown(md: string, deckTitle: string) {
   const filename = safeName ? `MD-${ts}_Slide-${safeName}.md` : `MD-${ts}_Slide.md`;
   downloadBlob(new Blob([md], { type: 'text/markdown;charset=utf-8' }), filename);
 }
+
+// ─────────────────────────────────────────────────────────────
+// HTMLエクスポート（スタンドアロン単一HTMLファイル）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * document.styleSheets を走査し、適用中の全CSSルールを1つの文字列に連結する。
+ * 同一オリジン配信のスタイルシート（Vite bundle・<style>タグ）はそのまま読める。
+ * クロスオリジン（例: Google Fonts の <link>）で cssRules にアクセスできない
+ * シートは黙ってスキップする（フォールバックとしてシステムフォント表示になる）。
+ */
+function collectCss(): string {
+  const parts: string[] = [];
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      const rules = sheet.cssRules;
+      for (const rule of Array.from(rules)) parts.push(rule.cssText);
+    } catch {
+      // クロスオリジン等でアクセス不可のシートはスキップ
+    }
+  }
+  return parts.join('\n');
+}
+
+function escapeHtml(s: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return s.replace(/[&<>"']/g, (c) => map[c]);
+}
+
+/**
+ * .slide-scaler 全体をクローンし、実行時JSに依存する要素を取り除いた
+ * スタンドアロンHTML文字列を組み立てる。
+ *
+ * - data-view="list" を <html> に固定し、CSS側の list 表示レイアウトに委ねる
+ *   （hero表示はJSのResizeObserver前提のため、静的ファイルには不向き）
+ * - .slide-inner の inline transform（実行時のコンテナ幅で計算された値）は
+ *   開封環境のウィンドウ幅と一致する保証がないため除去する
+ *   → 既知の制約: list表示の自動フィットはJS前提のため、ウィンドウ幅次第で
+ *     横スクロールが発生する場合がある
+ * - ナビ矢印・進捗バー・スライド番号などJS操作前提のUIは除去
+ * - active クラスは list 表示では不要なため除去
+ */
+function buildStandaloneHtml(scalerEl: HTMLElement, deckTitle: string): string {
+  const css = collectCss();
+  const root = document.documentElement;
+  const theme = root.dataset.theme ?? 'light';
+  const palette = root.dataset.palette ?? 'ocean';
+
+  const clone = scalerEl.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll<HTMLElement>('.slide-inner').forEach((el) => {
+    el.style.removeProperty('transform');
+  });
+  clone.querySelectorAll<HTMLElement>('.slide').forEach((el) => {
+    el.classList.remove('active');
+  });
+  clone
+    .querySelectorAll('.nav-arrow, #progress-bar, #slide-counter')
+    .forEach((el) => el.remove());
+
+  const title = deckTitle || 'MD Slide Studio Export';
+  return `<!doctype html>
+<html lang="ja" data-view="list" data-theme="${theme}" data-palette="${palette}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<style>${css}</style>
+</head>
+<body>
+${clone.outerHTML}
+</body>
+</html>
+`;
+}
+
+/** 現在のデッキをスタンドアロンHTML（1ファイル・JS不要）として保存 */
+export function exportHtml(scalerEl: HTMLElement, deckTitle: string) {
+  try {
+    const html = buildStandaloneHtml(scalerEl, deckTitle);
+    const ts = timestamp();
+    const safeName = sanitize(deckTitle);
+    const filename = safeName ? `HTML-${ts}_Slide-${safeName}.html` : `HTML-${ts}_Slide.html`;
+    downloadBlob(new Blob([html], { type: 'text/html;charset=utf-8' }), filename);
+  } catch (e) {
+    alert(`HTMLエクスポートに失敗しました: ${(e as Error).message}`);
+  }
+}

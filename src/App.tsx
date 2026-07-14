@@ -9,7 +9,7 @@ import type { Palette } from './parser/types';
 import { SlideDeckView, type SlideDeckHandle } from './components/SlideDeck';
 import { ControlCluster } from './components/ControlCluster';
 import { useKeyboardNav, usePersistentState } from './hooks/hooks';
-import { exportAllToZip, exportMarkdown, exportToPdf, exportToPng } from './export/exporters';
+import { exportAllToZip, exportHtml, exportMarkdown, exportToPdf, exportToPng } from './export/exporters';
 import { buildDraftAssistPrompt } from './ai/draftAssistPrompt';
 import sampleMd from './samples/sample.md?raw';
 
@@ -118,6 +118,10 @@ export default function App() {
     if (els.length) void exportAllToZip(els, title);
   }, [title]);
   const doMd = useCallback(() => exportMarkdown(md, title), [md, title]);
+  const doHtml = useCallback(() => {
+    const el = deckRef.current?.getScalerEl();
+    if (el) void exportHtml(el, title);
+  }, [title]);
 
   useKeyboardNav(
     useMemo(
@@ -218,6 +222,7 @@ export default function App() {
             onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             onToggleView={toggleView}
             onSetPalette={setPalette}
+            onExportHtml={doHtml}
             onExportPdf={doPdf}
             onExportPng={doPng}
             onExportZip={doZip}

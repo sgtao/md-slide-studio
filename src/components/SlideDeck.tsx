@@ -14,6 +14,8 @@ export interface SlideDeckHandle {
   /** 現在表示中の .slide 要素（PNGエクスポート用） */
   getActiveSlideEl: () => HTMLElement | null;
   getAllSlideEls: () => HTMLElement[];
+  /** .slide-scaler 全体（HTMLエクスポート用） */
+  getScalerEl: () => HTMLElement | null;
 }
 
 interface Props {
@@ -37,6 +39,7 @@ export const SlideDeckView = forwardRef<SlideDeckHandle, Props>(function SlideDe
     getActiveSlideEl: () => scalerRef.current?.querySelector<HTMLElement>('.slide.active') ?? null,
     getAllSlideEls: () =>
       Array.from(scalerRef.current?.querySelectorAll<HTMLElement>('.slide') ?? []),
+    getScalerEl: () => scalerRef.current,
   }));
 
   // list ビュー: 各 .slide-inner を親スライド幅/960 でスケール（scaleListSlides 移植）
