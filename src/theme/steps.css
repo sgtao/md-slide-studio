@@ -1,0 +1,283 @@
+/* steps.css — v0.2.0 Studio拡張のスタイルを1ファイルに集約。
+ *
+ * 収録内容:
+ *   §1 スライド単位ダーク（.slide--dark のCSS変数上書き）
+ *   §2 共通ヘッダ拡張（.slide-badge / .slide-lead / .slide-point）
+ *   §3 steps type（カード型ステップフロー・ratio帯）
+ *
+ * 設計:
+ * - 色は必ずCSS変数経由（ハードコード禁止規約）。ただし §1 は
+ *   theme-vars.css の [data-theme='dark'] と同値の「変数定義」なので例外
+ * - 優先順位「グローバルテーマ < スライドtone」は、変数を .slide 要素に
+ *   定義し直すことで（継承の近接性により）!important なしで成立する
+ * - main.tsx で app.css の後に import する（新規セレクタのみのため順序に
+ *   よる既存スタイルへの影響はない）
+ * - v0.3 の SSOT リファクタ時に theme-vars / content への再配置を検討
+ */
+
+/* ==========================================================================
+ * §1 スライド単位ダーク（ディレクティブ tone: dark → .slide--dark）
+ * 値は theme-vars.css の [data-theme='dark'] 系と同一。
+ * グローバルテーマが既にダークの場合は同値上書き（無害）。
+ * ========================================================================== */
+
+.slide.slide--dark {
+  --bg-slide: #161b22;
+  --bg-surface: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --accent-light: #1c2d3f;
+  --accent-dim: #1f3a57;
+  --chart-2: #3fb950;
+  --chart-3: #d29922;
+  --chart-4: #f85149;
+  --chart-5: #a371f7;
+  color: var(--text-primary);
+}
+
+/* パレット別 accent（theme-vars.css の [data-palette][data-theme='dark'] と同値） */
+[data-palette='forest'] .slide.slide--dark {
+  --accent: #34d399;
+  --accent-light: #14291e;
+  --accent-dim: #1b3d2b;
+}
+[data-palette='sunset'] .slide.slide--dark {
+  --accent: #fb923c;
+  --accent-light: #2f1d0e;
+  --accent-dim: #45290f;
+}
+[data-palette='plum'] .slide.slide--dark {
+  --accent: #a78bfa;
+  --accent-light: #221a38;
+  --accent-dim: #322659;
+}
+[data-palette='graphite'] .slide.slide--dark {
+  --accent: #94a3b8;
+  --accent-light: #202834;
+  --accent-dim: #2b3648;
+}
+
+/* ==========================================================================
+ * §2 共通ヘッダ拡張（badge / lead / point）
+ * ========================================================================== */
+
+/* 見出し行: badge ピルと slide-title を横並びに */
+.slide-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.slide-badge {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.32em 0.85em;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--bg-slide);
+}
+
+/* title スライド（h1）で badge 単独行になる場合の余白 */
+.slide-title-row + h1 {
+  margin-top: 0.8rem;
+}
+
+.slide-lead {
+  margin-top: 0.55rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* 下部の強調帯（point:） */
+.slide-point {
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  bottom: 26px;
+  padding: 0.55em 1.1em;
+  border-radius: 6px;
+  background: var(--bg-surface-dark);
+  color: var(--text-on-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.slide-point::before {
+  content: '💡 ';
+}
+.slide-point .hl {
+  color: var(--accent);
+}
+/* ダークスライド上では地色と同化するため、面＋枠のパネルに切り替える */
+.slide--dark .slide-point {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+/* ==========================================================================
+ * §3 steps（カード型ステップフロー）
+ * ========================================================================== */
+
+.steps-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 44px;
+  margin-top: 0.6rem;
+}
+
+/* 系統色の順繰り割当（決定論）。--chart-1 は var(--accent) 参照のため
+ * パレット・tone に自動追従する */
+.steps-item:nth-child(5n + 1) {
+  --step-color: var(--chart-1);
+}
+.steps-item:nth-child(5n + 2) {
+  --step-color: var(--chart-2);
+}
+.steps-item:nth-child(5n + 3) {
+  --step-color: var(--chart-3);
+}
+.steps-item:nth-child(5n + 4) {
+  --step-color: var(--chart-4);
+}
+.steps-item:nth-child(5n + 5) {
+  --step-color: var(--chart-5);
+}
+
+.steps-item {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 1.3rem 0.9rem 1.1rem;
+  border-radius: 8px;
+  background: var(--bg-surface);
+}
+
+/* カード間の矢印（gap: 44px の中央に配置） */
+.steps-item + .steps-item::before {
+  content: '→';
+  position: absolute;
+  left: -34px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* cards スタイル: 上ボーダーで系統色を示す */
+.steps-cards .steps-item {
+  border-top: 4px solid var(--step-color);
+}
+
+/* circled スタイル: 連番丸バッジ */
+.steps-circled .steps-item {
+  padding-top: 1.1rem;
+}
+.steps-num {
+  width: 2.1em;
+  height: 2.1em;
+  border-radius: 50%;
+  background: var(--step-color);
+  color: var(--bg-slide);
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* カード単位の見た目変種 */
+.steps-item--dark {
+  background: var(--bg-surface-dark);
+  color: var(--text-on-dark);
+}
+.steps-item--dark .steps-desc {
+  color: var(--text-on-dark-2);
+}
+.steps-item--outline {
+  background: var(--bg-slide);
+  border: 2px solid var(--step-color);
+}
+.steps-cards .steps-item--outline {
+  /* outline は全周枠のため上ボーダーの二重線を避ける */
+  border-top-width: 2px;
+}
+
+.steps-icon {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+.steps-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.steps-desc {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* ─── ratio 帯（セグメント＋凡例） ─── */
+.steps-ratio-wrap {
+  margin-top: 1.6rem;
+}
+.steps-ratio {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.steps-ratio-seg:nth-child(5n + 1) {
+  background: var(--chart-1);
+}
+.steps-ratio-seg:nth-child(5n + 2) {
+  background: var(--chart-2);
+}
+.steps-ratio-seg:nth-child(5n + 3) {
+  background: var(--chart-3);
+}
+.steps-ratio-seg:nth-child(5n + 4) {
+  background: var(--chart-4);
+}
+.steps-ratio-seg:nth-child(5n + 5) {
+  background: var(--chart-5);
+}
+.steps-ratio-legend {
+  display: flex;
+  margin-top: 0.45rem;
+}
+.steps-ratio-label {
+  min-width: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 0.3em;
+}
+
+/* ─── 印刷（PDF）: point帯・カード面の背景色を維持 ─── */
+@media print {
+  .slide-point,
+  .steps-item,
+  .steps-num,
+  .steps-ratio-seg {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

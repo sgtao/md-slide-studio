@@ -5,19 +5,18 @@ palette: ocean
 <!-- slide: title -->
 # Markdownから、==スライドを生成する。==
 subtitle: MD Slide Studio — スライドMD → HTML / PDF / PNG 変換デモ（全typeサンプル）
-badges: [v0.1.0, React + TypeScript, websearch-slide-ja 移植]
+badges: [v0.2.0, React + TypeScript, websearch-slide-ja 移植]
 ---
 <!-- slide: points -->
 ## このアプリでできること
 - **即時プレビュー**：左のエディタでMDを編集すると、右のスライドが即座に更新される
-- **14種のスライドtype**：タイトル・箇条書き・表・グラフ・図解・画像などを宣言的に記述
-- **テーマ切替**：🌙でライト／ダーク、🎨で5色パレットを即座に切替
-- **エクスポート**：📥メニューからPDF / PNG / ZIPをダウンロード
-- **AI原稿支援**：🤖ボタンでLLM用プロンプトを生成し、下書きをAIに任せることも可能
+- **15種のスライドtype**：タイトル・箇条書き・表・グラフ・図解・手順カードなどを宣言的に記述
+- **決定論的な変換**：LLM変換と違い、同じMDからは常に同じスライドが生成される
+- **エクスポート**：PDF（P）・PNG（Shift+S）・ZIP（Shift+P）・MD保存に対応
 > このスライド自体がエディタ内のMDから生成されています。編集して試してください。
 ---
 <!-- slide: summary -->
-## 使い方（3ステップ）
+## 使い方 3ステップ
 1. **原稿を書く**：左ペインにスライドMDを書く（AIプロンプト🤖でLLMに下書きさせてもOK）
 1. **確認する**：右ペインで確認。🎨でパレット、🌙でテーマを切替
 1. **書き出す**：📥メニューからPDF / PNG / ZIPをエクスポート
@@ -30,7 +29,9 @@ badges: [v0.1.0, React + TypeScript, websearch-slide-ja 移植]
 | table | 比較表 | Markdownテーブル |
 | chart-bar / line / donut | グラフ | ```chart ブロック |
 | diagram-flow / layer / cycle | 図解 | ```diagram / mermaid |
+| steps | 手順カードフロー | ```steps ブロック |
 | figure / feature-showcase / sources | 画像・機能紹介・出典 | 専用記法 |
+> 全typeで共通ヘッダ `badge:` / `lead:` / `point:` とディレクティブ `tone: dark` が使えます（v0.2.0）
 ---
 <!-- slide: chart-donut -->
 ## グラフはYAMLデータから自動描画
@@ -46,18 +47,41 @@ data:
 source: { name: サンプルデータ, url: https://example.com }
 ```
 ---
-<!-- slide: chart-bar -->
-## 横棒グラフの例
-```chart
-type: bar
-title: リポジトリ別スター数（例示データ）
-unit: "k"
-data:
-  - { label: project-a, value: 98 }
-  - { label: project-b, value: 74 }
-  - { label: project-c, value: 51 }
-  - { label: project-d, value: 33 }
-source: { name: サンプルデータ, url: https://example.com }
+<!-- slide: steps -->
+badge: Step 1
+## カード型ステップフロー（steps）
+lead: 手順・プロセス・ワークフローをアイコン付きカードの流れで表現する
+```steps
+style: cards
+items:
+  - icon: "🔍"
+    title: Claude が Web検索
+    desc: ブランドカラー／フォント情報／ロゴ・トーン
+  - icon: "✨"
+    title: Claude が自動整理
+    desc: カラーパレット／フォント指定／レイアウトルール
+  - icon: "🎨"
+    title: design-guide.md 完成
+    desc: カード単位で dark / outline の変種も指定できる
+    tone: outline
+```
+point: ==badge / lead / point== は全typeで使える共通ヘッダ拡張です
+---
+<!-- slide: steps, tone: dark -->
+## 番号丸スタイル ＋ 比率帯 ＋ tone: dark
+lead: ディレクティブに tone: dark を付けると、このスライドだけ地色を反転できる
+```steps
+style: circled
+items:
+  - { icon: "🔍", title: デザインガイド生成 }
+  - { icon: "📄", title: スライド一括生成 }
+  - { icon: "💬", title: Connector で修正 }
+  - { icon: "✋", title: 手動仕上げ }
+ratio:
+  - { label: AI 自動, value: 30 }
+  - { label: AI 自動, value: 30 }
+  - { label: AI + 指示, value: 30 }
+  - { label: 手動 10%, value: 10 }
 ```
 ---
 <!-- slide: diagram-flow -->
@@ -107,13 +131,14 @@ type: comparison-donut
 labels: { before: Before, after: After }
 center: { before: 605GB, after: 380GB }
 data:
-  - { label: Drive, before: 326, after: 128, class: 1 }
+  - { label: Google Drive, before: 326, after: 128, class: 1 }
+  - { label: 動画素材, before: 98, after: 80, class: 4 }
+  - { label: デスクトップ, before: 61, after: 61, class: 3 }
   - { label: 空き, before: 321, after: 546, class: neutral }
-source: { name: 計測メモ }
+source: { name: 計測メモ（例）, url: https://example.com }
 ```
 ---
 <!-- slide: sources -->
 ## 出典・参考リンク
-- [websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja) — 元スキル（v0.7系）
-- [React 公式ドキュメント](https://react.dev) — コンポーネント設計の参照
-- [Vite 公式ドキュメント](https://vite.dev) — ビルド・開発サーバー設定
+- [websearch-slide-ja スキル](https://github.com/) — 本アプリの移植元スキル（スライドMD仕様 v0.7）
+- [MD Slide Studio リポジトリ](https://github.com/) — ソースコード・Issue はこちら

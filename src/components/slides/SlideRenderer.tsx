@@ -1,6 +1,12 @@
 /**
  * SlideRenderer.tsx — slide-layouts.md の各レイアウトをtype別コンポーネントとして実装。
  * DOM構造・クラス名は元スキルの生成HTMLと互換（CSSをそのまま流用するため）。
+ *
+ * v0.2.0:
+ * - SlideHeading / Note を common.tsx へ移し、badge / lead（共通ヘッダ拡張）に対応
+ * - steps type（StepsView.tsx）を接続
+ * - point:（下部強調帯）を全typeで PointBand として描画
+ * - ディレクティブ tone: dark で section.slide に slide--dark クラスを付与
  */
 import type {
   ChartSlide,
@@ -18,31 +24,22 @@ import type {
 import { renderInline, safeUrl } from '../../parser/inline';
 import { BarChartSvg, ComparisonDonutSvg, DonutChartSvg, LineChartSvg } from '../charts/Charts';
 import { CycleDiagramSvg, FlowDiagramSvg, LayerDiagramSvg } from '../diagrams/Diagrams';
-
-// ---------------------------------------------------------------------------
-
-function SlideHeading({ text }: { text?: string }) {
-  if (!text) return null;
-  return (
-    <>
-      <div className="slide-title">{renderInline(text)}</div>
-      <div className="slide-divider" />
-    </>
-  );
-}
-
-function Note({ text }: { text?: string }) {
-  if (!text) return null;
-  return <p className="note">{renderInline(text)}</p>;
-}
+import { Note, PointBand, SlideHeading } from './common';
+import { StepsView } from './StepsView';
 
 // --- title ---
 
 function TitleView({ slide }: { slide: TitleSlide }) {
   return (
     <div className={`slide-inner${slide.layout === 'title-xl' ? ' layout-title-xl' : ''}`}>
+      {slide.badge && (
+        <div className="slide-title-row">
+          <span className="slide-badge">{slide.badge}</span>
+        </div>
+      )}
       <h1>{renderInline(slide.heading)}</h1>
       {slide.subtitle && <p className="subtitle">{renderInline(slide.subtitle)}</p>}
+      {slide.lead && <p className="slide-lead">{renderInline(slide.lead)}</p>}
       {slide.badges.length > 0 && (
         <div className="badges">
           {slide.badges.map((b, i) => (
@@ -68,7 +65,7 @@ function listClass(base: string, layout?: string): string {
 function PointsView({ slide }: { slide: PointsSlide }) {
   return (
     <div className="slide-inner">
-      <SlideHeading text={slide.heading} />
+      <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       <ul className={listClass('points', slide.layout)}>
         {slide.items.map((item, i) => (
           <li key={i}>
@@ -99,7 +96,7 @@ function PointsView({ slide }: { slide: PointsSlide }) {
 function SummaryView({ slide }: { slide: SummarySlide }) {
   return (
     <div className="slide-inner">
-      <SlideHeading text={slide.heading ?? 'まとめ'} />
+      <SlideHeading text={slide.heading ?? 'まとめ'} badge={slide.badge} lead={slide.lead} />
       <ol className={listClass('summary-list', slide.layout)}>
         {slide.items.map((item, i) => (
           <li key={i}>
@@ -127,7 +124,7 @@ function SummaryView({ slide }: { slide: SummarySlide }) {
 function TableView({ slide }: { slide: TableSlide }) {
   return (
     <div className="slide-inner top">
-      <SlideHeading text={slide.heading} />
+      <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       <table className={`cmp-table${slide.layout === 'compact' ? ' layout-compact' : ''}`}>
         {slide.header.length > 0 && (
           <thead>
@@ -163,7 +160,7 @@ function ChartView({ slide }: { slide: ChartSlide }) {
   const chart = slide.chart;
   return (
     <div className="slide-inner">
-      <SlideHeading text={slide.heading} />
+      <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       {chart ? (
         <div className="slide-chart">
           {chart.type === 'bar' && <BarChartSvg chart={chart} />}
@@ -226,7 +223,7 @@ function DiagramView({ slide, index }: { slide: DiagramSlide; index: number }) {
   const d = slide.diagram;
   return (
     <div className="slide-inner">
-      <SlideHeading text={slide.heading} />
+      <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       {d ? (
         <div className="slide-diagram">
           {d.type === 'flow' && (
@@ -255,7 +252,7 @@ function DiagramView({ slide, index }: { slide: DiagramSlide; index: number }) {
 function FigureView({ slide }: { slide: FigureSlide }) {
   return (
     <div className="slide-inner">
-      <SlideHeading text={slide.heading} />
+      <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       <figure className="slide-figure">
         {slide.url ? (
           <img
@@ -326,7 +323,7 @@ function FeatureShowcaseView({ slide }: { slide: FeatureShowcaseSlide }) {
 function SourcesView({ slide }: { slide: SourcesSlide }) {
   return (
     <div className="slide-inner top">
-      <SlideHeading text={slide.heading} />
+      <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       <ul className="links">
         {slide.links.map((l, i) => (
           <li key={i}>
@@ -343,7 +340,7 @@ function SourcesView({ slide }: { slide: SourcesSlide }) {
 
 // ---------------------------------------------------------------------------
 
-export function SlideRenderer({ slide, index }: { slide: Slide; index: number }) {
+function renderSlideBody(slide: Slide, index: number) {
   switch (slide.type) {
     case 'title':
       return <TitleView slide={slide} />;
@@ -367,16 +364,28 @@ export function SlideRenderer({ slide, index }: { slide: Slide; index: number })
       return <FigureView slide={slide} />;
     case 'feature-showcase':
       return <FeatureShowcaseView slide={slide} />;
+    case 'steps':
+      return <StepsView slide={slide} />;
     case 'sources':
       return <SourcesView slide={slide} />;
   }
 }
 
-/** section.slide のクラス名（slide-fit / feature-showcase 対応） */
+export function SlideRenderer({ slide, index }: { slide: Slide; index: number }) {
+  return (
+    <>
+      {renderSlideBody(slide, index)}
+      <PointBand text={slide.point} />
+    </>
+  );
+}
+
+/** section.slide のクラス名（slide-fit / feature-showcase / tone: dark 対応） */
 export function slideSectionClass(slide: Slide, active: boolean): string {
   const cls = ['slide'];
   if (active) cls.push('active');
   if (slide.fit) cls.push('slide-fit');
   if (slide.type === 'feature-showcase') cls.push('feature-showcase');
+  if (slide.tone === 'dark') cls.push('slide--dark');
   return cls.join(' ');
 }

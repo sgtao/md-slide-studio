@@ -1,6 +1,10 @@
 /**
- * スライドMD（markdown-format.md v0.7.0）のAST型定義。
+ * スライドMD（markdown-format.md v0.7.0 + Studio拡張 v0.2.0）のAST型定義。
  * MD が Single Source of Truth。HTML(React) はこのASTから毎回フル再生成する。
+ *
+ * v0.2.0 拡張（docs/references/markdown-format-ext.md）:
+ * - SlideBase に badge / lead / point（全type共通ヘッダ）と tone（スライド単位ダーク）
+ * - StepsSlide（カード型ステップフロー）を追加
  */
 
 export type Palette = 'ocean' | 'forest' | 'sunset' | 'plum' | 'graphite';
@@ -20,9 +24,13 @@ export type SlideType =
   | 'diagram-cycle'
   | 'figure'
   | 'feature-showcase'
+  | 'steps'
   | 'sources';
 
 export type LayoutVariant = 'two-col' | 'title-xl' | 'compact';
+
+/** スライド単位の地色反転（v0.2.0）。未知値はディレクティブ解析時に無視される */
+export type SlideTone = 'dark';
 
 export interface Frontmatter {
   title: string;
@@ -113,12 +121,39 @@ export interface SourceLink {
   note?: string;
 }
 
+/** steps（v0.2.0）: カード型ステップフロー */
+export type StepStyle = 'cards' | 'circled';
+
+export interface StepItem {
+  /** 絵文字1文字を想定（任意） */
+  icon?: string;
+  title: InlineText;
+  desc?: InlineText;
+  /** カード単位の見た目変種（任意）: dark=反転面 / outline=枠線強調 */
+  tone?: 'dark' | 'outline';
+}
+
+export interface StepRatioItem {
+  label: string;
+  value: number;
+}
+
 interface SlideBase {
   type: SlideType;
   fit: boolean;
   layout?: LayoutVariant;
   /** パース時の警告（未知type・不正ブロック等）。UIに表示する */
   warnings: string[];
+
+  // ─── v0.2.0 共通ヘッダ拡張（markdown-format-ext.md §1） ───
+  /** 見出し左のピル（例: Step 1 / WHY） */
+  badge?: string;
+  /** 見出し直下の補足1行 */
+  lead?: InlineText;
+  /** スライド下部の強調帯（💡付き） */
+  point?: InlineText;
+  /** スライド単位の地色反転（ディレクティブ `tone: dark`） */
+  tone?: SlideTone;
 }
 
 export interface TitleSlide extends SlideBase {
@@ -185,6 +220,16 @@ export interface FeatureShowcaseSlide extends SlideBase {
   right: FeatureShowcaseRight;
 }
 
+export interface StepsSlide extends SlideBase {
+  type: 'steps';
+  heading?: InlineText;
+  stepStyle: StepStyle;
+  items: StepItem[];
+  /** 任意: セグメント比率帯（値合計で正規化して描画） */
+  ratio?: StepRatioItem[];
+  note?: InlineText;
+}
+
 export interface SourcesSlide extends SlideBase {
   type: 'sources';
   heading?: InlineText;
@@ -201,6 +246,7 @@ export type Slide =
   | DiagramSlide
   | FigureSlide
   | FeatureShowcaseSlide
+  | StepsSlide
   | SourcesSlide;
 
 export interface SlideDeck {

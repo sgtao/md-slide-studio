@@ -1,14 +1,16 @@
 /**
- * slideMarkdown.ts — スライドMD（markdown-format.md v0.7.0 準拠）のパーサー。
+ * slideMarkdown.ts — スライドMD（markdown-format.md v0.7.0 準拠 + Studio拡張 v0.2.0）のパーサー。
  *
  * 仕様の要点:
  * - 先頭に YAML frontmatter、以降は行全体が `---` の行でスライド区切り
  *   （frontmatter 内・コードフェンス内の `---` は区切りとみなさない）
- * - 各スライド先頭行は `<!-- slide: <type>[, fit][, layout: x] -->`
- * - chart / diagram / mermaid（サブセット）フェンスブロックを構造化
+ * - 各スライド先頭行は `<!-- slide: <type>[, fit][, layout: x][, tone: dark] -->`
+ * - chart / diagram / mermaid（サブセット）/ steps フェンスブロックを構造化
+ * - 全typeで共通ヘッダキー（badge / lead / point）を受け付ける（slideHeader.ts）
  * - MD 内の生 <script> / <style> は無視（禁止事項）
  */
 import YAML from 'yaml';
+import { parseSlideHeader } from './slideHeader';
 import type {
   ChartBlock,
   ComparisonChartBlock,
@@ -22,8 +24,12 @@ import type {
   PointItem,
   Slide,
   SlideDeck,
+  SlideTone,
   SlideType,
   SourceLink,
+  StepItem,
+  StepRatioItem,
+  StepStyle,
 } from './types';
 
 const PALETTES: Palette[] = ['ocean', 'forest', 'sunset', 'plum', 'graphite'];
@@ -41,6 +47,7 @@ const SLIDE_TYPES: SlideType[] = [
   'diagram-cycle',
   'figure',
   'feature-showcase',
+  'steps',
   'sources',
 ];
 const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact'];
@@ -133,6 +140,7 @@ interface Directive {
   type: SlideType;
   fit: boolean;
   layout?: LayoutVariant;
+  tone?: SlideTone;
   warnings: string[];
 }
 
@@ -153,6 +161,7 @@ export function parseDirective(line: string): Directive | null {
   }
   let fit = false;
   let layout: LayoutVariant | undefined;
+  let tone: SlideTone | undefined;
   for (const p of parts) {
     if (p === 'fit') {
       fit = true;
@@ -164,9 +173,15 @@ export function parseDirective(line: string): Directive | null {
       // 未知の layout 値は無視して既定レイアウト（仕様どおりエラーにしない）
       continue;
     }
+    const tm = p.match(/^tone:\s*(\S+)$/);
+    if (tm) {
+      if (tm[1] === 'dark') tone = 'dark';
+      // 未知の tone 値は無視して既定表示（layout: と同じ前方互換方針）
+      continue;
+    }
     // その他の未知キーも無視（前方互換）
   }
-  return { type, fit, layout, warnings };
+  return { type, fit, layout, tone, warnings };
 }
 
 // ---------------------------------------------------------------------------
@@ -185,9 +200,11 @@ function parseSlide(raw: string): Slide | null {
     fit: false,
     warnings: ['スライドディレクティブがありません（points として描画します）'],
   };
-  const body = stripRawHtml(bodyLines.join('\n'), d.warnings);
+  const stripped = stripRawHtml(bodyLines.join('\n'), d.warnings);
+  // v0.2.0: 共通ヘッダ（badge / lead / point）を先に取り出し、残りを本文として解析する
+  const { header, rest: body } = parseSlideHeader(stripped);
 
-  const base = { fit: d.fit, layout: d.layout, warnings: d.warnings };
+  const base = { fit: d.fit, layout: d.layout, tone: d.tone, warnings: d.warnings, ...header };
 
   switch (d.type) {
     case 'title':
@@ -212,6 +229,8 @@ function parseSlide(raw: string): Slide | null {
       return { ...base, type: 'figure', ...parseFigure(body, d.warnings) };
     case 'feature-showcase':
       return { ...base, type: 'feature-showcase', ...parseFeatureShowcase(body, d.warnings) };
+    case 'steps':
+      return { ...base, type: 'steps', ...parseStepsSlide(body, d.warnings) };
     case 'sources':
       return { ...base, type: 'sources', ...parseSources(body) };
   }
@@ -354,10 +373,10 @@ function parseYamlBlock(content: string, warnings: string[]): Record<string, unk
   try {
     const v = YAML.parse(content);
     if (v && typeof v === 'object') return v as Record<string, unknown>;
-    warnings.push('chart/diagram ブロックの内容が YAML マップではありません');
+    warnings.push('chart/diagram/steps ブロックの内容が YAML マップではありません');
     return null;
   } catch (e) {
-    warnings.push(`chart/diagram ブロックの YAML 解析に失敗: ${(e as Error).message}`);
+    warnings.push(`chart/diagram/steps ブロックの YAML 解析に失敗: ${(e as Error).message}`);
     return null;
   }
 }
@@ -701,6 +720,81 @@ function parseFeatureShowcase(body: string, warnings: string[]) {
   if (!left.heading && !right.heading)
     warnings.push('feature-showcase の left/right の内容が読み取れません');
   return { left, right };
+}
+
+// --- steps（v0.2.0: カード型ステップフロー） ---
+
+const STEP_STYLES: StepStyle[] = ['cards', 'circled'];
+const STEPS_MAX_ITEMS = 5;
+
+function parseStepsSlide(body: string, warnings: string[]) {
+  const fence = extractFence(body, 'steps');
+  const { heading, note } = pickHeadingAndNote(fence ? fence.rest : body);
+  const empty = { heading, note, stepStyle: 'cards' as StepStyle, items: [] as StepItem[] };
+  if (!fence) {
+    warnings.push('```steps ブロックが見つかりません');
+    return empty;
+  }
+  const y = parseYamlBlock(fence.content, warnings);
+  if (!y) return empty;
+
+  let stepStyle: StepStyle = 'cards';
+  if (y.style != null) {
+    if ((STEP_STYLES as string[]).includes(String(y.style))) {
+      stepStyle = y.style as StepStyle;
+    } else {
+      warnings.push(`steps の style "${String(y.style)}" は未対応です（cards として描画）`);
+    }
+  }
+
+  const itemsRaw = Array.isArray(y.items) ? y.items : [];
+  const items: StepItem[] = itemsRaw
+    .filter((it) => it && typeof it === 'object')
+    .map((it) => {
+      const r = it as Record<string, unknown>;
+      const tone = r.tone === 'dark' || r.tone === 'outline' ? r.tone : undefined;
+      if (r.tone != null && tone === undefined) {
+        warnings.push(`steps item の tone "${String(r.tone)}" は未対応です（dark / outline）`);
+      }
+      return {
+        icon: r.icon != null ? String(r.icon) : undefined,
+        title: String(r.title ?? ''),
+        desc: r.desc != null ? String(r.desc) : undefined,
+        tone,
+      };
+    });
+  if (items.length === 0) {
+    warnings.push('steps の items が空です');
+  } else if (items.length === 1) {
+    warnings.push('steps の items は2個以上を推奨します');
+  }
+  if (items.length > STEPS_MAX_ITEMS) {
+    warnings.push(
+      `steps の items が ${items.length} 件あります（上限${STEPS_MAX_ITEMS}件・${STEPS_MAX_ITEMS + 1}件目以降は切り捨て）`,
+    );
+  }
+
+  let ratio: StepRatioItem[] | undefined;
+  if (Array.isArray(y.ratio)) {
+    const rr = y.ratio
+      .filter((it) => it && typeof it === 'object')
+      .map((it) => {
+        const r = it as Record<string, unknown>;
+        return { label: String(r.label ?? ''), value: Number(r.value) };
+      })
+      .filter((it) => Number.isFinite(it.value) && it.value > 0);
+    if (rr.length > 0) {
+      ratio = rr;
+      const sum = rr.reduce((a, b) => a + b.value, 0);
+      if (Math.round(sum) !== 100) {
+        warnings.push(`steps の ratio 合計が ${sum} です（比率として正規化して描画します）`);
+      }
+    } else {
+      warnings.push('steps の ratio に有効な値がありません（帯は非表示）');
+    }
+  }
+
+  return { heading, note, stepStyle, items: items.slice(0, STEPS_MAX_ITEMS), ratio };
 }
 
 // --- sources ---

@@ -40,6 +40,15 @@ MD Slide Studio のスライドMDをLLM（Claude / ChatGPT / Gemini 等）に書
 パレット変更は frontmatter の `palette:` を
 ocean / forest / sunset / plum / graphite のいずれかに変える。
 
+手順スライドへの変換依頼の例:
+
+    - このスライドMDの4枚目（diagram-flow）を steps type に変えてください。
+    - 各ノードを items の title にし、icon（絵文字1つ）と desc（1行説明）を補ってください。
+
+スライド単位の反転の例:
+
+    - 5枚目のディレクティブに tone: dark を追加してください。本文は変えないでください。
+
 ## 4. レビュー依頼
 
 ```
