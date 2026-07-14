@@ -3,6 +3,75 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.0] - 2026-07-14
+
+### 追加｜カード型ステップフロー（steps type）
+
+参考スライド（手順解説系）を再現する新スライドタイプを追加。図形ノードの流れは
+従来どおり diagram-flow、アイコン・説明文つきの内容カードの流れは steps を使う。
+
+- `<!-- slide: steps -->` ＋ ```steps ブロック（YAML）で記述。
+  `style: cards`（上ボーダーカード）／ `style: circled`（連番丸バッジ）の2スタイル
+- items は 2〜5個（超過は先頭5個を描画し警告）。各カードは
+  `icon` / `title` / `desc` / `tone: dark | outline` を指定可
+- カード間の矢印はCSSで自動挿入（MDには書かない）
+- 任意の `ratio:` でセグメント比率帯＋凡例を描画（値合計で正規化、
+  合計≠100 は警告のみ）。帯・カードの系統色は `--chart-1〜5` を順繰りに使用
+- 描画はHTML/CSS（flexbox）。SVGを使わないため折返し・自動縮小（fit）が既存機構で効く
+
+### 追加｜共通ヘッダ拡張（badge / lead / point）
+
+全スライドタイプで使える3つのヘッダキーを追加。抽出は新設の共通前処理
+`parseSlideHeader()`（純関数・フェンス内は走査しない）に集約。
+
+- `badge:` … 見出し左のピル（例: Step 1 / WHY）。accent地
+- `lead:` … 見出し直下の補足1行（--text-secondary）。title の subtitle: は従来どおり併存
+- `point:` … スライド下部の💡強調帯。`==テキスト==` 強調に対応。
+  既存の `>` ノート（控えめな補足）とは併存
+- badge / lead は見出しを持つtypeで有効（feature-showcase / comparison-chart では非描画）。
+  point は全typeで有効
+- SlideHeading / Note を SlideRenderer 内から `slides/common.tsx` へ分離
+  （type別コンポーネントの別ファイル化で循環importを避けるため）
+
+### 追加｜スライド単位のダーク反転（tone: dark）
+
+- `<!-- slide: steps, tone: dark -->` のようにディレクティブへ指定すると、
+  そのスライドだけ地色系のCSS変数を反転（accent はパレットのダーク側の値に切替）
+- 未知の tone 値は無視して既定表示（layout: と同じ前方互換方針）
+- 優先順位は「グローバルテーマ < スライドtone」（変数の継承近接性で成立、!important 不使用）
+- PDF/PNG出力でも同一CSSが適用（print-color-adjust: exact で面色を維持）
+
+### 変更｜sample.md の再編（12枚上限の維持）
+
+- steps 2例（cards＋共通ヘッダ／circled＋ratio＋tone: dark）を追加
+- 枚数上限（推奨12枚）を維持するため chart-bar の単独例を削除
+  （棒グラフ記法は donut 例と同一の ```chart ブロックで担保）
+- diagram-flow の nodes / labels を引用符付きに統一（v0.1.2 の YAML 修正方針を踏襲）
+
+### ファイル構成の変更
+
+```
+新規:
+  src/parser/slideHeader.ts
+  src/parser/slideHeader.test.ts
+  src/parser/steps.test.ts
+  src/components/slides/common.tsx
+  src/components/slides/StepsView.tsx
+  src/theme/steps.css
+  docs/references/markdown-format-ext.md
+変更:
+  src/parser/types.ts
+  src/parser/slideMarkdown.ts
+  src/components/slides/SlideRenderer.tsx
+  src/main.tsx
+  src/samples/sample.md
+  src/ai/draftAssistPrompt.ts
+  docs/prompts/draft-slide-md.md
+  README.md
+  e2e/basic.spec.ts
+```
+
+---
 ## [v0.1.2] - 2026-07-12
 
 ### 修正｜初回リリース動作確認の不備修正・機能補強
