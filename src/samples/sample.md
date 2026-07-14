@@ -15,23 +15,34 @@ badges: [v0.2.1, React + TypeScript, websearch-slide-ja 移植]
 - **エクスポート**：PDF（P）・PNG（Shift+S）・ZIP（Shift+P）・MD保存に対応
 > このスライド自体がエディタ内のMDから生成されています。編集して試してください。
 ---
-<!-- slide: summary -->
-## 使い方 3ステップ
-1. **原稿を書く**：左ペインにスライドMDを書く（AIプロンプト🤖でLLMに下書きさせてもOK）
-1. **確認する**：右ペインで確認。🎨でパレット、🌙でテーマを切替
-1. **書き出す**：📥メニューからPDF / PNG / ZIPをエクスポート
----
 <!-- slide: table -->
 ## 対応スライドtype一覧
 | type | 用途 | 記法 |
 |---|---|---|
-| title / points / summary | 表紙・箇条書き・まとめ | `#` / `-` / `1.` |
+| title / points / summary | 表紙・箇条書き・まとめ | ` # ` / ` - ` / ` 1. ` |
 | table | 比較表 | Markdownテーブル |
-| chart-bar / line / donut | グラフ | ```chart ブロック |
-| diagram-flow / layer / cycle / timeline | 図解・タイムライン | ```diagram ブロック |
-| steps | 手順カードフロー | ```steps ブロック |
+| chart-bar / line / donut | グラフ | ` ```chart ` ブロック |
+| diagram-flow / layer / cycle / ==timeline== | 図解・タイムライン | ` ```diagram ` ブロック |
+| ==steps== | 手順カードフロー | ` ```steps ` ブロック |
 | figure / feature-showcase / sources | 画像・機能紹介・出典 | 専用記法 |
-> 全typeで共通ヘッダ `badge:` / `lead:` / `point:` とディレクティブ `tone: dark` が使えます
+> 全typeで `badge:` / `lead:` / `point:` と `tone: dark` が使えます（v0.2.0+）
+---
+<!-- slide: chart-bar, layout: side-list -->
+## 売上目標と達成の前提条件
+lead: layout: side-list — グラフ左60%＋テキストパネル右40% の2カラム表示（v0.2.1）
+```chart
+type: bar
+title: 売上目標推移（億円）
+data:
+  - { label: 1年目, value: 8 }
+  - { label: 2年目, value: 18 }
+  - { label: 3年目, value: 35 }
+source: { name: 事業計画（例示データ）, url: https://example.com }
+```
+### 達成のための前提条件
+- **1年目（8億円）**：P1法人向け500社、P2個人向け15,000台
+- **2年目**：竹プラン（¥29,800）を売上構成比60%で維持
+- **3年目（35億円）**：教育機関200校以上、海外展開開始
 ---
 <!-- slide: chart-donut -->
 ## グラフはYAMLデータから自動描画
@@ -46,23 +57,6 @@ data:
   - { label: その他, value: 10 }
 source: { name: サンプルデータ, url: https://example.com }
 ```
----
-<!-- slide: chart-bar, layout: side-list -->
-## 売上目標と達成の前提条件
-```chart
-type: bar
-title: 売上目標推移（億円）
-data:
-  - { label: 1年目, value: 8 }
-  - { label: 2年目, value: 18 }
-  - { label: 3年目, value: 35 }
-source: { name: 事業計画（例示データ）, url: https://example.com }
-```
-### 達成のための前提条件
-- **1年目（8億円）**：P1法人向け500社、P2個人向け15,000台
-- **2年目**：竹プラン（¥29,800）を売上構成比60%で維持
-- **3年目（35億円）**：教育機関200校以上、海外展開開始
-point: ==layout: side-list== でグラフ左＋テキスト右の2カラム表示
 ---
 <!-- slide: steps -->
 badge: Step 1
@@ -81,20 +75,40 @@ items:
     title: design-guide.md 完成
     tone: outline
 ```
-point: ==badge / lead / point== は全typeで使える共通ヘッダ拡張です
+point: ==badge / lead / point== は全typeで使える共通ヘッダ拡張です（v0.2.0）
+---
+<!-- slide: steps, tone: dark -->
+## 番号丸スタイル ＋ 比率帯 ＋ tone: dark
+lead: ディレクティブに tone: dark を付けると、このスライドだけ地色を反転できる
+```steps
+style: circled
+items:
+  - { icon: "🔍", title: デザインガイド生成 }
+  - { icon: "📄", title: スライド一括生成 }
+  - { icon: "💬", title: Connector で修正 }
+  - { icon: "✋", title: 手動仕上げ }
+ratio:
+  - { label: AI 自動, value: 30 }
+  - { label: AI 自動, value: 30 }
+  - { label: AI + 指示, value: 30 }
+  - { label: 手動 10%, value: 10 }
+```
 ---
 <!-- slide: diagram-timeline -->
-## 開発マイルストーン
+## MD Slide Studio 開発ロードマップ
+lead: マイルストーンは上下交互に自動配置されます（2〜6個対応）
 ```diagram
 type: timeline
-start: Start
+start: v0.1
 milestones:
-  - { label: 要件定義, when: 1月 }
-  - { label: 設計・実装, when: 2〜3月 }
-  - { label: β公開, when: 4月 }
-  - { label: 正式リリース, when: 6月 }
+  - { label: 共通ヘッダ・steps, when: v0.2.0 }
+  - { label: timeline・side-list, when: v0.2.1 }
+  - { label: contrast・split-image, when: v0.2.2 }
+  - { label: Zod SSOT化, when: v0.3 }
+  - { label: AI下書き支援, when: v0.4 }
+  - { label: PPTX出力, when: v0.7 }
 ```
-> マイルストーンは上下交互に自動配置されます（2〜6個対応）
+point: このデモ自体が ==diagram-timeline== で描かれています
 ---
 <!-- slide: diagram-flow -->
 ## 変換パイプライン

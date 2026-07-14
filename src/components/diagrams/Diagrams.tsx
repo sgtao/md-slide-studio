@@ -93,13 +93,15 @@ const TL_X: Record<number, number[]> = {
   5: [220, 360, 500, 640, 780],
   6: [200, 330, 460, 590, 720, 850],
 };
-// ラベルの上下交互配置: 偶数indexは上（y=140）、奇数indexは下（y=340）
-const TL_LABEL_Y_ABOVE = 135;
-const TL_LABEL_Y_BELOW = 345;
-const TL_WHEN_Y_ABOVE = 160;
-const TL_WHEN_Y_BELOW = 320;
-const TL_TICK_TOP = 220;
-const TL_TICK_BOTTOM = 260;
+// ラベルの上下交互配置: 偶数indexは上、奇数indexは下。
+// チック（縦線）を軸から遠くまで伸ばし、線の先端にラベル/年次が
+// 乗っているように見せる（隙間を詰めて連続した1本の線に見せる）
+const TL_LABEL_Y_ABOVE = 108;
+const TL_LABEL_Y_BELOW = 378;
+const TL_WHEN_Y_ABOVE = 148;
+const TL_WHEN_Y_BELOW = 336;
+const TL_TICK_TOP = 165;
+const TL_TICK_BOTTOM = 315;
 
 /** SVG <text> は自動折返ししないため、長いラベルは手動2行分割（tspan） */
 function NodeLabel({
@@ -358,7 +360,7 @@ export function TimelineDiagramSvg({
             {/* 縦チック（軸から上下へ） */}
             <line className="diagram-edge tl-tick" x1={x} y1={tickY1} x2={x} y2={tickY2} />
             {/* チック先端の丸 */}
-            <circle className="diagram-node-accent tl-dot" cx={x} cy={above ? TL_TICK_TOP : TL_TICK_BOTTOM} r={5} />
+            <circle className="diagram-node-accent tl-dot" cx={x} cy={above ? TL_TICK_TOP : TL_TICK_BOTTOM} r={7} />
             {/* ラベル（8文字超は2行分割） */}
             <NodeLabel x={x} y={labelY} text={m.label} />
             {/* when テキスト */}
