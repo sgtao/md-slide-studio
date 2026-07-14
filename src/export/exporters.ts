@@ -189,7 +189,7 @@ function buildStandaloneHtml(scalerEl: HTMLElement, deckTitle: string): string {
 <title>${escapeHtml(title)}</title>
 <style>${css}</style>
 </head>
-<body>
+<body data-view="list">
 ${clone.outerHTML}
 </body>
 </html>
