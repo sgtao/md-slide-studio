@@ -1,5 +1,5 @@
 /**
- * slideMarkdown.ts — スライドMD（markdown-format.md v0.7.0 準拠 + Studio拡張 v0.2.0）のパーサー。
+ * slideMarkdown.ts — スライドMD（markdown-format.md v0.7.0 準拠 + Studio拡張 v0.2.1）のパーサー。
  *
  * 仕様の要点:
  * - 先頭に YAML frontmatter、以降は行全体が `---` の行でスライド区切り
@@ -13,6 +13,7 @@ import YAML from 'yaml';
 import { parseSlideHeader } from './slideHeader';
 import type {
   ChartBlock,
+  ChartSidePanel,
   ComparisonChartBlock,
   ComparisonLeft,
   DiagramBlock,
@@ -30,6 +31,7 @@ import type {
   StepItem,
   StepRatioItem,
   StepStyle,
+  TimelineBlock,
 } from './types';
 
 const PALETTES: Palette[] = ['ocean', 'forest', 'sunset', 'plum', 'graphite'];
@@ -45,12 +47,13 @@ const SLIDE_TYPES: SlideType[] = [
   'diagram-flow',
   'diagram-layer',
   'diagram-cycle',
+  'diagram-timeline',
   'figure',
   'feature-showcase',
   'steps',
   'sources',
 ];
-const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact'];
+const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact', 'side-list'];
 
 // ---------------------------------------------------------------------------
 // エントリポイント
@@ -225,6 +228,8 @@ function parseSlide(raw: string): Slide | null {
     case 'diagram-layer':
     case 'diagram-cycle':
       return { ...base, type: d.type, ...parseDiagramSlide(body, d.type, d.warnings) };
+    case 'diagram-timeline':
+      return { ...base, type: 'diagram-timeline', ...parseTimelineSlide(body, d.warnings) };
     case 'figure':
       return { ...base, type: 'figure', ...parseFigure(body, d.warnings) };
     case 'feature-showcase':
@@ -414,7 +419,9 @@ function parseChartSlide(body: string, slideType: string, warnings: string[]) {
     data: data.slice(0, 5),
     source: normalizeSource(y.source, warnings),
   };
-  return { heading, note, chart };
+  // v0.2.1: layout: side-list 用のサイドパネル（### 見出し + リスト）を後続から取り込む
+  const sidePanel = parseSidePanel(fence ? fence.rest : body);
+  return { heading, note, chart, sidePanel };
 }
 
 function normalizeChartData(raw: unknown, warnings: string[]): { label: string; value: number }[] {
@@ -440,6 +447,33 @@ function normalizeSource(raw: unknown, warnings: string[]): { name: string; url?
   }
   warnings.push('chart の source（出典）がありません（出典明記は必須ルール）');
   return { name: '出典未記載' };
+}
+
+
+/** v0.2.1: chart ブロック後続の ### 見出し + リストをサイドパネルとして取り込む */
+function parseSidePanel(rest: string): ChartSidePanel | undefined {
+  // ### 見出し を探す
+  const hMatch = rest.match(/^###\s+(.+)$/m);
+  if (!hMatch) return undefined;
+  const afterH = rest.slice(rest.indexOf(hMatch[0]) + hMatch[0].length);
+  const items: PointItem[] = [];
+  for (const line of afterH.split('\n')) {
+    const m = line.match(/^(\s*)-\s+(.+)$/);
+    if (m) {
+      const depth = Math.floor(m[1].replace(/\t/g, '  ').length / 2);
+      const item = parseSidePanelItem(m[2]);
+      if (depth === 0 || items.length === 0) items.push(item);
+      else items[items.length - 1].children.push(item);
+    }
+  }
+  if (items.length === 0) return undefined;
+  return { heading: hMatch[1].trim(), items };
+}
+
+function parseSidePanelItem(text: string): PointItem {
+  const m = text.match(/^\*\*(.+?)\*\*\s*[：:]\s*(.*)$/);
+  if (m) return { lead: m[1].trim(), text: m[2].trim(), children: [] };
+  return { text: text.trim(), children: [] };
 }
 
 // --- comparison-chart ---
@@ -665,6 +699,51 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
     return null;
   }
   return { type: 'layer', nodes: nodeLabels };
+}
+
+
+// --- diagram-timeline（v0.2.1: タイムライン図） ---
+
+const TIMELINE_MAX = 6;
+const TIMELINE_MIN = 2;
+
+function parseTimelineSlide(body: string, warnings: string[]) {
+  const fence = extractFence(body, 'diagram');
+  const { heading, note } = pickHeadingAndNote(fence ? fence.rest : body);
+  const sm = (fence ? fence.rest : body).match(/^source:\s*(.+)$/m);
+  const sourceText = sm ? sm[1].trim() : undefined;
+  const empty = { heading, note, timeline: undefined as TimelineBlock | undefined, sourceText };
+  if (!fence) {
+    warnings.push('```diagram ブロックが見つかりません');
+    return empty;
+  }
+  const y = parseYamlBlock(fence.content, warnings);
+  if (!y) return empty;
+
+  const start = typeof y.start === 'string' ? y.start : 'Start';
+  const msRaw = Array.isArray(y.milestones) ? y.milestones : [];
+  const milestones = msRaw
+    .filter((it) => it && typeof it === 'object')
+    .map((it) => {
+      const r = it as Record<string, unknown>;
+      return { label: String(r.label ?? ''), when: String(r.when ?? '') };
+    });
+
+  if (milestones.length < TIMELINE_MIN) {
+    warnings.push(`timeline の milestones は ${TIMELINE_MIN} 個以上を推奨します`);
+  }
+  if (milestones.length > TIMELINE_MAX) {
+    warnings.push(
+      `timeline の milestones が ${milestones.length} 件あります（上限${TIMELINE_MAX}件・${TIMELINE_MAX + 1}件目以降は切り捨て）`,
+    );
+  }
+
+  const timeline: TimelineBlock = {
+    type: 'timeline',
+    start,
+    milestones: milestones.slice(0, TIMELINE_MAX),
+  };
+  return { heading, note, timeline, sourceText };
 }
 
 // --- figure ---

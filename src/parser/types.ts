@@ -1,10 +1,9 @@
 /**
- * スライドMD（markdown-format.md v0.7.0 + Studio拡張 v0.2.0）のAST型定義。
+ * スライドMD（markdown-format.md v0.7.0 + Studio拡張 v0.2.1）のAST型定義。
  * MD が Single Source of Truth。HTML(React) はこのASTから毎回フル再生成する。
  *
- * v0.2.0 拡張（docs/references/markdown-format-ext.md）:
- * - SlideBase に badge / lead / point（全type共通ヘッダ）と tone（スライド単位ダーク）
- * - StepsSlide（カード型ステップフロー）を追加
+ * v0.2.0: badge/lead/point（共通ヘッダ）・tone・StepsSlide
+ * v0.2.1: diagram-timeline・ChartSlide.sidePanel・layout: side-list
  */
 
 export type Palette = 'ocean' | 'forest' | 'sunset' | 'plum' | 'graphite';
@@ -22,12 +21,13 @@ export type SlideType =
   | 'diagram-flow'
   | 'diagram-layer'
   | 'diagram-cycle'
+  | 'diagram-timeline'
   | 'figure'
   | 'feature-showcase'
   | 'steps'
   | 'sources';
 
-export type LayoutVariant = 'two-col' | 'title-xl' | 'compact';
+export type LayoutVariant = 'two-col' | 'title-xl' | 'compact' | 'side-list';
 
 /** スライド単位の地色反転（v0.2.0）。未知値はディレクティブ解析時に無視される */
 export type SlideTone = 'dark';
@@ -42,9 +42,9 @@ export interface Frontmatter {
 export type InlineText = string;
 
 export interface PointItem {
-  lead?: InlineText; // `**リード**：説明` のリード部
-  text: InlineText; // 説明本文（リードなしの場合は全文）
-  children: PointItem[]; // ネスト（2段まで）
+  lead?: InlineText;
+  text: InlineText;
+  children: PointItem[];
 }
 
 export interface ChartDataItem {
@@ -69,7 +69,7 @@ export interface ComparisonChartItem {
   label: string;
   before: number;
   after: number;
-  class: string; // '1'〜'5' | 'neutral'
+  class: string;
 }
 
 export interface ComparisonChartBlock {
@@ -86,6 +86,13 @@ export interface DiagramBlock {
   labels?: string[];
   /** layer 型のみ: 層ごとの箱ラベル（外側=層、内側=箱） */
   layers?: string[][];
+}
+
+/** timeline 型（v0.2.1）: 水平軸＋Start円＋上下交互マイルストーン */
+export interface TimelineBlock {
+  type: 'timeline';
+  start: string;
+  milestones: { label: string; when: string }[];
 }
 
 export interface FeatureShowcaseLeft {
@@ -125,11 +132,9 @@ export interface SourceLink {
 export type StepStyle = 'cards' | 'circled';
 
 export interface StepItem {
-  /** 絵文字1文字を想定（任意） */
   icon?: string;
   title: InlineText;
   desc?: InlineText;
-  /** カード単位の見た目変種（任意）: dark=反転面 / outline=枠線強調 */
   tone?: 'dark' | 'outline';
 }
 
@@ -138,21 +143,22 @@ export interface StepRatioItem {
   value: number;
 }
 
+/** chart のサイドパネル（v0.2.1: layout: side-list） */
+export interface ChartSidePanel {
+  heading: string;
+  items: PointItem[];
+}
+
 interface SlideBase {
   type: SlideType;
   fit: boolean;
   layout?: LayoutVariant;
-  /** パース時の警告（未知type・不正ブロック等）。UIに表示する */
   warnings: string[];
 
-  // ─── v0.2.0 共通ヘッダ拡張（markdown-format-ext.md §1） ───
-  /** 見出し左のピル（例: Step 1 / WHY） */
+  // v0.2.0 共通ヘッダ拡張
   badge?: string;
-  /** 見出し直下の補足1行 */
   lead?: InlineText;
-  /** スライド下部の強調帯（💡付き） */
   point?: InlineText;
-  /** スライド単位の地色反転（ディレクティブ `tone: dark`） */
   tone?: SlideTone;
 }
 
@@ -190,6 +196,8 @@ export interface ChartSlide extends SlideBase {
   heading?: InlineText;
   chart?: ChartBlock;
   note?: InlineText;
+  /** v0.2.1: layout: side-list 時の右パネル */
+  sidePanel?: ChartSidePanel;
 }
 
 export interface ComparisonChartSlide extends SlideBase {
@@ -202,6 +210,14 @@ export interface DiagramSlide extends SlideBase {
   type: 'diagram-flow' | 'diagram-layer' | 'diagram-cycle';
   heading?: InlineText;
   diagram?: DiagramBlock;
+  note?: InlineText;
+  sourceText?: string;
+}
+
+export interface TimelineSlide extends SlideBase {
+  type: 'diagram-timeline';
+  heading?: InlineText;
+  timeline?: TimelineBlock;
   note?: InlineText;
   sourceText?: string;
 }
@@ -225,7 +241,6 @@ export interface StepsSlide extends SlideBase {
   heading?: InlineText;
   stepStyle: StepStyle;
   items: StepItem[];
-  /** 任意: セグメント比率帯（値合計で正規化して描画） */
   ratio?: StepRatioItem[];
   note?: InlineText;
 }
@@ -244,6 +259,7 @@ export type Slide =
   | ChartSlide
   | ComparisonChartSlide
   | DiagramSlide
+  | TimelineSlide
   | FigureSlide
   | FeatureShowcaseSlide
   | StepsSlide
@@ -252,6 +268,5 @@ export type Slide =
 export interface SlideDeck {
   frontmatter: Frontmatter;
   slides: Slide[];
-  /** デッキ全体の警告（frontmatter欠落・枚数超過等） */
   warnings: string[];
 }

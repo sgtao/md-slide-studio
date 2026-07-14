@@ -1,0 +1,77 @@
+/* timeline-sidelist.css — v0.2.1 Studio拡張のスタイル
+ *
+ * §1 diagram-timeline（タイムライン図）
+ * §2 chart layout: side-list（チャート＋サイドパネル）
+ *
+ * main.tsx で steps.css の後に import する。
+ */
+
+/* ==========================================================================
+ * §1 タイムライン図
+ * ========================================================================== */
+
+/* チック線の太さを細くして軸と差別化 */
+.tl-tick {
+  stroke-width: 1.5;
+}
+
+/* マイルストーンの先端丸 */
+.tl-dot {
+  fill: var(--accent);
+}
+
+/* ==========================================================================
+ * §2 チャート side-list レイアウト
+ * ========================================================================== */
+
+.chart-side-list {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+}
+
+.chart-side-list > .slide-chart {
+  flex: 0 0 58%;
+  max-height: 280px;
+}
+
+.chart-side-panel {
+  flex: 1 1 38%;
+  min-width: 0;
+  overflow-y: auto;
+  max-height: 360px;
+}
+
+.chart-side-panel h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.6rem;
+  line-height: 1.35;
+}
+
+.chart-side-panel ul.points li {
+  font-size: 0.82rem;
+  padding: 0.25em 0 0.25em 1.2em;
+  line-height: 1.5;
+}
+
+.chart-side-panel ul.points li::before {
+  top: 0.65em;
+  width: 0.4em;
+  height: 0.4em;
+}
+
+.chart-side-panel ul.points li .sub {
+  font-size: 0.72rem;
+}
+
+/* ─── 印刷（PDF）───  */
+@media print {
+  .tl-dot {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

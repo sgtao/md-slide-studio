@@ -19,11 +19,12 @@ import type {
   SourcesSlide,
   SummarySlide,
   TableSlide,
+  TimelineSlide,
   TitleSlide,
 } from '../../parser/types';
 import { renderInline, safeUrl } from '../../parser/inline';
 import { BarChartSvg, ComparisonDonutSvg, DonutChartSvg, LineChartSvg } from '../charts/Charts';
-import { CycleDiagramSvg, FlowDiagramSvg, LayerDiagramSvg } from '../diagrams/Diagrams';
+import { CycleDiagramSvg, FlowDiagramSvg, LayerDiagramSvg, TimelineDiagramSvg } from '../diagrams/Diagrams';
 import { Note, PointBand, SlideHeading } from './common';
 import { StepsView } from './StepsView';
 
@@ -158,9 +159,11 @@ function TableView({ slide }: { slide: TableSlide }) {
 
 function ChartView({ slide }: { slide: ChartSlide }) {
   const chart = slide.chart;
+  const isSideList = slide.layout === 'side-list' && slide.sidePanel;
   return (
     <div className="slide-inner">
       <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
+      <div className={isSideList ? 'chart-side-list' : ''}>
       {chart ? (
         <div className="slide-chart">
           {chart.type === 'bar' && <BarChartSvg chart={chart} />}
@@ -170,6 +173,29 @@ function ChartView({ slide }: { slide: ChartSlide }) {
       ) : (
         <p className="note">（chart ブロックが未定義のため表示できません）</p>
       )}
+      {isSideList && slide.sidePanel && (
+          <div className="chart-side-panel">
+            <h3>{slide.sidePanel.heading}</h3>
+            <ul className="points">
+              {slide.sidePanel.items.map((item, i) => (
+                <li key={i}>
+                  {item.lead && (
+                    <>
+                      <strong>{item.lead}</strong>：
+                    </>
+                  )}
+                  {renderInline(item.text)}
+                  {item.children.map((c, j) => (
+                    <span key={j} className="sub">
+                      {renderInline(c.text)}
+                    </span>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
       <Note text={slide.note} />
     </div>
   );
@@ -340,6 +366,27 @@ function SourcesView({ slide }: { slide: SourcesSlide }) {
 
 // ---------------------------------------------------------------------------
 
+// --- timeline (v0.2.1) ---
+
+function TimelineView({ slide, index }: { slide: TimelineSlide; index: number }) {
+  const tl = slide.timeline;
+  return (
+    <div className="slide-inner">
+      <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
+      {tl ? (
+        <div className="slide-diagram">
+          <TimelineDiagramSvg timeline={tl} slideIndex={index} source={slide.sourceText} />
+        </div>
+      ) : (
+        <p className="note">
+          （timeline の milestones を解析できませんでした）
+        </p>
+      )}
+      <Note text={slide.note} />
+    </div>
+  );
+}
+
 function renderSlideBody(slide: Slide, index: number) {
   switch (slide.type) {
     case 'title':
@@ -360,6 +407,8 @@ function renderSlideBody(slide: Slide, index: number) {
     case 'diagram-layer':
     case 'diagram-cycle':
       return <DiagramView slide={slide} index={index} />;
+    case 'diagram-timeline':
+      return <TimelineView slide={slide} index={index} />;
     case 'figure':
       return <FigureView slide={slide} />;
     case 'feature-showcase':

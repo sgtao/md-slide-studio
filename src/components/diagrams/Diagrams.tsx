@@ -2,11 +2,13 @@
  * Diagrams.tsx — diagram-generation.md の既定座標テーブルに基づく決定論的SVG図解。
  * viewBox 960×480 / 外部依存ゼロ / 色は diagram-* クラス経由。
  * marker id はスライド番号でスコープ（arrow-sN）して文書内一意を保証。
+ *
+ * v0.2.1: TimelineDiagramSvg（水平軸＋Start円＋上下交互マイルストーン）を追加
  */
 import { Fragment } from 'react';
-import type { DiagramBlock } from '../../parser/types';
+import type { DiagramBlock, TimelineBlock } from '../../parser/types';
 
-// 横フロー座標テーブル（N=2〜5）
+// ─── 横フロー座標テーブル（N=2〜5） ───
 const FLOW_TABLE: Record<number, { width: number; xs: number[]; arrows: [number, number][] }> = {
   2: { width: 420, xs: [40, 500], arrows: [[460, 500]] },
   3: {
@@ -38,7 +40,7 @@ const FLOW_TABLE: Record<number, { width: number; xs: number[]; arrows: [number,
   },
 };
 
-// 縦レイヤー座標テーブル（L=2〜4層）
+// ─── 縦レイヤー座標テーブル（L=2〜4層） ───
 const LAYER_Y: Record<number, { ys: number[]; h: number }> = {
   2: { ys: [50, 245], h: 175 },
   3: { ys: [50, 180, 310], h: 110 },
@@ -51,7 +53,7 @@ const LAYER_X: Record<number, { width: number; xs: number[] }> = {
   4: { width: 202, xs: [40, 266, 492, 718] },
 };
 
-// サイクル座標テーブル（N=3〜4）
+// ─── サイクル座標テーブル（N=3〜4） ───
 const CYCLE_NODES: Record<number, [number, number][]> = {
   3: [
     [480, 85],
@@ -78,6 +80,26 @@ const CYCLE_ARROWS: Record<number, [number, number, number, number][]> = {
     [371, 194, 433, 132],
   ],
 };
+
+// ─── タイムライン座標テーブル（v0.2.1, N=2〜6） ───
+// 水平軸: y=240, 左端の Start 円: cx=80
+// マイルストーンの x 座標（個数別の等間隔配置）
+const TL_AXIS_Y = 240;
+const TL_START_CX = 80;
+const TL_X: Record<number, number[]> = {
+  2: [340, 680],
+  3: [280, 480, 680],
+  4: [240, 400, 560, 720],
+  5: [220, 360, 500, 640, 780],
+  6: [200, 330, 460, 590, 720, 850],
+};
+// ラベルの上下交互配置: 偶数indexは上（y=140）、奇数indexは下（y=340）
+const TL_LABEL_Y_ABOVE = 135;
+const TL_LABEL_Y_BELOW = 345;
+const TL_WHEN_Y_ABOVE = 160;
+const TL_WHEN_Y_BELOW = 320;
+const TL_TICK_TOP = 220;
+const TL_TICK_BOTTOM = 260;
 
 /** SVG <text> は自動折返ししないため、長いラベルは手動2行分割（tspan） */
 function NodeLabel({
@@ -203,7 +225,6 @@ export function LayerDiagramSvg({
   slideIndex: number;
   source?: string;
 }) {
-  // layers 指定があればそれを使い、なければ nodes を1層1箱として扱う
   const layers: string[][] = diagram.layers ?? diagram.nodes.map((n) => [n]);
   const L = Math.min(Math.max(layers.length, 2), 4);
   const ly = LAYER_Y[L];
@@ -275,6 +296,78 @@ export function CycleDiagramSvg({
           d={`M${x1},${y1} L${x2},${y2}`}
         />
       ))}
+    </DiagramFrame>
+  );
+}
+
+/**
+ * v0.2.1: タイムライン図（水平軸＋Start円＋上下交互マイルストーン）
+ * 座標は個数別テーブル（TL_X）を参照。計算しない（決定論的描画の原則）。
+ */
+export function TimelineDiagramSvg({
+  timeline,
+  slideIndex,
+  source,
+}: {
+  timeline: TimelineBlock;
+  slideIndex: number;
+  source?: string;
+}) {
+  const n = Math.min(Math.max(timeline.milestones.length, 2), 6) as 2 | 3 | 4 | 5 | 6;
+  const ms = timeline.milestones.slice(0, n);
+  const xs = TL_X[n];
+  const markerId = `arrow-s${slideIndex}`;
+  const axisEnd = xs[n - 1] + 40;
+
+  return (
+    <DiagramFrame
+      markerId={markerId}
+      title={`タイムライン: ${ms.map((m) => m.label).join(' → ')}`}
+      source={source}
+    >
+      {/* 水平軸 */}
+      <line
+        className="diagram-edge"
+        x1={TL_START_CX}
+        y1={TL_AXIS_Y}
+        x2={axisEnd}
+        y2={TL_AXIS_Y}
+      />
+
+      {/* Start 円 */}
+      <circle
+        className="diagram-node diagram-node-accent"
+        cx={TL_START_CX}
+        cy={TL_AXIS_Y}
+        r={28}
+      />
+      <text className="diagram-label" x={TL_START_CX} y={TL_AXIS_Y + 4} textAnchor="middle">
+        {timeline.start}
+      </text>
+
+      {/* マイルストーン */}
+      {ms.map((m, i) => {
+        const x = xs[i];
+        const above = i % 2 === 0;
+        const labelY = above ? TL_LABEL_Y_ABOVE : TL_LABEL_Y_BELOW;
+        const whenY = above ? TL_WHEN_Y_ABOVE : TL_WHEN_Y_BELOW;
+        const tickY1 = above ? TL_TICK_TOP : TL_AXIS_Y;
+        const tickY2 = above ? TL_AXIS_Y : TL_TICK_BOTTOM;
+        return (
+          <Fragment key={i}>
+            {/* 縦チック（軸から上下へ） */}
+            <line className="diagram-edge tl-tick" x1={x} y1={tickY1} x2={x} y2={tickY2} />
+            {/* チック先端の丸 */}
+            <circle className="diagram-node-accent tl-dot" cx={x} cy={above ? TL_TICK_TOP : TL_TICK_BOTTOM} r={5} />
+            {/* ラベル（8文字超は2行分割） */}
+            <NodeLabel x={x} y={labelY} text={m.label} />
+            {/* when テキスト */}
+            <text className="diagram-sublabel" x={x} y={whenY} textAnchor="middle">
+              {m.when}
+            </text>
+          </Fragment>
+        );
+      })}
     </DiagramFrame>
   );
 }

@@ -5,12 +5,12 @@ palette: ocean
 <!-- slide: title -->
 # Markdownから、==スライドを生成する。==
 subtitle: MD Slide Studio — スライドMD → HTML / PDF / PNG 変換デモ（全typeサンプル）
-badges: [v0.2.0, React + TypeScript, websearch-slide-ja 移植]
+badges: [v0.2.1, React + TypeScript, websearch-slide-ja 移植]
 ---
 <!-- slide: points -->
 ## このアプリでできること
 - **即時プレビュー**：左のエディタでMDを編集すると、右のスライドが即座に更新される
-- **15種のスライドtype**：タイトル・箇条書き・表・グラフ・図解・手順カードなどを宣言的に記述
+- **16種のスライドtype**：タイトル・箇条書き・表・グラフ・図解・手順カード・タイムラインなどを宣言的に記述
 - **決定論的な変換**：LLM変換と違い、同じMDからは常に同じスライドが生成される
 - **エクスポート**：PDF（P）・PNG（Shift+S）・ZIP（Shift+P）・MD保存に対応
 > このスライド自体がエディタ内のMDから生成されています。編集して試してください。
@@ -28,10 +28,10 @@ badges: [v0.2.0, React + TypeScript, websearch-slide-ja 移植]
 | title / points / summary | 表紙・箇条書き・まとめ | `#` / `-` / `1.` |
 | table | 比較表 | Markdownテーブル |
 | chart-bar / line / donut | グラフ | ```chart ブロック |
-| diagram-flow / layer / cycle | 図解 | ```diagram / mermaid |
+| diagram-flow / layer / cycle / timeline | 図解・タイムライン | ```diagram ブロック |
 | steps | 手順カードフロー | ```steps ブロック |
 | figure / feature-showcase / sources | 画像・機能紹介・出典 | 専用記法 |
-> 全typeで共通ヘッダ `badge:` / `lead:` / `point:` とディレクティブ `tone: dark` が使えます（v0.2.0）
+> 全typeで共通ヘッダ `badge:` / `lead:` / `point:` とディレクティブ `tone: dark` が使えます
 ---
 <!-- slide: chart-donut -->
 ## グラフはYAMLデータから自動描画
@@ -46,6 +46,23 @@ data:
   - { label: その他, value: 10 }
 source: { name: サンプルデータ, url: https://example.com }
 ```
+---
+<!-- slide: chart-bar, layout: side-list -->
+## 売上目標と達成の前提条件
+```chart
+type: bar
+title: 売上目標推移（億円）
+data:
+  - { label: 1年目, value: 8 }
+  - { label: 2年目, value: 18 }
+  - { label: 3年目, value: 35 }
+source: { name: 事業計画（例示データ）, url: https://example.com }
+```
+### 達成のための前提条件
+- **1年目（8億円）**：P1法人向け500社、P2個人向け15,000台
+- **2年目**：竹プラン（¥29,800）を売上構成比60%で維持
+- **3年目（35億円）**：教育機関200校以上、海外展開開始
+point: ==layout: side-list== でグラフ左＋テキスト右の2カラム表示
 ---
 <!-- slide: steps -->
 badge: Step 1
@@ -62,27 +79,22 @@ items:
     desc: カラーパレット／フォント指定／レイアウトルール
   - icon: "🎨"
     title: design-guide.md 完成
-    desc: カード単位で dark / outline の変種も指定できる
     tone: outline
 ```
 point: ==badge / lead / point== は全typeで使える共通ヘッダ拡張です
 ---
-<!-- slide: steps, tone: dark -->
-## 番号丸スタイル ＋ 比率帯 ＋ tone: dark
-lead: ディレクティブに tone: dark を付けると、このスライドだけ地色を反転できる
-```steps
-style: circled
-items:
-  - { icon: "🔍", title: デザインガイド生成 }
-  - { icon: "📄", title: スライド一括生成 }
-  - { icon: "💬", title: Connector で修正 }
-  - { icon: "✋", title: 手動仕上げ }
-ratio:
-  - { label: AI 自動, value: 30 }
-  - { label: AI 自動, value: 30 }
-  - { label: AI + 指示, value: 30 }
-  - { label: 手動 10%, value: 10 }
+<!-- slide: diagram-timeline -->
+## 開発マイルストーン
+```diagram
+type: timeline
+start: Start
+milestones:
+  - { label: 要件定義, when: 1月 }
+  - { label: 設計・実装, when: 2〜3月 }
+  - { label: β公開, when: 4月 }
+  - { label: 正式リリース, when: 6月 }
 ```
+> マイルストーンは上下交互に自動配置されます（2〜6個対応）
 ---
 <!-- slide: diagram-flow -->
 ## 変換パイプライン
@@ -90,13 +102,6 @@ ratio:
 type: flow
 nodes: ["スライドMD", "パーサー", "React AST", "レンダラ", "PDF / PNG"]
 labels: ["", "parseSlideMarkdown", "型付きSlide[]", "SVG含む", "エクスポート"]
-```
----
-<!-- slide: diagram-cycle -->
-## 制作サイクル
-```diagram
-type: cycle
-nodes: [下書き, プレビュー, 修正, 共有]
 ```
 ---
 <!-- slide: feature-showcase -->
