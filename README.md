@@ -142,13 +142,11 @@ LLM生成で必要だった「コンテンツ漏洩チェック」「JS構文チ
 | Shift+S | 現在スライドをPNG |
 | Shift+P | 全スライドをZIP |
 
-## ロードマップ
-
-- **Phase 1（本リポジトリ）**: MD → HTML(React) → PDF/PNG、全14type、GitHub Pages
-- **Phase 1.5**: HTML→MD逆抽出、chart-line複数系列、scatter
-- **Phase 2**: AI原稿支援の強化（API連携での下書き生成・レビュー）
-- **Phase 3**: PPTXエクスポート
-
 ## License
 
 MIT
+
+---
+
+🤖 Built with [Claude.ai](https://claude.ai/)
+
