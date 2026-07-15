@@ -1,9 +1,10 @@
 /**
- * スライドMD（markdown-format.md v0.7.0 + Studio拡張 v0.2.1）のAST型定義。
+ * スライドMD（markdown-format.md v0.7.0 + Studio拡張 v0.2.3）のAST型定義。
  * MD が Single Source of Truth。HTML(React) はこのASTから毎回フル再生成する。
  *
  * v0.2.0: badge/lead/point（共通ヘッダ）・tone・StepsSlide
  * v0.2.1: diagram-timeline・ChartSlide.sidePanel・layout: side-list
+ * v0.2.3: TitleSlide.image（layout: split-image）
  */
 
 export type Palette = 'ocean' | 'forest' | 'sunset' | 'plum' | 'graphite';
@@ -27,7 +28,7 @@ export type SlideType =
   | 'steps'
   | 'sources';
 
-export type LayoutVariant = 'two-col' | 'title-xl' | 'compact' | 'side-list';
+export type LayoutVariant = 'two-col' | 'title-xl' | 'compact' | 'side-list' | 'split-image';
 
 /** スライド単位の地色反転（v0.2.0）。未知値はディレクティブ解析時に無視される */
 export type SlideTone = 'dark';
@@ -167,6 +168,8 @@ export interface TitleSlide extends SlideBase {
   heading: InlineText;
   subtitle?: InlineText;
   badges: string[];
+  /** split-image レイアウト時の画像URL（v0.2.3） */
+  image?: string;
 }
 
 export interface PointsSlide extends SlideBase {

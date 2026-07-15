@@ -420,3 +420,40 @@ table.layout-compact td {
   padding: 0.3em 0.5em;
   font-size: 0.76rem;
 }
+
+/* ─── split-image（v0.2.3: title 左テキスト＋右画像） ─── */
+.layout-split-image {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  height: 100%;
+}
+.layout-split-image .split-text {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px 40px;
+  box-sizing: border-box;
+}
+.layout-split-image .split-image {
+  flex: 0 0 50%;
+  overflow: hidden;
+  position: relative;
+}
+.layout-split-image .split-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* split-image のテキスト側は余白調整 */
+.layout-split-image h1 {
+  font-size: 2.4rem;
+  margin: 0 0 0.3em;
+}
+.layout-split-image .subtitle {
+  font-size: 1rem;
+  margin: 0;
+}

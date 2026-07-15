@@ -1,5 +1,5 @@
 /**
- * slideMarkdown.ts — スライドMD（markdown-format.md v0.7.0 準拠 + Studio拡張 v0.2.1）のパーサー。
+ * slideMarkdown.ts — スライドMD（markdown-format.md v0.7.0 準拠 + Studio拡張 v0.2.3）のパーサー。
  *
  * 仕様の要点:
  * - 先頭に YAML frontmatter、以降は行全体が `---` の行でスライド区切り
@@ -53,7 +53,7 @@ const SLIDE_TYPES: SlideType[] = [
   'steps',
   'sources',
 ];
-const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact', 'side-list'];
+const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact', 'side-list', 'split-image'];
 
 // ---------------------------------------------------------------------------
 // エントリポイント
@@ -257,6 +257,7 @@ function parseTitle(body: string) {
   let heading = '';
   let subtitle: string | undefined;
   let badges: string[] = [];
+  let image: string | undefined;
   for (const line of lines) {
     const h = line.match(/^#\s+(.+)$/);
     if (h) {
@@ -276,8 +277,14 @@ function parseTitle(body: string) {
         .filter(Boolean);
       continue;
     }
+    // v0.2.3: split-image レイアウト用の画像URL
+    const im = line.match(/^image:\s*(.+)$/);
+    if (im) {
+      image = im[1].trim();
+      continue;
+    }
   }
-  return { heading, subtitle, badges };
+  return { heading, subtitle, badges, image };
 }
 
 // --- points / summary ---

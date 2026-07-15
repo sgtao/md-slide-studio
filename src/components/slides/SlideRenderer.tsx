@@ -31,6 +31,49 @@ import { StepsView } from './StepsView';
 // --- title ---
 
 function TitleView({ slide }: { slide: TitleSlide }) {
+  // v0.2.3: split-image レイアウト — 左テキスト＋右画像
+  if (slide.layout === 'split-image' && slide.image) {
+    return (
+      <div className="slide-inner layout-split-image">
+        <div className="split-text">
+          {slide.badge && (
+            <div className="slide-title-row">
+              <span className="slide-badge">{slide.badge}</span>
+            </div>
+          )}
+          <h1>{renderInline(slide.heading)}</h1>
+          {slide.subtitle && <p className="subtitle">{renderInline(slide.subtitle)}</p>}
+          {slide.lead && <p className="slide-lead">{renderInline(slide.lead)}</p>}
+          {slide.badges.length > 0 && (
+            <div className="badges">
+              {slide.badges.map((b, i) => (
+                <span key={i} className="badge">
+                  {b}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="split-image">
+          <img
+            src={safeUrl(slide.image)}
+            alt={slide.heading}
+            onError={(e) => {
+              // 画像読み込み失敗時: 画像枠を非表示にし通常titleへ退行
+              const imgContainer = e.currentTarget.parentElement;
+              if (imgContainer) imgContainer.style.display = 'none';
+              const textPane = imgContainer?.previousElementSibling as HTMLElement | null;
+              if (textPane) {
+                textPane.style.flex = '1';
+                textPane.style.maxWidth = '100%';
+              }
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+  // 通常の title レイアウト
   return (
     <div className={`slide-inner${slide.layout === 'title-xl' ? ' layout-title-xl' : ''}`}>
       {slide.badge && (

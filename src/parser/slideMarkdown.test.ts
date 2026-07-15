@@ -265,3 +265,38 @@ describe('デッキ制約', () => {
     expect(deck.slides[0].warnings.some((w) => w.includes('script'))).toBe(true);
   });
 });
+
+// --- split-image (v0.2.3) ---
+
+describe('title layout: split-image', () => {
+  it('layout: split-image を認識し image: を格納する', () => {
+    const md = fm('<!-- slide: title, layout: split-image, tone: dark -->\n# CASE ==STUDIES==\nsubtitle: luxury residences\nimage: https://example.com/hero.jpg');
+    const s = parseSlideMarkdown(md).slides[0] as TitleSlide;
+    expect(s.type).toBe('title');
+    expect(s.layout).toBe('split-image');
+    expect(s.tone).toBe('dark');
+    expect(s.heading).toBe('CASE ==STUDIES==');
+    expect(s.subtitle).toBe('luxury residences');
+    expect(s.image).toBe('https://example.com/hero.jpg');
+  });
+
+  it('image: が無い split-image は image が undefined', () => {
+    const md = fm('<!-- slide: title, layout: split-image -->\n# No Image');
+    const s = parseSlideMarkdown(md).slides[0] as TitleSlide;
+    expect(s.layout).toBe('split-image');
+    expect(s.image).toBeUndefined();
+  });
+
+  it('通常 title では image: は無視されない（格納される）', () => {
+    const md = fm('<!-- slide: title -->\n# Normal\nimage: https://example.com/bg.jpg');
+    const s = parseSlideMarkdown(md).slides[0] as TitleSlide;
+    expect(s.layout).toBeUndefined();
+    expect(s.image).toBe('https://example.com/bg.jpg');
+  });
+
+  it('image: に危険なスキームが含まれていても parseTitle はそのまま格納する（safeUrl はレンダラ側）', () => {
+    const md = fm('<!-- slide: title, layout: split-image -->\n# Test\nimage: javascript:alert(1)');
+    const s = parseSlideMarkdown(md).slides[0] as TitleSlide;
+    expect(s.image).toBe('javascript:alert(1)');
+  });
+});
