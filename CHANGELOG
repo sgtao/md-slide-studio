@@ -3,6 +3,54 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.3] - 2026-07-15
+
+### 追加｜title の `layout: split-image`
+
+タイトルスライドに「左50%テキスト・右50%画像」の2カラムレイアウトを追加。
+
+- `<!-- slide: title, layout: split-image -->` ＋ 本文に `image:` 行を追記して指定
+- 左: 見出し・subtitle・lead・badges（縦中央揃え）／右: 画像（`object-fit: cover`）
+- 画像URLは figure と同じ `safeUrl` 判定を通し、`onError` 時は画像枠を非表示にして
+  通常の title レイアウトへ自動退行（非クラッシュ原則）
+- 外部画像を使うため PNG/ZIP出力時のCORS制約が波及する点は既知の未決事項として
+  ロードマップ（v0.6でのサーバーサイド変換）に委ねる。今回は info 表示等の
+  能動的な警告は未実装（deckLint自体が次フェーズ）
+
+### 追加｜新type `contrast`
+
+「例示（左）vs 結論の連鎖（右）」を対比構図で見せる新スライドタイプを追加。
+
+- `<!-- slide: contrast -->` ＋ ```` ```contrast ```` ブロック（YAML）で記述。
+  `example.title` / `example.rows[]`（tag・text）／ `verdict[]`
+  （label・text の組、または `connector`、任意で `tone: warn`）
+- 汎用カードグリッド（`cards`型）への一般化は見送り、専用typeとして採用
+  （v0.3のSSOT化対象を必要以上に増やさない判断）
+- example / verdict の欠落・不正YAML・未知の tone 値は、いずれも警告を出しつつ
+  空データで描画継続（非クラッシュ原則を新typeでも踏襲）
+
+### 変更｜sample.md への実例追加
+
+- `contrast` の実例スライドを追加
+
+### ファイル構成の変更
+
+```
+新規:
+  src/theme/contrast.css
+  src/parser/contrast.test.ts
+変更:
+  src/parser/types.ts               LayoutVariant += split-image／TitleSlide.image?／
+                                     SlideType += contrast／ContrastSlide新設
+  src/parser/slideMarkdown.ts       parseTitle()のimage:認識／parseContrastSlide()新設
+  src/components/slides/SlideRenderer.tsx  TitleView split-image分岐／ContrastView新設
+  src/theme/content.css             .layout-split-image スタイル追加
+  src/main.tsx                      contrast.css の import 追加
+  src/parser/slideMarkdown.test.ts  split-image テスト4件追加
+  src/samples/sample.md             contrast の実例を追加
+```
+
+---
 ## [v0.2.2] - 2026-07-15
 
 ### 追加｜HTMLエクスポート（スタンドアロン単一ファイル）
