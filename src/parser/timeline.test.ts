@@ -42,15 +42,22 @@ milestones:
   });
 
   it('7件以上は先頭6件に切り捨てて警告する', () => {
-    const items = Array.from({ length: 8 }, (_, i) => `  - { label: M${i + 1}, when: ${i + 1}月 }`).join('\n');
-    const md = fm(`<!-- slide: diagram-timeline -->\n\`\`\`diagram\ntype: timeline\nmilestones:\n${items}\n\`\`\``);
+    const items = Array.from(
+      { length: 8 },
+      (_, i) => `  - { label: M${i + 1}, when: ${i + 1}月 }`,
+    ).join('\n');
+    const md = fm(
+      `<!-- slide: diagram-timeline -->\n\`\`\`diagram\ntype: timeline\nmilestones:\n${items}\n\`\`\``,
+    );
     const s = parseSlideMarkdown(md).slides[0] as TimelineSlide;
     expect(s.timeline?.milestones).toHaveLength(6);
     expect(s.warnings.some((w) => w.includes('上限6件'))).toBe(true);
   });
 
   it('1件は警告するが描画継続する', () => {
-    const md = fm(`<!-- slide: diagram-timeline -->\n\`\`\`diagram\ntype: timeline\nmilestones:\n  - { label: A, when: Q1 }\n\`\`\``);
+    const md = fm(
+      `<!-- slide: diagram-timeline -->\n\`\`\`diagram\ntype: timeline\nmilestones:\n  - { label: A, when: Q1 }\n\`\`\``,
+    );
     const s = parseSlideMarkdown(md).slides[0] as TimelineSlide;
     expect(s.timeline?.milestones).toHaveLength(1);
     expect(s.warnings.some((w) => w.includes('2 個以上'))).toBe(true);

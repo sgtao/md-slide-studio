@@ -5,11 +5,19 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { parseSlideMarkdown } from './parser/slideMarkdown';
+import { lintDeck } from './parser/deckLint';
+import { LintPanel } from './components/LintPanel';
 import type { Palette } from './parser/types';
 import { SlideDeckView, type SlideDeckHandle } from './components/SlideDeck';
 import { ControlCluster } from './components/ControlCluster';
 import { useKeyboardNav, usePersistentState } from './hooks/hooks';
-import { exportAllToZip, exportHtml, exportMarkdown, exportToPdf, exportToPng } from './export/exporters';
+import {
+  exportAllToZip,
+  exportHtml,
+  exportMarkdown,
+  exportToPdf,
+  exportToPng,
+} from './export/exporters';
 import { buildDraftAssistPrompt } from './ai/draftAssistPrompt';
 import sampleMd from './samples/sample.md?raw';
 
@@ -48,6 +56,7 @@ export default function App() {
   // --- パース（300ms デバウンス） ---
   const debouncedMd = useDebounced(md, 300);
   const deck = useMemo(() => parseSlideMarkdown(debouncedMd), [debouncedMd]);
+  const lintResults = useMemo(() => lintDeck(deck), [deck]);
 
   // --- 表示状態 ---
   const [mode, setMode] = usePersistentState<'edit' | 'present'>('mdss-mode', 'edit');
@@ -140,11 +149,6 @@ export default function App() {
   // --- AIプロンプトモーダル ---
   const [promptOpen, setPromptOpen] = useState(false);
 
-  const allWarnings = [
-    ...deck.warnings,
-    ...deck.slides.flatMap((s, i) => s.warnings.map((w) => `Slide ${i + 1}: ${w}`)),
-  ];
-
   return (
     <>
       <header className="app-header">
@@ -174,14 +178,14 @@ export default function App() {
               spellCheck={false}
               aria-label="スライドMDエディタ"
             />
-            {allWarnings.length > 0 && (
-              <div className="warnings-panel">
-                {allWarnings.map((w, i) => (
-                  <div key={i} className="warn-item">
-                    {w}
-                  </div>
-                ))}
-              </div>
+            {lintResults.length > 0 && (
+              <LintPanel
+                results={lintResults}
+                onJump={(i) => {
+                  setCurrent(i);
+                  setView('hero');
+                }}
+              />
             )}
             <div className="editor-status">
               <span>{md.length.toLocaleString()} 文字</span>

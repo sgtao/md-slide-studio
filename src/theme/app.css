@@ -356,3 +356,45 @@ html[data-mode='present'] .app-header .app-logo {
     overflow: visible !important;
   }
 }
+
+/* v0.2.4: deckLint 警告パネル */
+.lint-panel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lint-panel--empty {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+.lint-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+.lint-item--error {
+  background: rgba(220, 38, 38, 0.08);
+}
+.lint-item--warn {
+  background: rgba(217, 119, 6, 0.08);
+}
+.lint-item--info {
+  background: rgba(37, 99, 235, 0.08);
+}
+.lint-message {
+  flex: 1;
+}
+.lint-jump {
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+}

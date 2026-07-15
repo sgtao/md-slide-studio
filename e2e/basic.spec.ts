@@ -69,9 +69,7 @@ test('steps(cards): カード・badge・lead・point帯が描画される', asyn
   await expect(active.locator('.slide-point')).toContainText('E2E-POINT-BAND');
 });
 
-test('steps(circled) + tone: dark: 番号丸・ratio帯・slide--darkが適用される', async ({
-  page,
-}) => {
+test('steps(circled) + tone: dark: 番号丸・ratio帯・slide--darkが適用される', async ({ page }) => {
   await page.goto('/');
   await page.locator('textarea').fill(STEPS_DECK);
   await expect(page.locator('.slide.active .steps-item')).toHaveCount(2);

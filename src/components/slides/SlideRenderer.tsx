@@ -25,7 +25,12 @@ import type {
 } from '../../parser/types';
 import { renderInline, safeUrl } from '../../parser/inline';
 import { BarChartSvg, ComparisonDonutSvg, DonutChartSvg, LineChartSvg } from '../charts/Charts';
-import { CycleDiagramSvg, FlowDiagramSvg, LayerDiagramSvg, TimelineDiagramSvg } from '../diagrams/Diagrams';
+import {
+  CycleDiagramSvg,
+  FlowDiagramSvg,
+  LayerDiagramSvg,
+  TimelineDiagramSvg,
+} from '../diagrams/Diagrams';
 import { Note, PointBand, SlideHeading } from './common';
 import { StepsView } from './StepsView';
 
@@ -208,16 +213,16 @@ function ChartView({ slide }: { slide: ChartSlide }) {
     <div className="slide-inner">
       <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       <div className={isSideList ? 'chart-side-list' : ''}>
-      {chart ? (
-        <div className="slide-chart">
-          {chart.type === 'bar' && <BarChartSvg chart={chart} />}
-          {chart.type === 'line' && <LineChartSvg chart={chart} />}
-          {chart.type === 'donut' && <DonutChartSvg chart={chart} />}
-        </div>
-      ) : (
-        <p className="note">（chart ブロックが未定義のため表示できません）</p>
-      )}
-      {isSideList && slide.sidePanel && (
+        {chart ? (
+          <div className="slide-chart">
+            {chart.type === 'bar' && <BarChartSvg chart={chart} />}
+            {chart.type === 'line' && <LineChartSvg chart={chart} />}
+            {chart.type === 'donut' && <DonutChartSvg chart={chart} />}
+          </div>
+        ) : (
+          <p className="note">（chart ブロックが未定義のため表示できません）</p>
+        )}
+        {isSideList && slide.sidePanel && (
           <div className="chart-side-panel">
             <h3>{slide.sidePanel.heading}</h3>
             <ul className="points">
@@ -428,7 +433,9 @@ function ContrastView({ slide }: { slide: ContrastSlide }) {
                     className={`contrast-verdict-item${v.tone ? ` contrast-verdict-item--${v.tone}` : ''}`}
                   >
                     {v.label && <span className="contrast-verdict-label">{v.label}</span>}
-                    {v.text && <span className="contrast-verdict-text">{renderInline(v.text)}</span>}
+                    {v.text && (
+                      <span className="contrast-verdict-text">{renderInline(v.text)}</span>
+                    )}
                   </div>
                 ),
               )}
@@ -476,9 +483,7 @@ function TimelineView({ slide, index }: { slide: TimelineSlide; index: number })
           <TimelineDiagramSvg timeline={tl} slideIndex={index} source={slide.sourceText} />
         </div>
       ) : (
-        <p className="note">
-          （timeline の milestones を解析できませんでした）
-        </p>
+        <p className="note">（timeline の milestones を解析できませんでした）</p>
       )}
       <Note text={slide.note} />
     </div>

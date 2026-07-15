@@ -7,7 +7,9 @@ const fm = (body: string) => `---\ntitle: テスト\npalette: ocean\n---\n${body
 
 describe('parseSlideHeader（純関数）', () => {
   it('badge / lead / point を抽出し本文から取り除く', () => {
-    const { header, rest } = parseSlideHeader('badge: Step 1\n## 見出し\nlead: リード文\n- 項目\npoint: 帯テキスト');
+    const { header, rest } = parseSlideHeader(
+      'badge: Step 1\n## 見出し\nlead: リード文\n- 項目\npoint: 帯テキスト',
+    );
     expect(header.badge).toBe('Step 1');
     expect(header.lead).toBe('リード文');
     expect(header.point).toBe('帯テキスト');
@@ -45,7 +47,9 @@ describe('parseSlideHeader（純関数）', () => {
 
 describe('parseSlideHeader（デッキ統合）', () => {
   it('points スライドに badge / lead / point が載る', () => {
-    const md = fm('<!-- slide: points -->\nbadge: WHY\n## 見出し\nlead: 補足リード\n- **A**：説明\npoint: ==重要==な帯');
+    const md = fm(
+      '<!-- slide: points -->\nbadge: WHY\n## 見出し\nlead: 補足リード\n- **A**：説明\npoint: ==重要==な帯',
+    );
     const s = parseSlideMarkdown(md).slides[0] as PointsSlide;
     expect(s.badge).toBe('WHY');
     expect(s.lead).toBe('補足リード');

@@ -256,10 +256,6 @@ right:
 });
 
 describe('デッキ制約', () => {
-  it('最終スライドが sources でないと警告する', () => {
-    const deck = parseSlideMarkdown(fm('<!-- slide: points -->\n- a'));
-    expect(deck.warnings.some((w) => w.includes('sources'))).toBe(true);
-  });
   it('生の <script> は除去して警告する', () => {
     const deck = parseSlideMarkdown(fm('<!-- slide: points -->\n- a\n<script>alert(1)</script>'));
     expect(deck.slides[0].warnings.some((w) => w.includes('script'))).toBe(true);
@@ -270,7 +266,9 @@ describe('デッキ制約', () => {
 
 describe('title layout: split-image', () => {
   it('layout: split-image を認識し image: を格納する', () => {
-    const md = fm('<!-- slide: title, layout: split-image, tone: dark -->\n# CASE ==STUDIES==\nsubtitle: luxury residences\nimage: https://example.com/hero.jpg');
+    const md = fm(
+      '<!-- slide: title, layout: split-image, tone: dark -->\n# CASE ==STUDIES==\nsubtitle: luxury residences\nimage: https://example.com/hero.jpg',
+    );
     const s = parseSlideMarkdown(md).slides[0] as TitleSlide;
     expect(s.type).toBe('title');
     expect(s.layout).toBe('split-image');

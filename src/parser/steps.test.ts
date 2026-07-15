@@ -22,7 +22,12 @@ describe('steps: 正常系', () => {
     expect(s.type).toBe('steps');
     expect(s.stepStyle).toBe('cards');
     expect(s.items).toHaveLength(3);
-    expect(s.items[0]).toEqual({ icon: '🔍', title: 'Web検索', desc: 'ブランド情報を収集', tone: undefined });
+    expect(s.items[0]).toEqual({
+      icon: '🔍',
+      title: 'Web検索',
+      desc: 'ブランド情報を収集',
+      tone: undefined,
+    });
     expect(s.items[2].tone).toBe('outline');
     expect(s.heading).toBe('手順');
   });
@@ -51,7 +56,10 @@ describe('steps: 正常系', () => {
     const d = parseDirective('<!-- slide: steps, tone: dark -->')!;
     expect(d.type).toBe('steps');
     expect(d.tone).toBe('dark');
-    const md = stepsMd('items:\n  - { title: A }\n  - { title: B }', '<!-- slide: steps, tone: dark -->');
+    const md = stepsMd(
+      'items:\n  - { title: A }\n  - { title: B }',
+      '<!-- slide: steps, tone: dark -->',
+    );
     const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
     expect(s.tone).toBe('dark');
   });

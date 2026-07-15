@@ -328,21 +328,10 @@ export function TimelineDiagramSvg({
       source={source}
     >
       {/* 水平軸 */}
-      <line
-        className="diagram-edge"
-        x1={TL_START_CX}
-        y1={TL_AXIS_Y}
-        x2={axisEnd}
-        y2={TL_AXIS_Y}
-      />
+      <line className="diagram-edge" x1={TL_START_CX} y1={TL_AXIS_Y} x2={axisEnd} y2={TL_AXIS_Y} />
 
       {/* Start 円 */}
-      <circle
-        className="diagram-node diagram-node-accent"
-        cx={TL_START_CX}
-        cy={TL_AXIS_Y}
-        r={28}
-      />
+      <circle className="diagram-node diagram-node-accent" cx={TL_START_CX} cy={TL_AXIS_Y} r={28} />
       <text className="diagram-label" x={TL_START_CX} y={TL_AXIS_Y + 4} textAnchor="middle">
         {timeline.start}
       </text>
@@ -360,7 +349,12 @@ export function TimelineDiagramSvg({
             {/* 縦チック（軸から上下へ） */}
             <line className="diagram-edge tl-tick" x1={x} y1={tickY1} x2={x} y2={tickY2} />
             {/* チック先端の丸 */}
-            <circle className="diagram-node-accent tl-dot" cx={x} cy={above ? TL_TICK_TOP : TL_TICK_BOTTOM} r={7} />
+            <circle
+              className="diagram-node-accent tl-dot"
+              cx={x}
+              cy={above ? TL_TICK_TOP : TL_TICK_BOTTOM}
+              r={7}
+            />
             {/* ラベル（8文字超は2行分割） */}
             <NodeLabel x={x} y={labelY} text={m.label} />
             {/* when テキスト */}

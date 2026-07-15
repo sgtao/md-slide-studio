@@ -32,7 +32,12 @@ describe('contrast: 正常系', () => {
     expect(s.example?.rows).toHaveLength(2);
     expect(s.example?.rows[0]).toEqual({ tag: 'AIの推測', text: 'ログイン → たぶん必要だろう' });
     expect(s.verdict).toHaveLength(3);
-    expect(s.verdict[0]).toEqual({ label: '強み', text: 'それっぽく作れる', connector: undefined, tone: undefined });
+    expect(s.verdict[0]).toEqual({
+      label: '強み',
+      text: 'それっぽく作れる',
+      connector: undefined,
+      tone: undefined,
+    });
     expect(s.verdict[1].connector).toBe('↓ でも');
     expect(s.verdict[2].tone).toBe('warn');
   });
@@ -81,13 +86,9 @@ describe('contrast: 異常系（落ちないパーサー）', () => {
   });
 
   it('verdict が空の場合は警告する', () => {
-    const block = [
-      '```contrast',
-      'example:',
-      '  rows:',
-      '    - { tag: A, text: B }',
-      '```',
-    ].join('\n');
+    const block = ['```contrast', 'example:', '  rows:', '    - { tag: A, text: B }', '```'].join(
+      '\n',
+    );
     const md = contrastMd(block);
     const s = parseSlideMarkdown(md).slides[0] as ContrastSlide;
     expect(s.verdict).toHaveLength(0);

@@ -74,12 +74,6 @@ export function parseSlideMarkdown(src: string): SlideDeck {
       'スライドが1枚もありません（<!-- slide: type --> ディレクティブを確認してください）',
     );
   }
-  if (slides.length > 12) {
-    deckWarnings.push(`スライド枚数が ${slides.length} 枚です（推奨は3〜12枚）`);
-  }
-  if (slides.length > 0 && slides[slides.length - 1].type !== 'sources') {
-    deckWarnings.push('最終スライドが sources（出典）ではありません（推奨: sources で終える）');
-  }
 
   return { frontmatter, slides, warnings: deckWarnings };
 }
@@ -462,7 +456,6 @@ function normalizeSource(raw: unknown, warnings: string[]): { name: string; url?
   return { name: '出典未記載' };
 }
 
-
 /** v0.2.1: chart ブロック後続の ### 見出し + リストをサイドパネルとして取り込む */
 function parseSidePanel(rest: string): ChartSidePanel | undefined {
   // ### 見出し を探す
@@ -714,7 +707,6 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
   return { type: 'layer', nodes: nodeLabels };
 }
 
-
 // --- diagram-timeline（v0.2.1: タイムライン図） ---
 
 const TIMELINE_MAX = 6;
@@ -931,7 +923,9 @@ function parseContrastSlide(body: string, warnings: string[]) {
       const r = it as Record<string, unknown>;
       const tone = r.tone === 'warn' ? ('warn' as const) : undefined;
       if (r.tone != null && tone === undefined) {
-        warnings.push(`contrast verdict item の tone "${String(r.tone)}" は未対応です（warn のみ）`);
+        warnings.push(
+          `contrast verdict item の tone "${String(r.tone)}" は未対応です（warn のみ）`,
+        );
       }
       return {
         label: r.label != null ? String(r.label) : undefined,
