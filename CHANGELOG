@@ -1,6 +1,45 @@
-# Changelog
+# CHANGELOG
 
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
+
+---
+## [v0.2.4] - 2026-07-16
+
+### 追加｜デッキレベルLINT（deckLint.ts）
+- `lintDeck(deck): LintResult[]` を新設。error/warn/info の重要度・対象スライド番号・
+  ルールIDを持つ構造化警告に刷新
+- ルール: 最終スライドsources推奨／先頭スライドtitle推奨／contrastのexample・verdict欠落／
+  stepsのratio合計／title split-imageの外部画像CORS info
+- 警告パネル（LintPanel）でアイコン表示＋クリックで該当スライドへジャンプ
+
+### 変更｜スライド枚数の推奨閾値を撤去
+- `slideMarkdown.ts` の「12枚超で警告」「最終スライドsourcesでない」ロジックを撤去
+  （後者はdeckLintへ移設。前者は完全撤去し、LLM支援側の目安としてのみ残す）
+
+### ファイル構成の変更
+
+```
+新規:
+  src/parser/deckLint.ts
+  src/parser/deckLint.test.ts
+  src/components/LintPanel.tsx
+変更:
+  index.html
+  src/App.tsx
+  src/components/diagrams/Diagrams.tsx
+  src/components/slides/SlideRenderer.tsx
+  src/parser/contrast.test.ts
+  src/parser/slideHeader.test.ts
+  src/parser/slideMarkdown.test.ts
+  src/parser/slideMarkdown.ts
+  src/parser/steps.test.ts
+  src/parser/timeline.test.ts
+  src/theme/app.css
+  eslint.config.js
+  .prettierrc.json
+  e2e/basic.spec.ts
+  playwright.config.ts
+```
 
 ---
 ## [v0.2.3] - 2026-07-15
