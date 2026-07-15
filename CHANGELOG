@@ -3,6 +3,36 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.2] - 2026-07-15
+
+### 追加｜HTMLエクスポート（スタンドアロン単一ファイル）
+
+📥メニュー最上部に「🌐 HTMLとして保存」を追加。生成したデッキを、アプリなしで
+ブラウザだけで完全に操作できる単一HTMLファイルとして書き出す。
+
+- コントロールクラスタ（テーマ切替・表示切替・カラーパレット・エクスポート
+  メニュー）を丸ごと埋め込み、元スキル（websearch-slide-ja）のvanilla JS実装
+  （fit-slide / theme-toggle / view-toggle / navigation / palette-toggle /
+  export-pdf / export-png）をそのまま移植して1ファイルに内蔵
+- 内蔵エクスポートメニューは PDF印刷／PNG／ZIP／スライドMD保存の4項目。
+  「HTMLとして保存」自身は、既にHTMLとして開いているファイルに対して意味を
+  持たないため含めない
+- MD保存用に、元原稿（エディタの生Markdown）をファイル内に文字列として埋め込み
+- PNG/ZIPはhtml2canvas・JSZipをCDNから操作時のみ動的ロード（閲覧自体は
+  引き続き自己完結という元スキルの設計方針を踏襲）
+- 保存ファイル名は既存のMD保存と対になる命名規則: `HTML-{タイムスタンプ}_Slide-{デッキタイトル}.html`
+
+### ファイル構成の変更
+
+```
+変更:
+  src/export/exporters.ts
+  src/components/SlideDeck.tsx
+  src/components/ControlCluster.tsx
+  src/App.tsx
+```
+
+---
 ## [v0.2.1] - 2026-07-XX
 
 ### 追加｜タイムライン図（diagram-timeline）
