@@ -120,8 +120,8 @@ export default function App() {
   const doMd = useCallback(() => exportMarkdown(md, title), [md, title]);
   const doHtml = useCallback(() => {
     const el = deckRef.current?.getScalerEl();
-    if (el) void exportHtml(el, title);
-  }, [title]);
+    if (el) void exportHtml(el, title, md);
+  }, [title, md]);
 
   useKeyboardNav(
     useMemo(
