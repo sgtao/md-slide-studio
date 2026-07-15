@@ -5,7 +5,7 @@
  * - 先頭に YAML frontmatter、以降は行全体が `---` の行でスライド区切り
  *   （frontmatter 内・コードフェンス内の `---` は区切りとみなさない）
  * - 各スライド先頭行は `<!-- slide: <type>[, fit][, layout: x][, tone: dark] -->`
- * - chart / diagram / mermaid（サブセット）/ steps フェンスブロックを構造化
+ * - chart / diagram / mermaid（サブセット）/ steps / contrast フェンスブロックを構造化
  * - 全typeで共通ヘッダキー（badge / lead / point）を受け付ける（slideHeader.ts）
  * - MD 内の生 <script> / <style> は無視（禁止事項）
  */
@@ -16,6 +16,9 @@ import type {
   ChartSidePanel,
   ComparisonChartBlock,
   ComparisonLeft,
+  ContrastExample,
+  ContrastExampleRow,
+  ContrastVerdictItem,
   DiagramBlock,
   FeatureShowcaseLeft,
   FeatureShowcaseRight,
@@ -51,6 +54,7 @@ const SLIDE_TYPES: SlideType[] = [
   'figure',
   'feature-showcase',
   'steps',
+  'contrast',
   'sources',
 ];
 const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact', 'side-list', 'split-image'];
@@ -236,6 +240,8 @@ function parseSlide(raw: string): Slide | null {
       return { ...base, type: 'feature-showcase', ...parseFeatureShowcase(body, d.warnings) };
     case 'steps':
       return { ...base, type: 'steps', ...parseStepsSlide(body, d.warnings) };
+    case 'contrast':
+      return { ...base, type: 'contrast', ...parseContrastSlide(body, d.warnings) };
     case 'sources':
       return { ...base, type: 'sources', ...parseSources(body) };
   }
@@ -881,6 +887,64 @@ function parseStepsSlide(body: string, warnings: string[]) {
   }
 
   return { heading, note, stepStyle, items: items.slice(0, STEPS_MAX_ITEMS), ratio };
+}
+
+// --- contrast（v0.2.3: 例示 vs 結論の対比） ---
+
+function parseContrastSlide(body: string, warnings: string[]) {
+  const fence = extractFence(body, 'contrast');
+  const { heading } = pickHeadingAndNote(fence ? fence.rest : body);
+  const empty = {
+    heading,
+    example: undefined as ContrastExample | undefined,
+    verdict: [] as ContrastVerdictItem[],
+  };
+  if (!fence) {
+    warnings.push('```contrast ブロックが見つかりません');
+    return empty;
+  }
+  const y = parseYamlBlock(fence.content, warnings);
+  if (!y) return empty;
+
+  let example: ContrastExample | undefined;
+  if (y.example && typeof y.example === 'object') {
+    const ex = y.example as Record<string, unknown>;
+    const rowsRaw = Array.isArray(ex.rows) ? ex.rows : [];
+    const rows: ContrastExampleRow[] = rowsRaw
+      .filter((it) => it && typeof it === 'object')
+      .map((it) => {
+        const r = it as Record<string, unknown>;
+        return { tag: String(r.tag ?? ''), text: String(r.text ?? '') };
+      });
+    if (rows.length === 0) {
+      warnings.push('contrast の example.rows が空です');
+    }
+    example = { title: ex.title != null ? String(ex.title) : undefined, rows };
+  } else {
+    warnings.push('contrast の example がありません');
+  }
+
+  const verdictRaw = Array.isArray(y.verdict) ? y.verdict : [];
+  const verdict: ContrastVerdictItem[] = verdictRaw
+    .filter((it) => it && typeof it === 'object')
+    .map((it) => {
+      const r = it as Record<string, unknown>;
+      const tone = r.tone === 'warn' ? ('warn' as const) : undefined;
+      if (r.tone != null && tone === undefined) {
+        warnings.push(`contrast verdict item の tone "${String(r.tone)}" は未対応です（warn のみ）`);
+      }
+      return {
+        label: r.label != null ? String(r.label) : undefined,
+        text: r.text != null ? String(r.text) : undefined,
+        connector: r.connector != null ? String(r.connector) : undefined,
+        tone,
+      };
+    });
+  if (verdict.length === 0) {
+    warnings.push('contrast の verdict が空です');
+  }
+
+  return { heading, example, verdict };
 }
 
 // --- sources ---

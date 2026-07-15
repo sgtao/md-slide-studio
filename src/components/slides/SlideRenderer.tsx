@@ -11,6 +11,7 @@
 import type {
   ChartSlide,
   ComparisonChartSlide,
+  ContrastSlide,
   DiagramSlide,
   FeatureShowcaseSlide,
   FigureSlide,
@@ -387,6 +388,60 @@ function FeatureShowcaseView({ slide }: { slide: FeatureShowcaseSlide }) {
   );
 }
 
+// --- contrast (v0.2.3) ---
+
+function ContrastView({ slide }: { slide: ContrastSlide }) {
+  return (
+    <div className="slide-inner">
+      <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
+      <div className="contrast-grid">
+        <div className="contrast-left">
+          {slide.example ? (
+            <div className="contrast-example">
+              {slide.example.title && (
+                <div className="contrast-example-title">{renderInline(slide.example.title)}</div>
+              )}
+              <div className="contrast-rows">
+                {slide.example.rows.map((row, i) => (
+                  <div key={i} className="contrast-row">
+                    <span className="contrast-tag">{row.tag}</span>
+                    <span className="contrast-text">{renderInline(row.text)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="note">（example が未定義のため表示できません）</p>
+          )}
+        </div>
+        <div className="contrast-right">
+          {slide.verdict.length > 0 ? (
+            <div className="contrast-verdict">
+              {slide.verdict.map((v, i) =>
+                v.connector ? (
+                  <div key={i} className="contrast-connector">
+                    {renderInline(v.connector)}
+                  </div>
+                ) : (
+                  <div
+                    key={i}
+                    className={`contrast-verdict-item${v.tone ? ` contrast-verdict-item--${v.tone}` : ''}`}
+                  >
+                    {v.label && <span className="contrast-verdict-label">{v.label}</span>}
+                    {v.text && <span className="contrast-verdict-text">{renderInline(v.text)}</span>}
+                  </div>
+                ),
+              )}
+            </div>
+          ) : (
+            <p className="note">（verdict が未定義のため表示できません）</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // --- sources ---
 
 function SourcesView({ slide }: { slide: SourcesSlide }) {
@@ -458,6 +513,8 @@ function renderSlideBody(slide: Slide, index: number) {
       return <FeatureShowcaseView slide={slide} />;
     case 'steps':
       return <StepsView slide={slide} />;
+    case 'contrast':
+      return <ContrastView slide={slide} />;
     case 'sources':
       return <SourcesView slide={slide} />;
   }

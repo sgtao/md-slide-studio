@@ -157,6 +157,20 @@ data:
 source: { name: 計測メモ（例）, url: https://example.com }
 ```
 ---
+<!-- slide: contrast -->
+badge: WHY
+## AIは、足りない情報を==勝手に補う==
+```contrast
+example:
+  title: 「タスク管理アプリを作って」
+  rows:
+    - { tag: AIの推測, text: ログイン → たぶん必要だろう }
+verdict:
+  - { label: 強み, text: それっぽく作れる }
+  - { connector: ↓ でも }
+  - { label: 弱点, text: 意図と合うとは限らない, tone: warn }
+```
+---
 <!-- slide: sources -->
 ## 出典・参考リンク
 - [websearch-slide-ja スキル](https://github.com/) — 本アプリの移植元スキル（スライドMD仕様 v0.7）

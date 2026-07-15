@@ -4,7 +4,8 @@
  *
  * v0.2.0: badge/lead/point（共通ヘッダ）・tone・StepsSlide
  * v0.2.1: diagram-timeline・ChartSlide.sidePanel・layout: side-list
- * v0.2.3: TitleSlide.image（layout: split-image）
+ * v0.2.3: ContrastSlide（新type）
+ * v0.2.3: TitleSlide.image（layout: split-image）・ContrastSlide（新type）
  */
 
 export type Palette = 'ocean' | 'forest' | 'sunset' | 'plum' | 'graphite';
@@ -26,6 +27,7 @@ export type SlideType =
   | 'figure'
   | 'feature-showcase'
   | 'steps'
+  | 'contrast'
   | 'sources';
 
 export type LayoutVariant = 'two-col' | 'title-xl' | 'compact' | 'side-list' | 'split-image';
@@ -248,6 +250,32 @@ export interface StepsSlide extends SlideBase {
   note?: InlineText;
 }
 
+/** contrast（v0.2.3）: 例示 vs 結論の対比構図 */
+export interface ContrastExampleRow {
+  tag: string;
+  text: InlineText;
+}
+
+export interface ContrastExample {
+  title?: InlineText;
+  rows: ContrastExampleRow[];
+}
+
+export interface ContrastVerdictItem {
+  /** label/text 行、または connector 行のどちらか */
+  label?: string;
+  text?: InlineText;
+  connector?: InlineText;
+  tone?: 'warn';
+}
+
+export interface ContrastSlide extends SlideBase {
+  type: 'contrast';
+  heading?: InlineText;
+  example?: ContrastExample;
+  verdict: ContrastVerdictItem[];
+}
+
 export interface SourcesSlide extends SlideBase {
   type: 'sources';
   heading?: InlineText;
@@ -266,6 +294,7 @@ export type Slide =
   | FigureSlide
   | FeatureShowcaseSlide
   | StepsSlide
+  | ContrastSlide
   | SourcesSlide;
 
 export interface SlideDeck {

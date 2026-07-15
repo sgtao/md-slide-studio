@@ -1,0 +1,115 @@
+/* contrast.css
+ * contrast type（v0.2.3）: 「例示（左）vs 結論の連鎖（右）」の対比構図。
+ * - 左: タグ付き行のリスト（AIの推測、など）
+ * - 右: label/text の連鎖 + connector（矢印）+ tone: warn（弱点強調）
+ * 色は theme-vars.css の変数を参照し、ハードコード禁止規約に準拠。
+ */
+
+.contrast-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+/* ─── 左: 例示ボックス ─── */
+.contrast-example {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  padding: 1.2rem 1.4rem;
+}
+
+.contrast-example-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+  color: var(--text-primary);
+}
+
+.contrast-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contrast-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+}
+
+.contrast-tag {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  background: var(--accent-soft, var(--bg-surface));
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  white-space: nowrap;
+}
+
+.contrast-text {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ─── 右: 結論の連鎖 ─── */
+.contrast-verdict {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contrast-verdict-item {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  padding: 0.9rem 1.2rem;
+}
+
+.contrast-verdict-label {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+.contrast-verdict-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* tone: warn（弱点の強調表示） */
+.contrast-verdict-item--warn {
+  border-color: var(--warn, #d97757);
+  background: var(--warn-soft, var(--bg-surface));
+}
+.contrast-verdict-item--warn .contrast-verdict-label {
+  color: var(--warn, #d97757);
+}
+
+/* connector（矢印・「↓ でも」等） */
+.contrast-connector {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* ダークトーン（tone: dark ディレクティブとの併存） */
+.slide--dark .contrast-example,
+.slide--dark .contrast-verdict-item {
+  background: var(--bg-surface-dark, var(--bg-surface));
+  border-color: var(--border-dark, var(--border));
+}
