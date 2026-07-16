@@ -38,7 +38,7 @@ describe('sample.md（v0.2.5 統合デッキ）', () => {
       'steps',
       'contrast',
       'sources',
-    ];
+    ] as const;
     for (const t of expected) {
       expect(types.has(t), `type "${t}" が sample.md に含まれていません`).toBe(true);
     }

@@ -6,8 +6,13 @@ function deck(slides: Slide[], warnings: string[] = []): SlideDeck {
   return { frontmatter: { title: 'T', palette: 'ocean' }, slides, warnings };
 }
 
-function slide(partial: Partial<Slide> & { type: Slide['type'] }): Slide {
-  return { warnings: [], ...partial };
+// テスト用スタブファクトリ。T ごとに Extract<Slide, {type: T}> の
+// 専用フィールド（example / ratio / image 等）を型として認識できるようにする。
+// 戻り値の Slide は意図的に不完全なスタブのため as で明示的にキャストする。
+function slide<T extends Slide['type']>(
+  partial: Partial<Extract<Slide, { type: T }>> & { type: T },
+): Slide {
+  return { warnings: [], ...partial } as Slide;
 }
 
 describe('lintDeck — 構成ルール', () => {

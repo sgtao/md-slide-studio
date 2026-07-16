@@ -15,7 +15,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "typecheck": "tsc -b --noEmit",
+    "verify": "npm run typecheck && npm test && npm run lint && npm run test:e2e"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",
