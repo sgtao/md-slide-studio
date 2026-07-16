@@ -10,7 +10,7 @@ Markdown原稿（スライドMD）から **HTMLスライド／PDF／PNG** を生
 
 [Demo Site](https://sgtao.github.io/md-slide-studio/)
 
-![image](./public/assets/Screen-MD-Slide-studio.png)
+![image](./docs/images/Screen-MD-Slide-studio.png)
 
 
 ## 特徴
