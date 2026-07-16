@@ -4,119 +4,98 @@ palette: ocean
 ---
 <!-- slide: title -->
 # Markdownから、==スライドを生成する。==
-subtitle: MD Slide Studio — スライドMD → HTML / PDF / PNG 変換デモ（全typeサンプル）
+subtitle: MD Slide Studio — 内容はMarkdownで書き、見た目はレンダラが決める
 badges: [全16type網羅サンプル, React + TypeScript, websearch-slide-ja 移植]
 ---
+<!-- slide: contrast -->
+badge: WHY
+## 「いい感じにして」は、==毎回ちがう答え==を返す
+```contrast
+example:
+  title: 「この資料をスライドにして」とLLMに頼むと
+  rows:
+    - tag: 毎回変わる
+      text: 見出しのサイズと余白 — 同じ原稿でも出力ごとに違う
+    - tag: 毎回変わる
+      text: 配色とグラフの目盛 — そのつど選び直される
+    - tag: 直せない
+      text: 3枚目だけ直したい — 作り直すと他の11枚も変わる
+verdict:
+  - { label: 強み, text: 一発でそれっぽい形にはなる }
+  - { connector: ↓ でも }
+  - { label: 弱点, text: 同じ結果に何度でも戻れない, tone: warn }
+```
+point: 資料は==一度作って終わりではない==。差し替えと修正が何度も起きる
+---
 <!-- slide: points -->
-## このアプリでできること
-- **即時プレビュー**：左のエディタでMDを編集すると、右のスライドが即座に更新される
-- **16種のスライドtype**：タイトル・箇条書き・表・グラフ・図解・手順カード・タイムラインなどを宣言的に記述
-- **決定論的な変換**：LLM変換と違い、同じMDからは常に同じスライドが生成される
-- **エクスポート**：PDF（P）・PNG（Shift+S）・ZIP（Shift+P）・MD保存に対応
-> このスライド自体がエディタ内のMDから生成されています。編集して試してください。
+## だから、==役割を分ける==
+lead: 内容は人が書き、見た目は機械が決める。この境界を引くのが MD Slide Studio
+- **内容＝Markdown**：何を言うかだけを書く。HTMLは直接編集しない（MD＝唯一の情報源）
+- **見た目＝レンダラ**：typeごとに座標もCSS変数も固定済み。同じMDからは常に同じスライド
+- **AI＝下書きまで**：仕上がりの再現性は、AIに預けない
+> 3原則 ─ MD＝唯一の情報源／落ちないパーサー／決定論的描画
+point: このスライド自体が、左のエディタのMDから生成されています
+---
+<!-- slide: diagram-flow -->
+## 「決定論的」の中身
+lead: 変換パイプラインにLLMは登場しない。だから同じMDからは常に同じスライドが出る
+```diagram
+type: flow
+nodes: ["スライドMD", "パーサー", "型付きAST", "レンダラ", "HTML / PDF / PNG"]
+labels: ["人が書く", "落ちない", "判別共用体", "座標は固定", "そのまま共有"]
+```
+point: 未知の値は==警告してフォールバック==。原稿の途中でもプレビューは壊れない
 ---
 <!-- slide: table -->
-## 対応スライドtype一覧
+## 宣言的に書ける範囲＝16type
+lead: 「どう描くか」ではなく「何のスライドか」を宣言する。描画はtypeが引き受ける
 | type | 用途 | 記法 |
 |---|---|---|
 | title / points / summary | 表紙・箇条書き・まとめ | ` # ` / ` - ` / ` 1. ` |
 | table | 比較表 | Markdownテーブル |
 | chart-bar / line / donut | グラフ | ` ```chart ` ブロック |
-| diagram-flow / layer / cycle / ==timeline== | 図解・タイムライン | ` ```diagram ` ブロック |
-| ==steps== | 手順カードフロー | ` ```steps ` ブロック |
+| diagram-flow / layer / cycle / timeline | 図解・タイムライン | ` ```diagram ` ブロック |
+| steps | 手順カードフロー | ` ```steps ` ブロック |
+| contrast / comparison-chart | 対比・前後比較 | 専用ブロック |
 | figure / feature-showcase / sources | 画像・機能紹介・出典 | 専用記法 |
-| comparison-chart / ==contrast== | 比較・対比構造 | 専用記法 |
 > 全typeで `badge:` / `lead:` / `point:` と `tone: dark` が使えます（v0.2.0+）
 ---
 <!-- slide: chart-bar, layout: side-list -->
-## 売上目標と達成の前提条件
-lead: layout: side-list — グラフ左60%＋テキストパネル右40% の2カラム表示（v0.2.1）
+## 何の時間が減るのか
+lead: 12枚のデッキを1本仕上げるまでの所要時間（例示データ）
 ```chart
 type: bar
-title: 売上目標推移（億円）
+title: デッキ1本あたりの作業時間（分）
 data:
-  - { label: 1年目, value: 8 }
-  - { label: 2年目, value: 18 }
-  - { label: 3年目, value: 35 }
-source: { name: 事業計画（例示データ）, url: https://example.com }
+  - { label: 手作業, value: 120 }
+  - { label: LLMに直接生成, value: 95 }
+  - { label: MD Slide Studio, value: 45 }
+source: { name: 例示データ, url: https://example.com }
 ```
-### 達成のための前提条件
-- **1年目（8億円）**：P1法人向け500社、P2個人向け15,000台
-- **2年目**：竹プラン（¥29,800）を売上構成比60%で維持
-- **3年目（35億円）**：教育機関200校以上、海外展開開始
+### 測定の前提
+- **共通条件**：12枚・グラフ2点・図解1点。原稿の骨子は用意済み
+- **手作業**：スライドツールで作成。体裁の微調整を含む
+- **LLMに直接生成**：出力の手直しと再生成の往復を含む
 ---
-<!-- slide: chart-donut -->
-## グラフはYAMLデータから自動描画
+<!-- slide: comparison-chart -->
+left:
+  big: 75分
+  big_unit: 短縮
+  heading: 減ったのは、==体裁の時間==だけ。
+  lead: 構成を考える時間は変わらない。機械化できるのは、考えたあとの工程（例示データ）。
+  stats:
+    - { num: 120分 → 45分, label: 1本あたり }
+    - { num: 50分 → 0分, label: 体裁を整える }
 ```chart
-type: donut
-title: フロントエンド フレームワーク使用率（例示データ）
-unit: "%"
+type: comparison-donut
+labels: { before: 手作業, after: MD Slide Studio }
+center: { before: 120分, after: 45分 }
 data:
-  - { label: React,  value: 45 }
-  - { label: Vue,    value: 30 }
-  - { label: Svelte, value: 15 }
-  - { label: その他, value: 10 }
-source: { name: サンプルデータ, url: https://example.com }
-```
----
-<!-- slide: steps -->
-badge: Step 1
-## カード型ステップフロー（steps）
-lead: 手順・プロセス・ワークフローをアイコン付きカードの流れで表現する
-```steps
-style: cards
-items:
-  - icon: "🔍"
-    title: Claude が Web検索
-    desc: ブランドカラー／フォント情報／ロゴ・トーン
-  - icon: "✨"
-    title: Claude が自動整理
-    desc: カラーパレット／フォント指定／レイアウトルール
-  - icon: "🎨"
-    title: design-guide.md 完成
-    tone: outline
-```
-point: ==badge / lead / point== は全typeで使える共通ヘッダ拡張です（v0.2.0）
----
-<!-- slide: steps, tone: dark -->
-## 番号丸スタイル ＋ 比率帯 ＋ tone: dark
-lead: ディレクティブに tone: dark を付けると、このスライドだけ地色を反転できる
-```steps
-style: circled
-items:
-  - { icon: "🔍", title: デザインガイド生成 }
-  - { icon: "📄", title: スライド一括生成 }
-  - { icon: "💬", title: Connector で修正 }
-  - { icon: "✋", title: 手動仕上げ }
-ratio:
-  - { label: AI 自動, value: 30 }
-  - { label: AI 自動, value: 30 }
-  - { label: AI + 指示, value: 30 }
-  - { label: 手動 10%, value: 10 }
-```
----
-<!-- slide: diagram-timeline -->
-## MD Slide Studio 開発ロードマップ
-lead: マイルストーンは上下交互に自動配置されます（2〜6個対応）
-```diagram
-type: timeline
-start: v0.1
-milestones:
-  - { label: 共通ヘッダ・steps, when: v0.2.0 }
-  - { label: timeline・side-list, when: v0.2.1 }
-  - { label: contrast・split-image, when: v0.2.2 }
-  - { label: Zod SSOT化, when: v0.3 }
-  - { label: AI下書き支援, when: v0.4 }
-  - { label: PPTX出力, when: v0.7 }
-```
-point: このデモ自体が ==diagram-timeline== で描かれています
----
-<!-- slide: diagram-flow -->
-## 変換パイプライン
-```diagram
-type: flow
-nodes: ["スライドMD", "パーサー", "React AST", "レンダラ", "PDF / PNG"]
-labels: ["", "parseSlideMarkdown", "型付きSlide[]", "SVG含む", "エクスポート"]
+  - { label: 構成を考える, before: 30, after: 30, class: neutral }
+  - { label: 体裁を整える, before: 50, after: 0, class: 1 }
+  - { label: 図表を作る, before: 30, after: 5, class: 4 }
+  - { label: 修正対応, before: 10, after: 10, class: 3 }
+source: { name: 例示データ, url: https://example.com }
 ```
 ---
 <!-- slide: feature-showcase -->
@@ -137,40 +116,69 @@ right:
     - label: 決定論的レンダリング
       desc: 貼り付ければ常に同じ見た目に
 ---
-<!-- slide: comparison-chart -->
-left:
-  big: 225GB
-  big_unit: 解放
-  heading: 空き容量が ==321GB → 546GB== へ。
-  lead: 整理前は605GB使用。クラウド移行と重複削除で380GBまで削減（例示データ）。
-  stats:
-    - { num: 65% → 41%, label: 使用率 }
-    - { num: 926GB, label: SSD容量 }
-```chart
-type: comparison-donut
-labels: { before: Before, after: After }
-center: { before: 605GB, after: 380GB }
-data:
-  - { label: Google Drive, before: 326, after: 128, class: 1 }
-  - { label: 動画素材, before: 98, after: 80, class: 4 }
-  - { label: デスクトップ, before: 61, after: 61, class: 3 }
-  - { label: 空き, before: 321, after: 546, class: neutral }
-source: { name: 計測メモ（例）, url: https://example.com }
+<!-- slide: steps -->
+badge: HOW
+## 使い方は、==4ステップ==
+lead: プロンプトを取得 → LLMに下書きさせる → 貼り付けて手直し → 書き出す
+```steps
+style: cards
+items:
+  - icon: "🤖"
+    title: プロンプトを取得
+    desc: 🤖ボタンで、仕様込みの定型プロンプトをコピー
+  - icon: "💬"
+    title: LLMに下書きさせる
+    desc: テーマを差し替えるだけ。返ってくるのはスライドMD
+  - icon: "📋"
+    title: 貼り付けて手直し
+    desc: 左のエディタに貼ると右が即更新。文言はMDで直す
+  - icon: "📤"
+    title: 書き出す
+    desc: PDF・PNG・ZIP・単一HTMLで共有
+    tone: outline
 ```
+point: 直すのは常に==MDだけ==。HTMLに戻って直す作業は発生しない
 ---
-<!-- slide: contrast -->
-badge: WHY
-## AIは、足りない情報を==勝手に補う==
-```contrast
-example:
-  title: 「タスク管理アプリを作って」
-  rows:
-    - { tag: AIの推測, text: ログイン → たぶん必要だろう }
-verdict:
-  - { label: 強み, text: それっぽく作れる }
-  - { connector: ↓ でも }
-  - { label: 弱点, text: 意図と合うとは限らない, tone: warn }
+<!-- slide: steps, tone: dark -->
+## 人の判断は、==3割に集約される==
+lead: 4ステップのうち、どこをAIが担い、どこに人の判断が残るか
+```steps
+style: circled
+items:
+  - { icon: "🤖", title: プロンプト取得 }
+  - { icon: "💬", title: LLMが下書き }
+  - { icon: "📋", title: 人が手直し }
+  - { icon: "📤", title: エクスポート }
+ratio:
+  - { label: 定型・自動, value: 10 }
+  - { label: AI 下書き, value: 50 }
+  - { label: 人の判断, value: 30 }
+  - { label: 自動, value: 10 }
 ```
+point: 残る3割は「何を言うか」。==機械化しないと決めた領域==です
+---
+<!-- slide: diagram-timeline -->
+## 記法は増える。既存のMDは動き続ける
+lead: 後方互換を前提に、type・layoutを段階的に追加していきます
+```diagram
+type: timeline
+start: v0.1
+milestones:
+  - { label: 共通ヘッダ・steps, when: v0.2.0 }
+  - { label: timeline・side-list, when: v0.2.1 }
+  - { label: contrast・split-image, when: v0.2.2 }
+  - { label: Zod SSOT化, when: v0.3 }
+  - { label: AI下書き支援, when: v0.4 }
+  - { label: PPTX出力, when: v0.7 }
+```
+point: このロードマップ自体が ==diagram-timeline== で描かれています
+---
+<!-- slide: summary, layout: compact -->
+## まとめ
+1. **問題は「毎回ちがう」こと**：LLMに直接作らせると、同じ結果に戻れない
+2. **だから役割を分ける**：内容＝Markdown／見た目＝決定論的レンダラ／AIは下書きまで
+3. **減るのは体裁の時間**：考える時間は、人の手元に残る
+> このデッキは、左のMDと右のスライドが1対1で対応しています。編集して確かめてください。
 ---
 <!-- slide: title, layout: split-image, tone: dark -->
 # 参考｜==記法リファレンス==
@@ -188,7 +196,22 @@ data:
   - { label: 2月, value: 180 }
   - { label: 3月, value: 260 }
   - { label: 4月, value: 340 }
-source: { name: 社内ダッシュボード（例）, url: https://example.com }
+source: { name: 例示データ, url: https://example.com }
+```
+---
+<!-- slide: chart-donut -->
+## ドーナツグラフ（chart-donut）
+lead: 構成比はYAMLデータから自動描画。系列は5つまで
+```chart
+type: donut
+title: エクスポート形式の利用割合（例示データ）
+unit: "%"
+data:
+  - { label: PDF,  value: 45 }
+  - { label: PNG,  value: 30 }
+  - { label: ZIP,  value: 15 }
+  - { label: HTML, value: 10 }
+source: { name: 例示データ, url: https://example.com }
 ```
 ---
 <!-- slide: diagram-layer -->
@@ -209,12 +232,6 @@ nodes: [計画, 実装, 計測, 改善]
 ## 図版と出典（figure）
 ![image](https://upload.wikimedia.org/wikipedia/commons/c/c3/Chrysanthemum01s3872.jpg)
 source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemum01s3872.jpg)
----
-<!-- slide: summary, layout: compact -->
-## まとめ
-1. **MDが唯一の情報源**：HTMLを直接編集しない
-2. **崩れないパーサー**：未知の値も警告付きでフォールバックする
-3. **PDF/PNG/ZIPでそのまま共有**：エクスポートまで一貫している
 ---
 <!-- slide: sources -->
 ## 出典・参考リンク
