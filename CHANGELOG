@@ -3,6 +3,42 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.5] - 2026-07-16
+
+### 変更｜sample.md をストーリー重視の統合デッキに刷新
+
+紹介・テンプレ習熟用だった旧sample.mdと、全16type網羅のカバレッジ検証用デッキを1本に統合。物語性（WHY→原則→根拠→HOW→まとめ）を前半に置き、記法リファレンスは後半に「参考」として配置する構成に変更（並び順の設計は引き継ぎメモの決定事項Cに準拠）。
+
+- **本編を「LLM直接生成は再現できない」というWHYから開始**：`contrast` type を無関係な例から本アプリの存在理由の説明に差し替え、以降の主張（役割分担・決定論的変換・作業時間削減）の起点とした
+- **`chart-bar` と `comparison-chart` の題材を統一**：デッキ制作の作業時間（総量／内訳）を同一指標で扱い、根拠として機能するようにした
+- **`badge` / `lead` / `point` の自己言及的な説明文を削除**：機能名の紹介ではなく、各スライドの価値を伝える文言に統一
+- 全16type・主要layout（`side-list` / `split-image` / `compact`）・`tone: dark` の網羅は維持
+
+### 追加｜sample.md のカバレッジ検証テスト
+
+- `src/samples/sample.test.ts` を新設。`lintDeck` の結果に error が無いこと／先頭title・最終sources／全16type網羅を検証（3件）
+
+### 修正｜tsc型チェックの欠落によるビルド失敗
+
+`npm test`（vitest・型チェックなし）と `npm run lint` では検出できず、GitHub Actionsの `npm run build`（`tsc -b`）でのみ顕在化していた型エラーを修正。
+
+- **`deckLint.test.ts` の `slide()` ヘルパー**：判別共用体 `Slide` に対する `Partial<Slide>` がフィールド情報を失う問題を、`Extract<Slide, {type: T}>` を用いた型パラメータ化で解消
+- **`sample.test.ts` の type一覧配列**：`as const` 未指定により `string` へ広がっていた型を修正
+- 再発防止として `package.json` に `typecheck`（`tsc -b --noEmit`）・`verify`（typecheck＋test＋lint＋e2e一括）を追加
+
+### ファイル構成の変更
+
+```
+新規:
+  src/samples/sample.test.ts
+
+変更:
+  src/samples/sample.md
+  src/parser/deckLint.test.ts
+  package.json
+```
+
+---
 ## [v0.2.4] - 2026-07-16
 
 ### 追加｜デッキレベルLINT（deckLint.ts）
