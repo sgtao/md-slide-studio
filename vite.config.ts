@@ -10,5 +10,10 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.ts'],
     exclude: ['e2e/**', 'node_modules/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'], // ← ここがポイント
+      reportsDirectory: './coverage', // 省略可、デフォルトも./coverage
+    },
   },
 } as never);
