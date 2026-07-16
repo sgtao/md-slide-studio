@@ -5,7 +5,7 @@ palette: ocean
 <!-- slide: title -->
 # Markdownから、==スライドを生成する。==
 subtitle: MD Slide Studio — スライドMD → HTML / PDF / PNG 変換デモ（全typeサンプル）
-badges: [v0.2.1, React + TypeScript, websearch-slide-ja 移植]
+badges: [全16type網羅サンプル, React + TypeScript, websearch-slide-ja 移植]
 ---
 <!-- slide: points -->
 ## このアプリでできること
@@ -25,6 +25,7 @@ badges: [v0.2.1, React + TypeScript, websearch-slide-ja 移植]
 | diagram-flow / layer / cycle / ==timeline== | 図解・タイムライン | ` ```diagram ` ブロック |
 | ==steps== | 手順カードフロー | ` ```steps ` ブロック |
 | figure / feature-showcase / sources | 画像・機能紹介・出典 | 専用記法 |
+| comparison-chart / ==contrast== | 比較・対比構造 | 専用記法 |
 > 全typeで `badge:` / `lead:` / `point:` と `tone: dark` が使えます（v0.2.0+）
 ---
 <!-- slide: chart-bar, layout: side-list -->
@@ -170,6 +171,50 @@ verdict:
   - { connector: ↓ でも }
   - { label: 弱点, text: 意図と合うとは限らない, tone: warn }
 ```
+---
+<!-- slide: title, layout: split-image, tone: dark -->
+# 参考｜==記法リファレンス==
+subtitle: ここから先は、残りのtype・layoutバリアントの記法サンプルです
+image: https://upload.wikimedia.org/wikipedia/commons/c/c3/Chrysanthemum01s3872.jpg
+---
+<!-- slide: chart-line -->
+## 折れ線グラフ（chart-line）
+```chart
+type: line
+title: 月次アクティブユーザー数（例示データ）
+unit: 人
+data:
+  - { label: 1月, value: 120 }
+  - { label: 2月, value: 180 }
+  - { label: 3月, value: 260 }
+  - { label: 4月, value: 340 }
+source: { name: 社内ダッシュボード（例）, url: https://example.com }
+```
+---
+<!-- slide: diagram-layer -->
+## レイヤー図（diagram-layer）
+```diagram
+type: layer
+nodes: [[プレゼンテーション層], [アプリケーション層], [データアクセス層], [データベース]]
+```
+---
+<!-- slide: diagram-cycle -->
+## サイクル図（diagram-cycle）
+```diagram
+type: cycle
+nodes: [計画, 実装, 計測, 改善]
+```
+---
+<!-- slide: figure -->
+## 図版と出典（figure）
+![image](https://upload.wikimedia.org/wikipedia/commons/c/c3/Chrysanthemum01s3872.jpg)
+source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemum01s3872.jpg)
+---
+<!-- slide: summary, layout: compact -->
+## まとめ
+1. **MDが唯一の情報源**：HTMLを直接編集しない
+2. **崩れないパーサー**：未知の値も警告付きでフォールバックする
+3. **PDF/PNG/ZIPでそのまま共有**：エクスポートまで一貫している
 ---
 <!-- slide: sources -->
 ## 出典・参考リンク
