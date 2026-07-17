@@ -275,6 +275,9 @@ function PromptModal({ onClose }: { onClose: () => void }) {
           >
             このプロンプトを Claude / ChatGPT 等のLLMに送ると、本アプリの仕様に準拠した
             スライドMDが返ってきます。返ってきたMDを左のエディタに貼り付けてください。
+            <br />
+            なお、アプリ自体にはスライド枚数の上限はありません。8〜16枚は
+            AIへ依頼する際の読みやすさの目安です。
           </p>
           <pre>{prompt}</pre>
         </div>
