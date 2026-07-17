@@ -3,6 +3,38 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.6] - 2026-07-17
+
+### 変更｜draftAssistPromptをv0.2.3拡張記法に同期
+
+v0.2.0〜v0.2.3で追加された記法（steps／contrast／diagram-timeline／split-image／共通ヘッダ）が未反映だったLLM向けプロンプトを更新し、全16 type網羅の状態に揃えた。
+
+- **枚数目安を「推奨6〜10枚」から「推奨8〜16枚」に変更**：deckLint側は枚数制約を撤去済み（v0.2.4）だが、LLM生成時の目安としては表紙・出典を含めると8〜16枚が実用的と判断
+- `comparison-chart`の記述を追加し、diagram種別（flow/layer/cycle/timeline）の使い分けをtypeごとに明記
+- `PromptModal`（`App.tsx`）の説明文に「アプリ自体には枚数上限はない」旨の注記を追加し、AI推奨枚数との二重基準による混乱を防止
+
+### 追加｜draftAssistPromptのテスト
+
+- `src/ai/draftAssistPrompt.test.ts`を新設。全16 type名の網羅／テーマ埋め込み／枚数目安の記載をVitestで検証（文面スナップショットは意図的に避けた）
+
+### 追加｜test:covのテストカバレッジ
+
+- `npm run test:cov`でテストカバレッジ測定を追加
+
+
+### ファイル構成の変更
+
+```
+新規:
+  src/ai/draftAssistPrompt.test.ts
+
+変更:
+  src/ai/draftAssistPrompt.ts
+  src/App.tsx
+  package.json
+```
+
+---
 ## [v0.2.5] - 2026-07-16
 
 ### 変更｜sample.md をストーリー重視の統合デッキに刷新
