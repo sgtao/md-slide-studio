@@ -10,6 +10,7 @@ import { LintPanel } from './components/LintPanel';
 import type { Palette } from './parser/types';
 import { SlideDeckView, type SlideDeckHandle } from './components/SlideDeck';
 import { ControlCluster } from './components/ControlCluster';
+import { TemplateMenu } from './components/TemplateMenu';
 import { useKeyboardNav, usePersistentState } from './hooks/hooks';
 import {
   exportAllToZip,
@@ -57,6 +58,7 @@ export default function App() {
   const debouncedMd = useDebounced(md, 300);
   const deck = useMemo(() => parseSlideMarkdown(debouncedMd), [debouncedMd]);
   const lintResults = useMemo(() => lintDeck(deck), [deck]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // --- 表示状態 ---
   const [mode, setMode] = usePersistentState<'edit' | 'present'>('mdss-mode', 'edit');
@@ -127,6 +129,21 @@ export default function App() {
     if (els.length) void exportAllToZip(els, title);
   }, [title]);
   const doMd = useCallback(() => exportMarkdown(md, title), [md, title]);
+  const insertSnippet = useCallback((snippet: string) => {
+    const el = textareaRef.current;
+    if (!el) {
+      setMd((prev) => prev + snippet);
+      return;
+    }
+    const pos = el.selectionStart ?? el.value.length;
+    setMd((prev) => prev.slice(0, pos) + snippet + prev.slice(pos));
+    // カーソルを挿入後の位置へ復元（DOM更新後の次tickで実行）
+    requestAnimationFrame(() => {
+      const newPos = pos + snippet.length;
+      el.focus();
+      el.setSelectionRange(newPos, newPos);
+    });
+  }, []);
   const doHtml = useCallback(() => {
     const el = deckRef.current?.getScalerEl();
     if (el) void exportHtml(el, title, md);
@@ -172,7 +189,11 @@ export default function App() {
       <div className="workspace">
         {mode === 'edit' && (
           <div className="editor-pane">
+            <div className="editor-toolbar">
+              <TemplateMenu onInsert={insertSnippet} />
+            </div>
             <textarea
+              ref={textareaRef}
               value={md}
               onChange={(e) => setMd(e.target.value)}
               spellCheck={false}
