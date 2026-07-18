@@ -3,6 +3,38 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.8] - 2026-07-18
+
+### 追加｜ヘルプモーダル（❓ボタン）
+
+ヘッダーの❓ボタンから、記法チートシート／キーボードショートカット／制約ルールの3タブ構成モーダルを開けるようにした。素材はv0.2.6の`draftAssistPrompt.ts`の仕様記述、v0.2.4の`deckLint.ts`のルール一覧、v0.2.7の`slideTemplates.ts`と同期させ、二重管理を避けている。
+
+- **記法チートシートタブ**：`slideTemplates.ts`（v0.2.7）の20テンプレートをそのまま一覧表示。各コードの先頭にスライド区切り`---`を付けて表示し、右上のコピーアイコンでそのままクリップボードにコピーできる（コピー直後は✅表示に切り替わり1.5秒後に戻る）
+- **キーボードショートカットタブ**：`useKeyboardNav`（hooks.ts）の実際の割当と一致させた一覧（→/←/Space・F・V・P・Shift+S・Shift+P）
+- **制約ルールタブ**：sources推奨／title推奨／steps items数／chart系列数上限に加え、枚数目安は**v0.2.6の「8〜16枚」に統一**
+- 初回訪問時のみ画面右下にトーストを表示。`usePersistentState`は文字列限定の型のため、`'seen' | 'unseen'`のパターン（mode/theme/viewと同じ既存パターン）で管理し、6秒後に自動でseen化する
+- モーダルのUI構造は既存`PromptModal`と同じ`.modal-backdrop`/`.modal-head`/`.modal-body`/`.modal-foot`を踏襲し、見た目の一貫性を保った
+
+### 修正｜E2Eの文言重複によるstrict mode violation
+
+- `e2e/help.spec.ts`のショートカット文言検索が、既存のエクスポートドロップダウン（`#export-dropdown`）内の同一文言（Shift+P等）と重複し、Playwrightのstrict modeエラーを起こしていたのを修正。検索対象を`.help-modal`内に限定するロケーターに変更した
+
+Vitest 102件・Playwright E2E 11件、全グリーン確認済み。
+
+### ファイル構成の変更
+
+```
+新規:
+  src/help/helpContent.ts
+  src/components/HelpModal.tsx
+  e2e/help.spec.ts
+
+変更:
+  src/App.tsx
+  src/theme/app.css
+```
+
+---
 ## [v0.2.7] - 2026-07-18
 
 ### 追加｜テンプレート挿入機能
