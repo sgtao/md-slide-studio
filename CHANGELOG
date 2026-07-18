@@ -3,6 +3,46 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.7] - 2026-07-18
+
+### 追加｜テンプレート挿入機能
+
+エディタから「正しい記法」をワンクリックで挿入できるようにし、記法の発見性を高めた。内容は`sample.md`（v0.2.5統合版）・`types.ts`の記法と実際に突き合わせて同期させ、全17type・20テンプレートを網羅している（`comparison-chart`・`feature-showcase`・`diagram-timeline`は当初案の記法に誤りがあり、実ファイルとの照合で修正済み）。
+
+- `slideTemplates.ts`を新設。basic／chart／diagram／showcaseの4カテゴリでテンプレートを管理
+- `TemplateMenu.tsx`を新設。`editor-toolbar`にカテゴリ別ドロップダウンとして設置
+- `App.tsx`に`insertSnippet`を追加し、カーソル位置（`textarea.selectionStart`）への挿入に対応
+
+### 修正｜テンプレート挿入時の改行結合・カーソル位置維持
+
+実装直後の動作確認で発覚した2件を修正。
+
+- **改行結合**：挿入位置の次の文字が改行以外のときにテンプレ本文が既存行へ連結され、Markdownの区切りが崩れる問題を修正。次の文字が改行・文末でない場合のみ、テンプレ末尾に改行を1つ補うようにした
+- **カーソル位置の巻き戻り**：`textarea.value`を書き換えるとブラウザが既定でスクロール位置を先頭にリセットする挙動により、挿入直後に見た目上「1行目に戻る」不具合を修正。挿入位置までの行数から`scrollTop`を明示的に計算し、挿入箇所を維持するようにした
+- **未フォーカス時の誤挿入**：textareaが一度もフォーカスされていない状態でボタンを押すと、`selectionStart`の既定値0を実カーソル位置と誤認し、frontmatter直前に挿入してスライド数が想定より増えるバグをE2Eで検出。`hasFocusedTextareaRef`で「フォーカス実績」を追跡し、未フォーカス時は末尾追記にフォールバックするよう修正
+
+### 追加｜テンプレートのカバレッジ検証テスト
+
+- `slideTemplates.test.ts`を新設。全テンプレートを`parseSlideMarkdown`→`lintDeck`に通し、error 0件を検証
+- `e2e/templates.spec.ts`を新設。既存`e2e/basic.spec.ts`とは独立ファイルとした（アンカーベースの`apply-*.sh`が既存ファイルの正確な内容に依存せずに済むため）。テンプレ挿入によるスライド増加・カーソル位置挿入の2件を検証
+
+Vitest 102件・Playwright E2E 9件、全グリーン確認済み。
+
+### ファイル構成の変更
+
+```
+新規:
+  src/templates/slideTemplates.ts
+  src/templates/slideTemplates.test.ts
+  src/components/TemplateMenu.tsx
+  e2e/templates.spec.ts
+
+変更:
+  src/App.tsx
+  src/theme/app.css
+```
+
+---
 ## [v0.2.6] - 2026-07-17
 
 ### 変更｜draftAssistPromptをv0.2.3拡張記法に同期
