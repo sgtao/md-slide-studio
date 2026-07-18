@@ -59,6 +59,12 @@ export default function App() {
   const deck = useMemo(() => parseSlideMarkdown(debouncedMd), [debouncedMd]);
   const lintResults = useMemo(() => lintDeck(deck), [deck]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // テンプレート挿入ボタンはtextarea外の要素なので、クリック時には
+  // textareaがフォーカスを失っている（= document.activeElement !== el）。
+  // selectionStartはfocus有無に関わらず最後の値を保持するが、
+  // 一度もフォーカスされたことが無い場合は既定値の0を返すため、
+  // 「一度でもフォーカスされたか」を別途追跡し、未フォーカス時は末尾追記にフォールバックする。
+  const hasFocusedTextareaRef = useRef(false);
 
   // --- 表示状態 ---
   const [mode, setMode] = usePersistentState<'edit' | 'present'>('mdss-mode', 'edit');
@@ -131,17 +137,28 @@ export default function App() {
   const doMd = useCallback(() => exportMarkdown(md, title), [md, title]);
   const insertSnippet = useCallback((snippet: string) => {
     const el = textareaRef.current;
-    if (!el) {
-      setMd((prev) => prev + snippet);
-      return;
-    }
-    const pos = el.selectionStart ?? el.value.length;
-    setMd((prev) => prev.slice(0, pos) + snippet + prev.slice(pos));
-    // カーソルを挿入後の位置へ復元（DOM更新後の次tickで実行）
+    let newPos = 0;
+    setMd((prev) => {
+      const pos =
+        hasFocusedTextareaRef.current && el ? (el.selectionStart ?? prev.length) : prev.length;
+      const nextChar = prev.charAt(pos);
+      // 挿入位置の次の文字がすでに改行（または文末）でなければ、テンプレ末尾に改行を補う。
+      // 既存行にテンプレ本文が連結されてMarkdownの区切りが崩れるのを防ぐ。
+      const needsNewline = nextChar !== '' && nextChar !== '\n';
+      const insertText = needsNewline ? `${snippet}\n` : snippet;
+      newPos = pos + snippet.length;
+      return prev.slice(0, pos) + insertText + prev.slice(pos);
+    });
+    // カーソル位置とスクロール位置を、挿入した箇所へ復元する（DOM更新後の次フレームで実行）。
+    // textarea.value を書き換えるとブラウザは既定でスクロール位置を先頭へリセットするため、
+    // setSelectionRange だけでなく scrollTop も行数から明示的に計算し直す。
     requestAnimationFrame(() => {
-      const newPos = pos + snippet.length;
+      if (!el) return;
       el.focus();
       el.setSelectionRange(newPos, newPos);
+      const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 18;
+      const linesBefore = el.value.slice(0, newPos).split('\n').length - 1;
+      el.scrollTop = Math.max(0, linesBefore * lineHeight - el.clientHeight / 2);
     });
   }, []);
   const doHtml = useCallback(() => {
@@ -196,6 +213,9 @@ export default function App() {
               ref={textareaRef}
               value={md}
               onChange={(e) => setMd(e.target.value)}
+              onFocus={() => {
+                hasFocusedTextareaRef.current = true;
+              }}
               spellCheck={false}
               aria-label="スライドMDエディタ"
             />
