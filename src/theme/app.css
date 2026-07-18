@@ -464,3 +464,115 @@ html[data-mode='present'] .app-header .app-logo {
   background: var(--accent-light);
   color: var(--accent);
 }
+
+/* v0.2.8: help-modal / help-toast */
+.help-modal {
+  width: min(720px, 92vw);
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+}
+.help-modal__tabs {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.help-modal__tabs button {
+  font-size: 0.72rem;
+  font-family: inherit;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-slide);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.help-modal__tabs button.active,
+.help-modal__tabs button[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+.help-modal__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+.help-modal__cheatsheet {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.help-modal__cheatsheet li {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.help-modal__cheat-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.help-modal__cheatsheet pre {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.help-modal__shortcuts {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.help-modal__shortcuts td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.help-modal__shortcuts kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.76rem;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-surface);
+}
+.help-modal__rules {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.86rem;
+  line-height: 1.9;
+}
+
+.help-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1400;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--text-primary);
+  color: var(--bg-slide);
+  font-size: 0.8rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+  animation: help-toast-fade 6s ease forwards;
+}
+@keyframes help-toast-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

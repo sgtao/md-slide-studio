@@ -11,6 +11,7 @@ import type { Palette } from './parser/types';
 import { SlideDeckView, type SlideDeckHandle } from './components/SlideDeck';
 import { ControlCluster } from './components/ControlCluster';
 import { TemplateMenu } from './components/TemplateMenu';
+import { HelpModal } from './components/HelpModal';
 import { useKeyboardNav, usePersistentState } from './hooks/hooks';
 import {
   exportAllToZip,
@@ -182,6 +183,17 @@ export default function App() {
 
   // --- AIプロンプトモーダル ---
   const [promptOpen, setPromptOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  // 初回訪問時のみトーストを出すためのフラグ。usePersistentStateは文字列限定の型のため
+  // 'seen' | 'unseen' で管理する（mode/theme/view と同じ既存パターン）。
+  const [helpSeen, setHelpSeen] = usePersistentState<'seen' | 'unseen'>('help-seen', 'unseen');
+
+  // トーストは一定時間後に自動でseen化する（クリックされなくても再表示されないように）
+  useEffect(() => {
+    if (helpSeen !== 'unseen') return;
+    const t = setTimeout(() => setHelpSeen('seen'), 6000);
+    return () => clearTimeout(t);
+  }, [helpSeen, setHelpSeen]);
 
   return (
     <>
@@ -197,6 +209,15 @@ export default function App() {
         </button>
         <button onClick={() => setMd(sampleMd)} title="サンプル原稿を読み込む">
           サンプル
+        </button>
+        <button
+          onClick={() => {
+            setHelpOpen(true);
+            setHelpSeen('seen');
+          }}
+          title="記法チートシート・ショートカット・制約ルールを表示"
+        >
+          ❓ ヘルプ
         </button>
         <button className="primary" onClick={() => setMode(mode === 'edit' ? 'present' : 'edit')}>
           {mode === 'edit' ? '▶ プレゼン' : '✎ 編集に戻る'}
@@ -277,6 +298,18 @@ export default function App() {
       </div>
 
       {promptOpen && <PromptModal onClose={() => setPromptOpen(false)} />}
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+      {helpSeen === 'unseen' && !helpOpen && (
+        <div
+          className="help-toast"
+          onClick={() => {
+            setHelpOpen(true);
+            setHelpSeen('seen');
+          }}
+        >
+          ❓ 使い方・記法はヘルプで確認できます
+        </div>
+      )}
     </>
   );
 }
