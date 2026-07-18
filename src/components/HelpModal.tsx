@@ -12,6 +12,19 @@ const TABS: { id: HelpTab; label: string }[] = [
 
 export function HelpModal({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<HelpTab>('cheatsheet');
+  const [copiedTemplateId, setCopiedTemplateId] = useState<string | null>(null);
+
+  const copySnippet = async (text: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedTemplateId(id);
+      setTimeout(() => {
+        setCopiedTemplateId((cur) => (cur === id ? null : cur));
+      }, 1500);
+    } catch {
+      alert('コピーに失敗しました。テキストを選択して手動でコピーしてください。');
+    }
+  };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -36,12 +49,28 @@ export function HelpModal({ onClose }: { onClose: () => void }) {
         <div className="modal-body help-modal__body">
           {tab === 'cheatsheet' && (
             <ul className="help-modal__cheatsheet">
-              {SLIDE_TEMPLATES.map((t) => (
-                <li key={t.id}>
-                  <div className="help-modal__cheat-label">{t.label}</div>
-                  <pre>{t.snippet}</pre>
-                </li>
-              ))}
+              {SLIDE_TEMPLATES.map((t) => {
+                // 先頭に区切り線を付けて表示・コピーする（コピー時も同じ内容になるようにする）
+                const displayText = `---\n${t.snippet}`;
+                return (
+                  <li key={t.id}>
+                    <div className="help-modal__cheat-label">{t.label}</div>
+                    <div className="help-modal__cheat-code">
+                      <button
+                        type="button"
+                        className="help-modal__copy-btn"
+                        title="コードをコピー"
+                        onClick={() => {
+                          void copySnippet(displayText, t.id);
+                        }}
+                      >
+                        {copiedTemplateId === t.id ? '✅' : '📋'}
+                      </button>
+                      <pre>{displayText}</pre>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
 

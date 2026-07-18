@@ -6,13 +6,16 @@ test('ヘルプ: ❓ボタンでモーダルが開き、タブを切り替えら
   await page.goto('/');
   await page.getByRole('button', { name: '❓ ヘルプ' }).click();
 
-  await expect(page.getByText('記法チートシート')).toBeVisible();
+  // 既存のエクスポートドロップダウン（#export-dropdown）にも同じショートカット文言
+  // （Shift+P等）が表示されているため、検索対象をヘルプモーダル内に限定する。
+  const helpModal = page.locator('.help-modal');
+  await expect(helpModal.getByText('記法チートシート')).toBeVisible();
 
-  await page.getByRole('button', { name: 'キーボードショートカット' }).click();
-  await expect(page.getByText('Shift+P')).toBeVisible();
+  await helpModal.getByRole('button', { name: 'キーボードショートカット' }).click();
+  await expect(helpModal.getByText('Shift+P')).toBeVisible();
 
-  await page.getByRole('button', { name: '制約ルール' }).click();
-  await expect(page.getByText('先頭スライドは title を推奨')).toBeVisible();
+  await helpModal.getByRole('button', { name: '制約ルール' }).click();
+  await expect(helpModal.getByText('先頭スライドは title を推奨')).toBeVisible();
 });
 
 test('ヘルプ: 初回訪問時のみトーストが表示され、閉じると再表示されない', async ({ page }) => {

@@ -576,3 +576,28 @@ html[data-mode='present'] .app-header .app-logo {
     opacity: 0;
   }
 }
+
+/* v0.2.8-fix: help-modal cheat-code copy button */
+.help-modal__cheat-code {
+  position: relative;
+}
+.help-modal__copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-slide);
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0.7;
+}
+.help-modal__copy-btn:hover {
+  opacity: 1;
+  border-color: var(--accent);
+  color: var(--accent);
+}
