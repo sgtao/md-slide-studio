@@ -3,6 +3,31 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.2.9] - 2026-07-19
+
+### 変更｜README.mdをv0.2.4〜v0.2.8の変更内容に合わせて更新
+
+- 「特徴」：全14→**全17スライドtype対応**に更新（`diagram-timeline`・`steps`・`contrast`を追加）。
+  「テンプレート挿入」「ヘルプチートシート」の2機能を追記
+- 「セットアップ」：`npm run verify`（typecheck+test+lint+e2e一括）を追記
+- 「スライドMD仕様（要約）」：
+  - `layout:` の一覧に `side-list` / `split-image` を追加
+  - diagram の type一覧に `timeline` を追加
+  - 制約行を実態に合わせて修正（枚数上限を撤廃し、AI依頼時の目安「8〜16枚」に統一／
+    先頭は title を推奨、を追記）
+  - `contrast` type の説明を追加
+- 「ディレクトリ構成」：`templates/`（テンプレート挿入スニペット集）・`help/`
+  （ヘルプモーダル静的コンテンツ）を追記
+
+### ファイル構成の変更
+
+```
+変更:
+  README.md
+  package.json
+```
+
+---
 ## [v0.2.8] - 2026-07-18
 
 ### 追加｜ヘルプモーダル（❓ボタン）
@@ -260,7 +285,7 @@ v0.2.0〜v0.2.3で追加された記法（steps／contrast／diagram-timeline／
 ```
 
 ---
-## [v0.2.1] - 2026-07-XX
+## [v0.2.1] - 2026-07-14
 
 ### 追加｜タイムライン図（diagram-timeline）
 
