@@ -11,6 +11,15 @@
  */
 import YAML from 'yaml';
 import { parseSlideHeader } from './slideHeader';
+import {
+  zChartYaml,
+  zChartDataItem,
+  zComparisonChartYaml,
+  zComparisonDataItem,
+  zComparisonLeftYaml,
+} from '../schema/chart';
+import { zChartSource } from '../schema/primitives';
+import { collectValid } from '../schema/issues';
 import type {
   ChartBlock,
   ChartSidePanel,
@@ -402,11 +411,17 @@ function parseChartSlide(body: string, slideType: string, warnings: string[]) {
     warnings.push('```chart ブロックが見つかりません');
     return { heading, note, chart: undefined };
   }
-  const y = parseYamlBlock(fence.content, warnings);
-  if (!y) return { heading, note, chart: undefined };
+  const raw = parseYamlBlock(fence.content, warnings);
+  if (!raw) return { heading, note, chart: undefined };
+  const shaped = zChartYaml.safeParse(raw);
+  if (!shaped.success) {
+    warnings.push('chart ブロックの形式が不正です');
+    return { heading, note, chart: undefined };
+  }
+  const y = shaped.data;
 
   const expected = slideType.replace('chart-', ''); // bar | line | donut
-  const type = typeof y.type === 'string' ? y.type : expected;
+  const type = y.type ?? expected;
   if (type !== expected) {
     warnings.push(
       `chart type "${type}" とスライド type "${slideType}" が不一致です（chart 側を優先）`,
@@ -421,8 +436,8 @@ function parseChartSlide(body: string, slideType: string, warnings: string[]) {
     warnings.push(`chart の系列が ${data.length} 件あります（最大5件・6件目以降は切り捨て）`);
   const chart: ChartBlock = {
     type: (['bar', 'line', 'donut'].includes(type) ? type : expected) as ChartBlock['type'],
-    title: String(y.title ?? heading ?? ''),
-    unit: y.unit != null ? String(y.unit) : undefined,
+    title: y.title ?? heading ?? '',
+    unit: y.unit,
     data: data.slice(0, 5),
     source: normalizeSource(y.source, warnings),
   };
@@ -431,29 +446,17 @@ function parseChartSlide(body: string, slideType: string, warnings: string[]) {
   return { heading, note, chart, sidePanel };
 }
 
-function normalizeChartData(raw: unknown, warnings: string[]): { label: string; value: number }[] {
-  if (!Array.isArray(raw)) return [];
-  const out: { label: string; value: number }[] = [];
-  for (const item of raw) {
-    if (item && typeof item === 'object' && 'label' in item && 'value' in item) {
-      const v = Number((item as Record<string, unknown>).value);
-      if (Number.isFinite(v)) {
-        out.push({ label: String((item as Record<string, unknown>).label), value: v });
-      } else {
-        warnings.push(`数値に変換できない value をスキップ: ${JSON.stringify(item)}`);
-      }
-    }
-  }
-  return out;
-}
-
+// v0.3.0-zod-applied
 function normalizeSource(raw: unknown, warnings: string[]): { name: string; url?: string } {
-  if (raw && typeof raw === 'object' && 'name' in raw) {
-    const r = raw as Record<string, unknown>;
-    return { name: String(r.name), url: r.url != null ? String(r.url) : undefined };
-  }
+  const r = zChartSource.safeParse(raw);
+  if (r.success) return r.data;
   warnings.push('chart の source（出典）がありません（出典明記は必須ルール）');
   return { name: '出典未記載' };
+}
+
+function normalizeChartData(raw: unknown, warnings: string[]): { label: string; value: number }[] {
+  if (!Array.isArray(raw)) return [];
+  return collectValid(raw, (item) => zChartDataItem.safeParse(item), 'value', warnings);
 }
 
 /** v0.2.1: chart ブロック後続の ### 見出し + リストをサイドパネルとして取り込む */
@@ -492,31 +495,37 @@ function parseComparisonChart(body: string, warnings: string[]) {
     warnings.push('```chart ブロック（comparison-donut）が見つかりません');
     return { left, chart: undefined };
   }
-  const y = parseYamlBlock(fence.content, warnings);
-  if (!y) return { left, chart: undefined };
-  const labels = (y.labels ?? {}) as Record<string, unknown>;
-  const center = (y.center ?? {}) as Record<string, unknown>;
-  const dataRaw = Array.isArray(y.data) ? y.data : [];
-  const data = dataRaw
-    .filter((it) => it && typeof it === 'object')
-    .map((it) => {
-      const r = it as Record<string, unknown>;
-      return {
-        label: String(r.label ?? ''),
-        before: Number(r.before ?? 0),
-        after: Number(r.after ?? 0),
-        class: String(r.class ?? '1'),
-      };
-    })
-    .filter((it) => Number.isFinite(it.before) && Number.isFinite(it.after));
+  const raw = parseYamlBlock(fence.content, warnings);
+  if (!raw) return { left, chart: undefined };
+  const shaped = zComparisonChartYaml.safeParse(raw);
+  if (!shaped.success) {
+    warnings.push('comparison-chart ブロックの形式が不正です');
+    return { left, chart: undefined };
+  }
+  const y = shaped.data;
+  const rawData = Array.isArray(y.data) ? y.data : [];
+  const data = collectValid(
+    rawData,
+    (item) => zComparisonDataItem.safeParse(item),
+    'comparisonデータ',
+    warnings,
+  );
   if (data.length === 0) {
     warnings.push('comparison-chart の data が空です');
     return { left, chart: undefined };
   }
+  const labels = y.labels ?? {};
+  const center = y.center ?? {};
   const chart: ComparisonChartBlock = {
     type: 'comparison-donut',
-    labels: { before: String(labels.before ?? 'Before'), after: String(labels.after ?? 'After') },
-    center: { before: String(center.before ?? ''), after: String(center.after ?? '') },
+    labels: {
+      before: labels.before != null ? String(labels.before) : 'Before',
+      after: labels.after != null ? String(labels.after) : 'After',
+    },
+    center: {
+      before: center.before != null ? String(center.before) : '',
+      after: center.after != null ? String(center.after) : '',
+    },
     data,
     source: normalizeSource(y.source, warnings),
   };
@@ -528,20 +537,19 @@ function parseComparisonLeft(rest: string, warnings: string[]): ComparisonLeft {
   const m = rest.match(/(^|\n)left:\s*\n((?:[ \t]+.*(?:\n|$))+)/);
   const out: ComparisonLeft = { stats: [] };
   if (!m) return out;
-  const y = parseYamlBlock('left:\n' + m[2], warnings);
-  const left = (y?.left ?? null) as Record<string, unknown> | null;
-  if (!left) return out;
+  const raw = parseYamlBlock('left:\n' + m[2], warnings);
+  if (!raw) return out;
+  const shaped = zComparisonLeftYaml.safeParse((raw as { left?: unknown }).left);
+  if (!shaped.success || !shaped.data) return out;
+  const left = shaped.data;
   out.big = left.big != null ? String(left.big) : undefined;
   out.bigUnit = left.big_unit != null ? String(left.big_unit) : undefined;
   out.heading = left.heading != null ? String(left.heading) : undefined;
   out.lead = left.lead != null ? String(left.lead) : undefined;
   if (Array.isArray(left.stats)) {
     out.stats = left.stats
-      .filter((s) => s && typeof s === 'object')
-      .map((s) => {
-        const r = s as Record<string, unknown>;
-        return { num: String(r.num ?? ''), label: String(r.label ?? '') };
-      });
+      .filter((s): s is Record<string, unknown> => !!s && typeof s === 'object')
+      .map((r) => ({ num: String(r.num ?? ''), label: String(r.label ?? '') }));
   }
   return out;
 }
