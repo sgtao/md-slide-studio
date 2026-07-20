@@ -1,0 +1,38 @@
+{
+  "name": "@mdss/cli",
+  "version": "0.4.0",
+  "description": "MD Slide Studio のMD→スタンドアロンHTML変換CLI（@mdss/core + SlideRendererを再利用）",
+  "type": "module",
+  "bin": {
+    "mdss-convert": "./dist/cli.mjs"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node build.mjs && node --test test/smoke.test.mjs",
+    "prepublishOnly": "node build.mjs"
+  },
+  "keywords": [
+    "markdown",
+    "slides",
+    "html",
+    "presentation",
+    "mdss"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@mdss/app": "*",
+    "@mdss/core": "*",
+    "esbuild": "^0.28.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "yaml": "^2.5.0",
+    "zod": "^4.4.3"
+  }
+}
