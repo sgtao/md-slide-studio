@@ -1,10 +1,16 @@
+// ssot-applied
 /**
  * draftAssistPrompt.ts — LLMサービス（Claude / ChatGPT 等）にスライドMD原稿を
  * 作成してもらうためのプロンプトテンプレート。
  * アプリの「AIプロンプト」ボタンからコピーして使う。
  * 仕様の詳細版は docs/prompts/draft-slide-md.md と
  * docs/references/markdown-format-ext.md（v0.2.0 拡張）を参照。
+ *
+ * 型別の数値制約（系列数上限・ノード数上限・items数上限・example要否等）は
+ * src/schema/*.ts の meta を単一の情報源として `buildTypeReferenceTable()` が
+ * 生成する（下記「型別の詳細仕様」節）。ここに数値を直接書き足さないこと。
  */
+import { buildTypeReferenceTable } from '../schema/describe';
 
 export function buildDraftAssistPrompt(theme: string = '（ここにテーマを記入）'): string {
   return `あなたはプレゼン資料の構成作家です。以下の仕様に**厳密に**準拠した「スライドMD」を生成してください。
@@ -27,19 +33,19 @@ ${theme}
   - \`table\`: \`## 見出し\` + Markdownテーブル（5列以下）。\`layout: compact\` 可
   - \`chart-bar\` / \`chart-line\` / \`chart-donut\`: \`\`\`chart フェンスに type / title / unit / data
     （label, value）/ source（name, url）をYAMLで記述。**数値は実在の出典に基づく実数のみ**
-    （推定値の捏造禁止）。系列は最大5。\`chart-bar\`・\`chart-line\`は\`layout: side-list\`で
-    前提条件パネルを併記可
+    （推定値の捏造禁止。系列数の上限は下記「型別の詳細仕様」参照）。
+    \`chart-bar\`・\`chart-line\`は\`layout: side-list\`で前提条件パネルを併記可
   - \`diagram-flow\` / \`diagram-layer\` / \`diagram-cycle\` / \`diagram-timeline\`: \`\`\`diagram
-    フェンスに type（flow|layer|cycle|timeline）と nodes 配列。flow≤5 / layer≤4 / cycle≤4 / timeline≤6。
+    フェンスに type（flow|layer|cycle|timeline）と nodes 配列（ノード数上限は下記「型別の詳細仕様」参照）。
     **抽象的な処理の流れはflow、階層構造はlayer、循環プロセスはcycle、時系列・ロードマップはtimeline**
   - \`steps\`: 手順・プロセス・ワークフローのカード型フロー。\`\`\`steps フェンスに
-    style（cards|circled）と items（icon / title / desc、任意で tone: dark|outline）をYAMLで記述。
-    items は2〜5個。任意の ratio（label, value の配列）でセグメント比率帯を描画（合計は100を推奨）。
-    **手順の説明には diagram-flow より steps を優先する**
+    style（cards|circled）と items（icon / title / desc、任意で tone: dark|outline）をYAMLで記述
+    （items数の上限は下記「型別の詳細仕様」参照）。任意の ratio（label, value の配列）で
+    セグメント比率帯を描画（合計は100を推奨）。**手順の説明には diagram-flow より steps を優先する**
   - \`contrast\`: 「思い込み・誤解 → 実際の強み/弱点」のような**対比構造**を示す専用type。
     \`\`\`contrast フェンスに example（title, rows[tag, text]）と verdict（label/text/tone、
-    または connector）をYAMLで記述。example は必須。**頻用しない**：単なる比較には
-    comparison-chart、単なる列挙にはpointsを優先し、対比構造が明確な場合のみ使う
+    または connector）をYAMLで記述（example の要否は下記「型別の詳細仕様」参照）。**頻用しない**：
+    単なる比較にはcomparison-chart、単なる列挙にはpointsを優先し、対比構造が明確な場合のみ使う
   - \`figure\`: \`![alt](画像URL)\` + \`source: [出典名](URL)\`（source必須）
   - \`feature-showcase\`: left（eyebrow / heading / lead）とright
     （num / eyebrow / heading / sub / items[label, desc]）のYAML
@@ -55,6 +61,9 @@ ${theme}
   1スライド1グラフ / グラフ・図解・画像は同一スライドに共存させない /
   **最終スライドは必ず sources** / 先頭スライドは title を推奨 /
   MD内に生の<script><style>を書かない
+
+# 型別の詳細仕様（制約は自動生成・schemaが単一の情報源）
+${buildTypeReferenceTable()}
 
 # 構成フレーム
 1. title（タイトル・サブタイトル・バッジ）

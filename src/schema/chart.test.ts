@@ -1,3 +1,4 @@
+// ssot-applied
 import { describe, it, expect } from 'vitest';
 import { zChartDataItem, zChartYaml } from './chart';
 import { zChartSource } from './primitives';
@@ -18,7 +19,9 @@ describe('zChartSource', () => {
 });
 
 describe('zChartYaml meta', () => {
-  it('maxSeries制約がmetaに載っている（v0.3.2のSSOT生成が読む値）', () => {
-    expect(zChartYaml.meta()?.maxSeries).toBe(5);
+  it('系列数の制約がmetaのconstraintsに載っている（SSOT生成が読む値）', () => {
+    const meta = zChartYaml.meta();
+    expect(meta?.id).toBe('chart');
+    expect(meta?.constraints).toContain('data は最大5系列（6系列目以降は切り捨て）');
   });
 });

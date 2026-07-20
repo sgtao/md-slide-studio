@@ -12,7 +12,7 @@
  * - コードフェンス（``` 〜 ```）内は走査しない（chart/steps 等の YAML を保護）
  * - 該当行は本文から取り除き、残りを rest として type 別パーサーへ渡す
  * - 同一キーの重複は後勝ち（警告なし・落ちないパーサー原則）
- * - 純関数・DOM非依存（v0.3 の @mdss/core 分離を見据える）
+ * - 純関数・DOM非依存（@mdss/core 分離を見据える）
  */
 
 export interface SlideHeaderFields {

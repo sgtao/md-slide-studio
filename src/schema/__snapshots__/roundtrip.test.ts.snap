@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`describe() 生成物のスナップショット > buildConstraintRules のスナップショット 1`] = `
+[
+  "chart-bar/chart-line/chart-donut: data は最大5系列（6系列目以降は切り捨て）",
+  "chart-bar/chart-line/chart-donut: source（出典）は必須",
+  "comparison-chart: source（出典）は必須",
+  "diagram-flow/diagram-layer/diagram-cycle: flow は最大5ノード",
+  "diagram-flow/diagram-layer/diagram-cycle: layer は最大4層",
+  "diagram-flow/diagram-layer/diagram-cycle: cycle は最大4ノード",
+  "diagram-timeline: milestones は2〜6個を推奨（6件目以降は切り捨て）",
+  "steps: items は2〜5個（1個以下は警告・6件目以降は切り捨て）",
+  "steps: 任意の ratio でセグメント比率帯を描画可（合計100を推奨）",
+  "contrast: example は必須",
+]
+`;
+
+exports[`describe() 生成物のスナップショット > buildTypeReferenceTable のスナップショット 1`] = `
+"- \`chart-bar\` / \`chart-line\` / \`chart-donut\`: 棒/折れ線/ドーナツグラフ。data(label,value)とsource(出典)をYAMLで記述（制約: data は最大5系列（6系列目以降は切り捨て）／source（出典）は必須）（対応layout: side-list）
+- \`comparison-chart\`: Before/After比較ドーナツ。left(big/heading/stats)とchart(data[before,after,class])（制約: source（出典）は必須）
+- \`diagram-flow\` / \`diagram-layer\` / \`diagram-cycle\`: flow(横フロー)/layer(層構造)/cycle(循環)の図解。nodes配列をYAMLで記述（制約: flow は最大5ノード／layer は最大4層／cycle は最大4ノード）
+- \`diagram-timeline\`: 水平軸タイムライン。start と milestones(label,when) をYAMLで記述（制約: milestones は2〜6個を推奨（6件目以降は切り捨て））
+- \`steps\`: カード型ステップフロー。style(cards|circled)とitems(icon/title/desc/tone)をYAMLで記述（制約: items は2〜5個（1個以下は警告・6件目以降は切り捨て）／任意の ratio でセグメント比率帯を描画可（合計100を推奨））
+- \`contrast\`: 対比構造（例示→結論）。example(title,rows[tag,text])とverdict(label/text/tone)をYAMLで記述（制約: example は必須）
+- \`feature-showcase\`: 2カラム紹介。left(eyebrow/heading/lead)とright(num/eyebrow/heading/sub/items[label,desc])をYAMLで記述"
+`;

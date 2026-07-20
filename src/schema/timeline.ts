@@ -1,3 +1,4 @@
+// meta-unified
 import { z } from 'zod';
 
 export const zTimelineMilestone = z.object({
@@ -13,9 +14,9 @@ export const zTimelineYaml = z
     milestones: z.array(z.unknown()).optional(),
   })
   .meta({
-    id: 'timeline-yaml',
-    summary: '水平軸タイムライン。milestones(label,when) 2〜6個推奨',
-    minMilestones: 2,
-    maxMilestones: 6,
+    id: 'diagram-timeline',
+    slideTypes: ['diagram-timeline'],
+    summary: '水平軸タイムライン。start と milestones(label,when) をYAMLで記述',
+    constraints: ['milestones は2〜6個を推奨（6件目以降は切り捨て）'],
   });
 export type TimelineYaml = z.infer<typeof zTimelineYaml>;

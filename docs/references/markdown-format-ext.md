@@ -7,7 +7,7 @@ MD Slide Studio 独自のスライドMD拡張仕様。
 移植元スキルの `markdown-format.md`（v0.7 系）は**変更せず**、拡張分をここに分離する。
 基本仕様（frontmatter・区切り・既存14type・chart/diagramブロック）は元仕様を参照。
 
-> v0.3 の SSOT リファクタで `src/schema/`（zod）からの自動生成に統合予定。
+> SSOT リファクタで `src/schema/`（zod）からの自動生成に統合予定。
 > それまでは本ファイルが拡張仕様の正とする。
 
 ---
@@ -137,7 +137,7 @@ interface StepsSlide extends SlideBase {
 }
 ```
 
-YAMLブロックは意図的に**平坦な構造**で設計している（v0.3 zodスキーマへの機械的翻訳を容易にするため）。
+YAMLブロックは意図的に**平坦な構造**で設計している（zodスキーマへの機械的翻訳を容易にするため）。
 
 ---
 

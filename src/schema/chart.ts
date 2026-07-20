@@ -1,3 +1,4 @@
+// meta-unified
 import { z } from 'zod';
 
 /** chart系の1データ点。文字列数値も許容（現行 Number()/String() 挙動を維持）。 */
@@ -17,9 +18,11 @@ export const zChartYaml = z
     source: z.unknown().optional(),
   })
   .meta({
-    id: 'chart-yaml',
-    summary: 'bar/line/donut。data(label,value)最大5・source必須',
-    maxSeries: 5,
+    id: 'chart',
+    slideTypes: ['chart-bar', 'chart-line', 'chart-donut'],
+    summary: '棒/折れ線/ドーナツグラフ。data(label,value)とsource(出典)をYAMLで記述',
+    constraints: ['data は最大5系列（6系列目以降は切り捨て）', 'source（出典）は必須'],
+    layouts: ['side-list'],
   });
 export type ChartYaml = z.infer<typeof zChartYaml>;
 
@@ -36,8 +39,10 @@ export const zComparisonChartYaml = z
     source: z.unknown().optional(),
   })
   .meta({
-    id: 'comparison-chart-yaml',
-    summary: 'comparison-donut。left(big/heading/stats)＋chart(data[before,after,class])',
+    id: 'comparison-chart',
+    slideTypes: ['comparison-chart'],
+    summary: 'Before/After比較ドーナツ。left(big/heading/stats)とchart(data[before,after,class])',
+    constraints: ['source（出典）は必須'],
   });
 export type ComparisonChartYaml = z.infer<typeof zComparisonChartYaml>;
 

@@ -1,3 +1,4 @@
+// meta-unified
 import { z } from 'zod';
 
 export const zStepStyle = z.enum(['cards', 'circled']);
@@ -25,8 +26,13 @@ export const zStepsYaml = z
     ratio: z.array(z.unknown()).optional(),
   })
   .meta({
-    id: 'steps-yaml',
-    summary: 'カード型ステップフロー。items 最大5・style は cards/circled',
-    maxItems: 5,
+    id: 'steps',
+    slideTypes: ['steps'],
+    summary:
+      'カード型ステップフロー。style(cards|circled)とitems(icon/title/desc/tone)をYAMLで記述',
+    constraints: [
+      'items は2〜5個（1個以下は警告・6件目以降は切り捨て）',
+      '任意の ratio でセグメント比率帯を描画可（合計100を推奨）',
+    ],
   });
 export type StepsYaml = z.infer<typeof zStepsYaml>;

@@ -1,3 +1,4 @@
+// meta-unified
 import { z } from 'zod';
 
 export const zFeatureLeft = z.object({
@@ -29,7 +30,10 @@ export const zFeatureShowcaseYaml = z
     right: z.unknown().optional(),
   })
   .meta({
-    id: 'feature-showcase-yaml',
-    summary: '左(eyebrow/heading/lead)＋右(num/eyebrow/heading/sub/items[label,desc])の2カラム',
+    id: 'feature-showcase',
+    slideTypes: ['feature-showcase'],
+    summary:
+      '2カラム紹介。left(eyebrow/heading/lead)とright(num/eyebrow/heading/sub/items[label,desc])をYAMLで記述',
+    constraints: [],
   });
 export type FeatureShowcaseYaml = z.infer<typeof zFeatureShowcaseYaml>;

@@ -9,7 +9,7 @@
  * - 全typeで共通ヘッダキー（badge / lead / point）を受け付ける（slideHeader.ts）
  * - MD 内の生 <script> / <style> は無視（禁止事項）
  */
-// v0.3.1-zod-applied
+// zod-applied
 import YAML from 'yaml';
 import { parseSlideHeader } from './slideHeader';
 import {
@@ -463,7 +463,7 @@ function parseChartSlide(body: string, slideType: string, warnings: string[]) {
   return { heading, note, chart, sidePanel };
 }
 
-// v0.3.0-zod-applied
+// zod-applied
 function normalizeSource(raw: unknown, warnings: string[]): { name: string; url?: string } {
   const r = zChartSource.safeParse(raw);
   if (r.success) return r.data;

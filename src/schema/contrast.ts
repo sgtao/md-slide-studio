@@ -1,3 +1,4 @@
+// meta-unified
 import { z } from 'zod';
 
 export const zContrastExampleRow = z.object({
@@ -27,7 +28,10 @@ export const zContrastYaml = z
     verdict: z.array(z.unknown()).optional(),
   })
   .meta({
-    id: 'contrast-yaml',
-    summary: '例示(example.rows)と結論(verdict)の対比。example は必須ルール',
+    id: 'contrast',
+    slideTypes: ['contrast'],
+    summary:
+      '対比構造（例示→結論）。example(title,rows[tag,text])とverdict(label/text/tone)をYAMLで記述',
+    constraints: ['example は必須'],
   });
 export type ContrastYaml = z.infer<typeof zContrastYaml>;
