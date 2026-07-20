@@ -29,13 +29,5 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
-  {
-    files: ['src/parser/**/*.{ts,tsx}'],
-    rules: {
-      // TODO: YAML由来の値の型付け（バリデーション関数導入）を整理したらoffを外す
-      '@typescript-eslint/no-base-to-string': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-    },
-  },
   eslintConfigPrettier,
 );

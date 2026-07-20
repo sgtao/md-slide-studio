@@ -9,6 +9,7 @@
  * - 全typeで共通ヘッダキー（badge / lead / point）を受け付ける（slideHeader.ts）
  * - MD 内の生 <script> / <style> は無視（禁止事項）
  */
+// v0.3.1-zod-applied
 import YAML from 'yaml';
 import { parseSlideHeader } from './slideHeader';
 import {
@@ -17,9 +18,25 @@ import {
   zComparisonChartYaml,
   zComparisonDataItem,
   zComparisonLeftYaml,
+  zComparisonLeftStat,
 } from '../schema/chart';
 import { zChartSource } from '../schema/primitives';
 import { collectValid } from '../schema/issues';
+import { zDiagramYaml } from '../schema/diagram';
+import { zTimelineYaml, zTimelineMilestone } from '../schema/timeline';
+import { zStepsYaml, zStepItem, zStepRatioItem } from '../schema/steps';
+import {
+  zContrastYaml,
+  zContrastExample,
+  zContrastExampleRow,
+  zContrastVerdictItem,
+} from '../schema/contrast';
+import {
+  zFeatureShowcaseYaml,
+  zFeatureLeft,
+  zFeatureRightItem,
+  zFeatureRight,
+} from '../schema/feature';
 import type {
   ChartBlock,
   ChartSidePanel,
@@ -392,7 +409,7 @@ function extractFence(body: string, lang: string): { content: string; rest: stri
 
 function parseYamlBlock(content: string, warnings: string[]): Record<string, unknown> | null {
   try {
-    const v = YAML.parse(content);
+    const v: unknown = YAML.parse(content);
     if (v && typeof v === 'object') return v as Record<string, unknown>;
     warnings.push('chart/diagram/steps ブロックの内容が YAML マップではありません');
     return null;
@@ -549,7 +566,7 @@ function parseComparisonLeft(rest: string, warnings: string[]): ComparisonLeft {
   if (Array.isArray(left.stats)) {
     out.stats = left.stats
       .filter((s): s is Record<string, unknown> => !!s && typeof s === 'object')
-      .map((r) => ({ num: String(r.num ?? ''), label: String(r.label ?? '') }));
+      .map((r) => zComparisonLeftStat.parse(r));
   }
   return out;
 }
@@ -580,25 +597,30 @@ function parseDiagramSlide(body: string, slideType: string, warnings: string[]) 
 }
 
 function normalizeDiagram(
-  y: Record<string, unknown>,
+  raw: Record<string, unknown>,
   expected: DiagramBlock['type'],
   warnings: string[],
 ): DiagramBlock | undefined {
-  const type = (typeof y.type === 'string' ? y.type : expected) as DiagramBlock['type'];
+  const shaped = zDiagramYaml.safeParse(raw);
+  if (!shaped.success) {
+    warnings.push('diagram ブロックの形式が不正です');
+    return undefined;
+  }
+  const y = shaped.data;
+  const type = (y.type ?? expected) as DiagramBlock['type'];
   if (!['flow', 'layer', 'cycle'].includes(type)) {
     warnings.push(`diagram type "${type}" は未対応です（flow / layer / cycle）`);
     return undefined;
   }
   // layer は nodes をネスト配列（層→箱）でも受け付ける
-  if (type === 'layer' && Array.isArray(y.nodes) && y.nodes.some((n) => Array.isArray(n))) {
-    const layers = (y.nodes as unknown[]).map((n) =>
-      Array.isArray(n) ? n.map(String) : [String(n)],
-    );
+  const rawNodes = y.nodes ?? [];
+  if (type === 'layer' && rawNodes.some((n) => Array.isArray(n))) {
+    const layers = rawNodes.map((n) => (Array.isArray(n) ? n.map(String) : [String(n)]));
     if (layers.length > 4)
       warnings.push(`layer が ${layers.length} 層あります（上限4層・5層目以降は切り捨て）`);
     return { type, nodes: layers.flat(), layers: layers.slice(0, 4) };
   }
-  const nodes = Array.isArray(y.nodes) ? y.nodes.map(String) : [];
+  const nodes = rawNodes.map(String);
   if (nodes.length === 0) {
     warnings.push('diagram の nodes が空です');
     return undefined;
@@ -609,7 +631,7 @@ function normalizeDiagram(
       `${type} のノード数 ${nodes.length} は上限 ${limits[type]} を超えています（超過分は切り捨て）`,
     );
   }
-  const labels = Array.isArray(y.labels) ? y.labels.map(String) : undefined;
+  const labels = y.labels?.map(String);
   return { type, nodes: nodes.slice(0, limits[type]), labels };
 }
 
@@ -730,17 +752,20 @@ function parseTimelineSlide(body: string, warnings: string[]) {
     warnings.push('```diagram ブロックが見つかりません');
     return empty;
   }
-  const y = parseYamlBlock(fence.content, warnings);
-  if (!y) return empty;
+  const raw = parseYamlBlock(fence.content, warnings);
+  if (!raw) return empty;
+  const shaped = zTimelineYaml.safeParse(raw);
+  if (!shaped.success) {
+    warnings.push('diagram-timeline ブロックの形式が不正です');
+    return empty;
+  }
+  const y = shaped.data;
 
-  const start = typeof y.start === 'string' ? y.start : 'Start';
-  const msRaw = Array.isArray(y.milestones) ? y.milestones : [];
+  const start = y.start ?? 'Start';
+  const msRaw = y.milestones ?? [];
   const milestones = msRaw
-    .filter((it) => it && typeof it === 'object')
-    .map((it) => {
-      const r = it as Record<string, unknown>;
-      return { label: String(r.label ?? ''), when: String(r.when ?? '') };
-    });
+    .filter((it): it is Record<string, unknown> => !!it && typeof it === 'object')
+    .map((it) => zTimelineMilestone.parse(it));
 
   if (milestones.length < TIMELINE_MIN) {
     warnings.push(`timeline の milestones は ${TIMELINE_MIN} 個以上を推奨します`);
@@ -785,28 +810,32 @@ function parseFigure(body: string, warnings: string[]) {
 function parseFeatureShowcase(body: string, warnings: string[]) {
   const fallbackLeft: FeatureShowcaseLeft = { heading: '' };
   const fallbackRight: FeatureShowcaseRight = { heading: '', items: [] };
-  const y = parseYamlBlock(body, warnings);
-  if (!y) return { left: fallbackLeft, right: fallbackRight };
-  const l = (y.left ?? {}) as Record<string, unknown>;
-  const r = (y.right ?? {}) as Record<string, unknown>;
+  const raw = parseYamlBlock(body, warnings);
+  if (!raw) return { left: fallbackLeft, right: fallbackRight };
+  const shaped = zFeatureShowcaseYaml.safeParse(raw);
+  if (!shaped.success) {
+    warnings.push('feature-showcase ブロックの形式が不正です');
+    return { left: fallbackLeft, right: fallbackRight };
+  }
+  const leftRaw = shaped.data.left && typeof shaped.data.left === 'object' ? shaped.data.left : {};
+  const rightRaw =
+    shaped.data.right && typeof shaped.data.right === 'object' ? shaped.data.right : {};
+  const l = zFeatureLeft.parse(leftRaw);
+  const r = zFeatureRight.parse(rightRaw);
+
   const left: FeatureShowcaseLeft = {
-    eyebrow: l.eyebrow != null ? String(l.eyebrow) : undefined,
-    heading: String(l.heading ?? ''),
-    lead: l.lead != null ? String(l.lead) : undefined,
+    eyebrow: l.eyebrow,
+    heading: l.heading,
+    lead: l.lead,
   };
-  const items = Array.isArray(r.items)
-    ? r.items
-        .filter((it) => it && typeof it === 'object')
-        .map((it) => {
-          const o = it as Record<string, unknown>;
-          return { label: String(o.label ?? ''), desc: String(o.desc ?? '') };
-        })
-    : [];
+  const items = (r.items ?? [])
+    .filter((it): it is Record<string, unknown> => !!it && typeof it === 'object')
+    .map((it) => zFeatureRightItem.parse(it));
   const right: FeatureShowcaseRight = {
-    num: r.num != null ? String(r.num) : undefined,
-    eyebrow: r.eyebrow != null ? String(r.eyebrow) : undefined,
-    heading: String(r.heading ?? ''),
-    sub: r.sub != null ? String(r.sub) : undefined,
+    num: r.num,
+    eyebrow: r.eyebrow,
+    heading: r.heading,
+    sub: r.sub,
     items,
   };
   if (!left.heading && !right.heading)
@@ -827,8 +856,14 @@ function parseStepsSlide(body: string, warnings: string[]) {
     warnings.push('```steps ブロックが見つかりません');
     return empty;
   }
-  const y = parseYamlBlock(fence.content, warnings);
-  if (!y) return empty;
+  const raw = parseYamlBlock(fence.content, warnings);
+  if (!raw) return empty;
+  const shaped = zStepsYaml.safeParse(raw);
+  if (!shaped.success) {
+    warnings.push('steps ブロックの形式が不正です');
+    return empty;
+  }
+  const y = shaped.data;
 
   let stepStyle: StepStyle = 'cards';
   if (y.style != null) {
@@ -839,21 +874,16 @@ function parseStepsSlide(body: string, warnings: string[]) {
     }
   }
 
-  const itemsRaw = Array.isArray(y.items) ? y.items : [];
+  const itemsRaw = y.items ?? [];
   const items: StepItem[] = itemsRaw
-    .filter((it) => it && typeof it === 'object')
+    .filter((it): it is Record<string, unknown> => !!it && typeof it === 'object')
     .map((it) => {
-      const r = it as Record<string, unknown>;
+      const r = zStepItem.parse(it);
       const tone = r.tone === 'dark' || r.tone === 'outline' ? r.tone : undefined;
       if (r.tone != null && tone === undefined) {
         warnings.push(`steps item の tone "${String(r.tone)}" は未対応です（dark / outline）`);
       }
-      return {
-        icon: r.icon != null ? String(r.icon) : undefined,
-        title: String(r.title ?? ''),
-        desc: r.desc != null ? String(r.desc) : undefined,
-        tone,
-      };
+      return { icon: r.icon, title: r.title, desc: r.desc, tone };
     });
   if (items.length === 0) {
     warnings.push('steps の items が空です');
@@ -867,13 +897,10 @@ function parseStepsSlide(body: string, warnings: string[]) {
   }
 
   let ratio: StepRatioItem[] | undefined;
-  if (Array.isArray(y.ratio)) {
+  if (y.ratio) {
     const rr = y.ratio
-      .filter((it) => it && typeof it === 'object')
-      .map((it) => {
-        const r = it as Record<string, unknown>;
-        return { label: String(r.label ?? ''), value: Number(r.value) };
-      })
+      .filter((it): it is Record<string, unknown> => !!it && typeof it === 'object')
+      .map((it) => zStepRatioItem.parse(it))
       .filter((it) => Number.isFinite(it.value) && it.value > 0);
     if (rr.length > 0) {
       ratio = rr;
@@ -903,44 +930,42 @@ function parseContrastSlide(body: string, warnings: string[]) {
     warnings.push('```contrast ブロックが見つかりません');
     return empty;
   }
-  const y = parseYamlBlock(fence.content, warnings);
-  if (!y) return empty;
+  const raw = parseYamlBlock(fence.content, warnings);
+  if (!raw) return empty;
+  const shaped = zContrastYaml.safeParse(raw);
+  if (!shaped.success) {
+    warnings.push('contrast ブロックの形式が不正です');
+    return empty;
+  }
+  const y = shaped.data;
 
   let example: ContrastExample | undefined;
   if (y.example && typeof y.example === 'object') {
-    const ex = y.example as Record<string, unknown>;
-    const rowsRaw = Array.isArray(ex.rows) ? ex.rows : [];
+    const ex = zContrastExample.parse(y.example);
+    const rowsRaw = ex.rows ?? [];
     const rows: ContrastExampleRow[] = rowsRaw
-      .filter((it) => it && typeof it === 'object')
-      .map((it) => {
-        const r = it as Record<string, unknown>;
-        return { tag: String(r.tag ?? ''), text: String(r.text ?? '') };
-      });
+      .filter((it): it is Record<string, unknown> => !!it && typeof it === 'object')
+      .map((it) => zContrastExampleRow.parse(it));
     if (rows.length === 0) {
       warnings.push('contrast の example.rows が空です');
     }
-    example = { title: ex.title != null ? String(ex.title) : undefined, rows };
+    example = { title: ex.title, rows };
   } else {
     warnings.push('contrast の example がありません');
   }
 
-  const verdictRaw = Array.isArray(y.verdict) ? y.verdict : [];
+  const verdictRaw = y.verdict ?? [];
   const verdict: ContrastVerdictItem[] = verdictRaw
-    .filter((it) => it && typeof it === 'object')
+    .filter((it): it is Record<string, unknown> => !!it && typeof it === 'object')
     .map((it) => {
-      const r = it as Record<string, unknown>;
+      const r = zContrastVerdictItem.parse(it);
       const tone = r.tone === 'warn' ? ('warn' as const) : undefined;
       if (r.tone != null && tone === undefined) {
         warnings.push(
           `contrast verdict item の tone "${String(r.tone)}" は未対応です（warn のみ）`,
         );
       }
-      return {
-        label: r.label != null ? String(r.label) : undefined,
-        text: r.text != null ? String(r.text) : undefined,
-        connector: r.connector != null ? String(r.connector) : undefined,
-        tone,
-      };
+      return { label: r.label, text: r.text, connector: r.connector, tone };
     });
   if (verdict.length === 0) {
     warnings.push('contrast の verdict が空です');

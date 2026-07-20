@@ -26,8 +26,12 @@ export type ChartYaml = z.infer<typeof zChartYaml>;
 export const zComparisonChartYaml = z
   .object({
     type: z.coerce.string().optional(),
-    labels: z.object({ before: z.unknown().optional(), after: z.unknown().optional() }).optional(),
-    center: z.object({ before: z.unknown().optional(), after: z.unknown().optional() }).optional(),
+    labels: z
+      .object({ before: z.coerce.string().optional(), after: z.coerce.string().optional() })
+      .optional(),
+    center: z
+      .object({ before: z.coerce.string().optional(), after: z.coerce.string().optional() })
+      .optional(),
     data: z.array(z.unknown()).optional(),
     source: z.unknown().optional(),
   })
@@ -45,12 +49,18 @@ export const zComparisonDataItem = z.object({
 });
 export type ComparisonDataItem = z.infer<typeof zComparisonDataItem>;
 
+export const zComparisonLeftStat = z.object({
+  num: z.coerce.string().catch(''),
+  label: z.coerce.string().catch(''),
+});
+export type ComparisonLeftStatYaml = z.infer<typeof zComparisonLeftStat>;
+
 export const zComparisonLeftYaml = z
   .object({
-    big: z.unknown().optional(),
-    big_unit: z.unknown().optional(),
-    heading: z.unknown().optional(),
-    lead: z.unknown().optional(),
+    big: z.coerce.string().optional(),
+    big_unit: z.coerce.string().optional(),
+    heading: z.coerce.string().optional(),
+    lead: z.coerce.string().optional(),
     stats: z.array(z.unknown()).optional(),
   })
   .optional();
