@@ -3,6 +3,40 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.3.2] - 2026-07-20
+
+### 変更｜schemaの単一情報源化（SSOT）：AIプロンプト型表／helpの制約ルールを生成に
+
+v0.3.0〜v0.3.1で導入したschemaの`.meta()`を単一の情報源とし、AIプロンプトの「型別詳細仕様」節とhelpの`CONSTRAINT_RULES`を生成関数から作る構成に変更。
+
+- `src/schema/registry.ts`：全7type分のschemaとmetaを`SlideTypeMeta`（id/slideTypes/summary/constraints/layouts?）の統一形状で集約
+- `src/schema/describe.ts`：`buildTypeReferenceTable()`（プロンプト用）／`buildConstraintRules()`（help用）を追加
+- `draftAssistPrompt.ts`：型別の数値制約（系列数・ノード数・items数上限等）を手書き散文から削除し、生成セクションへ一本化。フェンスの書き方等の手書き解説はそのまま維持
+- `helpContent.ts`：`CONSTRAINT_RULES`を「デッキ全体ルール（sources/title推奨など・手書き維持）＋type別ルール（生成）」の連結に変更
+- 各schemaの`.meta()`形状統一に伴い、旧`maxSeries`キー参照だった`chart.test.ts`の1件を新形状に合わせて修正
+- **round-trip検証テスト**（`src/schema/roundtrip.test.ts`）を新設：`SLIDE_TEMPLATES`（20件）と`sample.md`（19スライド）を実際にparseし、`warnings`が全て空であることを確認。
+
+テンプレ・サンプルと実装仕様の乖離を機械的に検知できるようにした。
+
+### ファイル構成の変更
+```
+新規:
+  src/schema/registry.ts
+  src/schema/describe.ts
+  src/schema/roundtrip.test.ts
+変更:
+  src/schema/chart.ts
+  src/schema/diagram.ts
+  src/schema/timeline.ts
+  src/schema/steps.ts
+  src/schema/contrast.ts
+  src/schema/feature.ts
+  src/schema/chart.test.ts
+  src/ai/draftAssistPrompt.ts
+  src/help/helpContent.ts
+```
+
+---
 ## [v0.3.1] - 2026-07-20
 
 ### 変更｜スライド 5typeのzod検証追加とeslint override撤去
