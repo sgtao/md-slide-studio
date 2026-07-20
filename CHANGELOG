@@ -3,6 +3,39 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.3.4] - 2026-07-20
+
+### 変更｜coreのテストカバレッジ向上 ＋ E2E拡充（navigation/render/theme/export）
+`@mdss/core`のVitestカバレッジ向上（当初計画の「E2E拡充」に加え、実施時に判断してカバレッジ改善も同時に対応）と、v0.3.3（monorepo分離）の統合レベルの安全網としてE2Eを4ファイル新設。
+
+- **カバレッジ**：全未カバー分岐を実コードで特定し、`errorPaths.test.ts`（chart/comparison-chart/diagram/mermaid/timeline/steps/contrast/feature-showcaseの形式不正・警告パスを網羅）・`issues.test.ts`（`collectValid`/`itemParseWarning`の直接単体テスト）を新設。`deckLint.test.ts`に`sortLintResults`・空デッキ・contrast verdict欠落・steps ratio合計の分岐テストを追加
+- Stmts 85.73%→**97.59%**／Branch 73.7%→**87.64%**／Funcs 93.75%→**100%**／Lines 87.99%→**99.67%**
+- **実バグ2件を発見・修正**：
+  1. `z.coerce.string().catch('')`が13箇所（chart/contrast/feature/steps/timeline.ts）で機能していなかった。`z.coerce.string()`はどんな入力にも失敗しない（undefinedは文字列`"undefined"`になる）ため`.catch()`が到達不能だった。`.default('')`に修正
+  2. `feature-showcase`の`left`/`right`が`z.unknown()`だったため「ブロックの形式が不正です」分岐が理論上到達不可能だった。`z.record(z.string(), z.unknown())`に強化し、他6type同様の形式検証を実際に機能させた
+- 残る未カバーは`slideMarkdown.ts`のmermaid「開始ノード特定不可」分岐（703-704行）のみ。先行の分岐/合流検知の不変条件により実行時に到達し得ないことを解析で確認済み（対応不要）
+- **E2E新設**：`e2e/navigation.spec.ts`（→/Space/←・V キーでのhero⇔list切替・入力欄フォーカス時の無効化）・`render.spec.ts`（chart-bar/diagram-flow/steps/contrastのDOM目印）・`theme.spec.ts`（テーマ/パレット/view切替のlocalStorage永続化）・`export.spec.ts`（PDF/PNG/ZIPのハンドラ起動をwindow.printスタブ・downloadイベントで検証）
+
+
+### ファイル構成の変更
+```
+新規:
+  packages/core/src/parser/errorPaths.test.ts
+  packages/core/src/schema/issues.test.ts
+  e2e/navigation.spec.ts
+  e2e/render.spec.ts
+  e2e/theme.spec.ts
+  e2e/export.spec.ts
+変更:
+  packages/core/src/schema/chart.ts
+  packages/core/src/schema/contrast.ts
+  packages/core/src/schema/feature.ts
+  packages/core/src/schema/steps.ts
+  packages/core/src/schema/timeline.ts
+  packages/core/src/parser/deckLint.test.ts
+```
+
+---
 ## [v0.3.3] - 2026-07-20
 
 ### 変更｜npm workspacesでのモノレポ化：`@mdss/core`パッケージ分離
