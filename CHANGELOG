@@ -3,6 +3,27 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.3.0] - 2026-07-20
+
+### 変更｜zod導入によるchart/comparison-chart系パーサーのスキーマ検証化
+Phase v0.3（基盤リファクタ）着手。`src/schema/`を新設し、chart（bar/line/donut）・comparison-chartのYAMLブロック検証をzod（v4系）ベースに置換した。型・制約数値・1行説明を将来的に単一情報源（v0.3.2のSSOT化）へ寄せるための布石として、`maxSeries: 5`等の制約を`.meta()`に持たせている。
+- `normalizeChartData`／`normalizeSource`の手書き型ガード（`as Record<string, unknown>`）をzod `safeParse`ベースへ置換。不正値は例外を投げず「フォールバック＋warning」に倒す非クラッシュ規約を維持
+- `parseChartSlide`／`parseComparisonChart`／`parseComparisonLeft`をschema経由の型付けに変更
+- diagram/timeline/steps/contrast/feature-showcase等の残りtypeは未着手（v0.3.1で対応）のため、eslintのparser向けoverrideは今回はまだ維持
+
+### ファイル構成の変更
+```
+新規:
+  src/schema/primitives.ts
+  src/schema/chart.ts
+  src/schema/issues.ts
+  src/schema/chart.test.ts
+変更:
+  package.json
+  src/parser/slideMarkdown.ts
+```
+
+---
 ## [v0.2.9] - 2026-07-19
 
 ### 変更｜README.mdをv0.2.4〜v0.2.8の変更内容に合わせて更新
