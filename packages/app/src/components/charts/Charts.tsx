@@ -259,9 +259,7 @@ export function ComparisonDonutSvg({ chart }: { chart: ComparisonChartBlock }) {
   const legendCols = chart.data.slice(0, 4);
   return (
     <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" className="chart-svg" role="img">
-      <title>
-        {chart.labels.before} / {chart.labels.after} 比較
-      </title>
+      <title>{`${chart.labels.before} / ${chart.labels.after} 比較`}</title>
       <defs>
         <marker
           id="ba-arrow"
