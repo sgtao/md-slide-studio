@@ -231,6 +231,11 @@ describe('contrast: エラー/警告パス', () => {
 });
 
 describe('その他の未カバー分岐', () => {
+  it('feature-showcase: left が配列だと形式不正で警告する', () => {
+    const w = warningsOf('<!-- slide: feature-showcase -->\nleft: [a, b]\nright: {}');
+    expect(w.some((x) => x.includes('feature-showcase ブロックの形式が不正です'))).toBe(true);
+  });
+
   it('summary type（番号付きリスト）を解析できる', () => {
     const deck = parseSlideMarkdown(fm('<!-- slide: summary -->\n## まとめ\n1. 要点1\n2. 要点2'));
     expect(deck.slides[0].type).toBe('summary');

@@ -26,8 +26,8 @@ export type FeatureRightYaml = z.infer<typeof zFeatureRight>;
 /** feature-showcase のYAML形状（フェンス無し・スライド本文全体がYAML）。 */
 export const zFeatureShowcaseYaml = z
   .object({
-    left: z.unknown().optional(),
-    right: z.unknown().optional(),
+    left: z.record(z.string(), z.unknown()).optional(),
+    right: z.record(z.string(), z.unknown()).optional(),
   })
   .meta({
     id: 'feature-showcase',
