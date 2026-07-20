@@ -1,0 +1,8 @@
+node_modules
+dist
+bundle.html
+*.local
+.DS_Store
+test-results
+.idea
+coverage

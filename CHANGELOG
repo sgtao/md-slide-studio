@@ -3,6 +3,48 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.3.3] - 2026-07-20
+
+### 変更｜npm workspacesでのモノレポ化：`@mdss/core`パッケージ分離
+Phase v0.3（基盤リファクタ）の最終フェーズ。
+UI非依存の純粋ライブラリ`@mdss/core`を切り出し、`packages/core`（DOM非依存）と`packages/app`（現行Reactアプリ、coreに依存）の2パッケージ構成に変更。
+
+- **core行き**：`parser/*`（型・パーサー・slideHeader・deckLint）、`schema/*`（全スキーマ・registry・describe・issues）、新設`geometry/chart.ts`（`donutSegmentPath`・`formatValue`の座標計算純関数）
+- **app残留**：`inline.tsx`（`renderInline`がReactNode を返すため）、`components/*`のJSX組み立て、`export`／`hooks`／`theme`／`ai`／`help`／`templates`／`samples`
+- **計画から2点変更**（実装中に判明）：①`roundtrip.test.ts`は`SLIDE_TEMPLATES`・`sample.md`（app資産）に依存するためapp側に配置。②`donutSegmentPath`/`formatValue`は`charts.test.ts`ごとcore/geometryへ移動し、`Charts.tsx`は`@mdss/core`からre-exportして後方互換を維持
+- ルート`package.json`に`workspaces`を追加。`@mdss/core`は`"exports"`を切り、`@mdss/app`は`"@mdss/core": "*"`で依存（`workspace:*`はnpm非対応のため）
+- **tsconfigはcomposite/references方式ではなく、パッケージ独立の`tsc -p ... --noEmit`方式を採用**（composite projectは`noEmit`と両立不可なため）。`packages/core/tsconfig.json`は`lib`から`DOM`を除外し、DOM非依存を型レベルで強制
+- `vite.config.ts`は`packages/app`に移設（`@mdss/core`をソース直接参照するaliasを設定）。ルート直下の旧`vite.config.ts`は削除（残すと事故の元になるため）
+- `deploy.yml`のPages artifact pathを`packages/app/dist`に変更
+- Vitest: `@mdss/core`単体でnode環境（DOM無し）77件・`@mdss/app`53件、合わせて既存と同数の130件。eslintは`projectService: true`でmonorepoの複数tsconfigに対応し、override無しで0 errors継続。Playwright E2E 11件、全グリーン確認済み
+
+### ファイル構成の変更
+```
+新規:
+  packages/core/src/index.ts
+  packages/core/src/geometry/chart.ts
+  packages/core/package.json
+  packages/core/tsconfig.json
+  packages/core/vitest.config.ts
+  packages/app/package.json
+  packages/app/tsconfig.json
+  packages/app/vite.config.ts
+移動:
+  src/parser/* → packages/core/src/parser/*（inline.tsx除く）
+  src/schema/* → packages/core/src/schema/*（roundtrip.test.ts除く）
+  src/components/, ai/, help/, hooks/, export/, templates/, samples/, theme/ → packages/app/src/配下
+  src/App.tsx, main.tsx, vite-env.d.ts, index.html → packages/app/配下
+変更:
+  package.json（workspaces化）
+  eslint.config.js（projectService対応）
+  tsconfig.json（typecheckをパッケージ独立方式に）
+  .github/workflows/deploy.yml
+  .gitignore
+削除:
+  vite.config.ts（ルート直下・packages/app/vite.config.tsに統合）
+```
+
+---
 ## [v0.3.2] - 2026-07-20
 
 ### 変更｜schemaの単一情報源化（SSOT）：AIプロンプト型表／helpの制約ルールを生成に
