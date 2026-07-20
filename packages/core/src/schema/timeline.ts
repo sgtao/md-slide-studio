@@ -2,8 +2,8 @@
 import { z } from 'zod';
 
 export const zTimelineMilestone = z.object({
-  label: z.coerce.string().catch(''),
-  when: z.coerce.string().catch(''),
+  label: z.coerce.string().default(''),
+  when: z.coerce.string().default(''),
 });
 export type TimelineMilestone = z.infer<typeof zTimelineMilestone>;
 

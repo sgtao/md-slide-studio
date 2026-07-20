@@ -47,7 +47,7 @@ export const zComparisonChartYaml = z
 export type ComparisonChartYaml = z.infer<typeof zComparisonChartYaml>;
 
 export const zComparisonDataItem = z.object({
-  label: z.coerce.string().catch(''),
+  label: z.coerce.string().default(''),
   before: z.coerce.number().catch(0),
   after: z.coerce.number().catch(0),
   class: z.coerce.string().catch('1'),
@@ -55,8 +55,8 @@ export const zComparisonDataItem = z.object({
 export type ComparisonDataItem = z.infer<typeof zComparisonDataItem>;
 
 export const zComparisonLeftStat = z.object({
-  num: z.coerce.string().catch(''),
-  label: z.coerce.string().catch(''),
+  num: z.coerce.string().default(''),
+  label: z.coerce.string().default(''),
 });
 export type ComparisonLeftStatYaml = z.infer<typeof zComparisonLeftStat>;
 

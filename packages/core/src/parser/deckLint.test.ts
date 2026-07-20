@@ -119,3 +119,54 @@ describe('lintDeck — 既存 warnings の引き継ぎ', () => {
     ).toBe(true);
   });
 });
+
+describe('sortLintResults', () => {
+  it('error → warn → info の順に安定ソートする', async () => {
+    const { sortLintResults } = await import('./deckLint');
+    const results = [
+      { level: 'info' as const, slideIndex: 0, rule: 'r1', message: 'i' },
+      { level: 'error' as const, slideIndex: 1, rule: 'r2', message: 'e' },
+      { level: 'warn' as const, slideIndex: 2, rule: 'r3', message: 'w' },
+    ];
+    const sorted = sortLintResults(results);
+    expect(sorted.map((r) => r.level)).toEqual(['error', 'warn', 'info']);
+  });
+});
+
+describe('lintDeck — 追加の分岐カバー', () => {
+  it('空デッキは何も報告しない', () => {
+    const d = deck([]);
+    expect(lintDeck(d)).toEqual([]);
+  });
+
+  it('contrast: example はあるが verdict が空だと warn', () => {
+    const d = deck([
+      slide<'contrast'>({
+        type: 'contrast',
+        example: { rows: [{ tag: 't', text: 'x' }] },
+        verdict: [],
+      }),
+    ]);
+    const results = lintDeck(d);
+    expect(results.some((r) => r.rule === 'contrast-verdict-missing')).toBe(true);
+    expect(results.some((r) => r.rule === 'contrast-example-missing')).toBe(false);
+  });
+
+  it('steps: ratio合計が100以外だとwarn（deckLint側の検知）', () => {
+    const d = deck([
+      slide({ type: 'title' }),
+      slide<'steps'>({
+        type: 'steps',
+        stepStyle: 'cards',
+        items: [{ title: 'a' }, { title: 'b' }],
+        ratio: [
+          { label: 'x', value: 30 },
+          { label: 'y', value: 30 },
+        ],
+      }),
+      slide({ type: 'sources' }),
+    ]);
+    const results = lintDeck(d);
+    expect(results.some((r) => r.rule === 'steps-ratio-sum')).toBe(true);
+  });
+});

@@ -2,8 +2,8 @@
 import { z } from 'zod';
 
 export const zContrastExampleRow = z.object({
-  tag: z.coerce.string().catch(''),
-  text: z.coerce.string().catch(''),
+  tag: z.coerce.string().default(''),
+  text: z.coerce.string().default(''),
 });
 export type ContrastExampleRowYaml = z.infer<typeof zContrastExampleRow>;
 

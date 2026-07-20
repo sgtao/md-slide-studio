@@ -3,21 +3,21 @@ import { z } from 'zod';
 
 export const zFeatureLeft = z.object({
   eyebrow: z.coerce.string().optional(),
-  heading: z.coerce.string().catch(''),
+  heading: z.coerce.string().default(''),
   lead: z.coerce.string().optional(),
 });
 export type FeatureLeftYaml = z.infer<typeof zFeatureLeft>;
 
 export const zFeatureRightItem = z.object({
-  label: z.coerce.string().catch(''),
-  desc: z.coerce.string().catch(''),
+  label: z.coerce.string().default(''),
+  desc: z.coerce.string().default(''),
 });
 export type FeatureRightItemYaml = z.infer<typeof zFeatureRightItem>;
 
 export const zFeatureRight = z.object({
   num: z.coerce.string().optional(),
   eyebrow: z.coerce.string().optional(),
-  heading: z.coerce.string().catch(''),
+  heading: z.coerce.string().default(''),
   sub: z.coerce.string().optional(),
   items: z.array(z.unknown()).optional(),
 });

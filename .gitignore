@@ -151,3 +151,5 @@ test-results
 .idea
 playwright-report
 coverage
+.vite
+result.json
