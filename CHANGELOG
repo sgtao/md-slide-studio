@@ -3,6 +3,32 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.3.1] - 2026-07-20
+
+### 変更｜スライド 5typeのzod検証追加とeslint override撤去
+Phase v0.3（基盤リファクタ）続き。v0.3.0のchart/comparison-chartに続き、diagram（flow/layer/cycle）・diagram-timeline・steps・contrast・feature-showcaseのYAMLブロック検証もzodへ置換。全typeがschema経由になったことで、`eslint.config.js`のparser向けoverride（`no-base-to-string`／`no-unsafe-assignment`）を撤去し、`recommendedTypeChecked`をフル適用した。
+- `normalizeDiagram`／`parseTimelineSlide`／`parseFeatureShowcase`／`parseStepsSlide`／`parseContrastSlide`をschema `safeParse`ベースへ置換。手書きの`as Record<string, unknown>`キャストを一掃
+- mermaidサブセットパーサー（`parseMermaidSubset`）はYAMLブロック検証ではなく独自のグラフ解析アルゴリズムのため、今回はzod化対象外（変更なし）
+- override撤去で新たに顕在化した設計不備を修正：comparison-chartのlabels/center/left/stats・stepsのstyle/tone・contrastのtitle/toneが`z.unknown()`のまま`String()`されていた16箇所を`z.coerce.string()`に変更。`zComparisonLeftStat`スキーマを追加し、`zContrastExample`を実配線
+- `parseYamlBlock`内`YAML.parse()`の暗黙`any`型を`unknown`型注釈で解消（override前提で潜在していた既存バグ）
+- 各schemaに`.meta()`で制約情報を付与（`diagram`の層/ノード数上限、`timeline`のmilestones推奨数、`steps`のitems上限等）。v0.3.2のSSOT化（AIプロンプト/ヘルプ生成）が読む値として使う想定
+Vitest 106件・eslint 0 errors（override無し・全域）・Playwright E2E 11件、全グリーン確認済み。
+
+### ファイル構成の変更
+```
+新規:
+  src/schema/diagram.ts
+  src/schema/timeline.ts
+  src/schema/steps.ts
+  src/schema/contrast.ts
+  src/schema/feature.ts
+変更:
+  src/schema/chart.ts
+  src/parser/slideMarkdown.ts
+  eslint.config.js
+```
+
+---
 ## [v0.3.0] - 2026-07-20
 
 ### 変更｜zod導入によるchart/comparison-chart系パーサーのスキーマ検証化
