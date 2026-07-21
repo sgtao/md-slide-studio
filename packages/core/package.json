@@ -1,6 +1,6 @@
 {
   "name": "@mdss/core",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
   "type": "module",
   "description": "MD Slide Studio のDOM非依存コアライブラリ（パーサー・スキーマ・座標計算）",

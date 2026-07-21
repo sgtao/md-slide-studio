@@ -1,6 +1,6 @@
 {
   "name": "@mdss/app",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
   "type": "module",
   "description": "MD Slide Studio のReactアプリ（@mdss/core に依存）",

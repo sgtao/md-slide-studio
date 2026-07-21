@@ -3,6 +3,37 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [cli:v0.4.0] - 2026-07-21
+
+### 追加｜MD→スタンドアロンHTML変換CLI `@mdss/cli`（core+SlideRenderer再利用）
+`websearch-slide-ja` スキルのMD→HTML変換を、LLM生成から決定論的CLI呼び出しへ置換可能にする
+新パッケージ。Web版と同一の `parseSlideMarkdown`（@mdss/core）＋ `SlideRenderer`（@mdss/app）を
+Nodeの `react-dom/server` で再利用し、スライド描画がWeb版とドリフトしないことを構造的に担保。
+
+- `mdss-convert <in.md> -o <out.html>`／stdin対応／`--palette`・`--theme`上書き／`--json(-only)`で
+  title・枚数・warnings・lintをJSON出力
+- `build.mjs`：theme CSS 13枚を main.tsx と同一順で連結しインライン化＋esbuildで自己完結バンドル
+  （react/react-dom/zod/yaml同梱、`npx`時に追加install不要）
+- app側は `src/ssr.tsx`（SSR用再exportバレル）1ファイル追加のみ。本体ロジック不介入
+- node:test スモーク5件（生成骨格・テーマ/パレット上書き・stdin・json-only・不正MD非クラッシュ）
+
+### ファイル構成の変更
+```
+新規:
+  packages/cli/package.json
+  packages/cli/tsconfig.json
+  packages/cli/build.mjs
+  packages/cli/README.md
+  packages/cli/src/cli.ts
+  packages/cli/src/render.tsx
+  packages/cli/src/standalone.ts
+  packages/cli/test/smoke.test.mjs
+  packages/app/src/ssr.tsx
+変更:
+  package.json（workspacesに packages/cli を追加）
+```
+
+---
 ## [v0.3.4] - 2026-07-20
 
 ### 変更｜coreのテストカバレッジ向上 ＋ E2E拡充（navigation/render/theme/export）
