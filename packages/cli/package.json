@@ -1,7 +1,7 @@
 {
-  "name": "@mdss/cli",
-  "version": "0.4.0",
-  "description": "MD Slide Studio のMD→スタンドアロンHTML変換CLI（@mdss/core + SlideRendererを再利用）",
+  "name": "mdss-convert",
+  "version": "0.4.1",
+  "description": "CLI that converts MD-Slide-Studio markdown into standalone HTML",
   "type": "module",
   "bin": {
     "mdss-convert": "./dist/cli.mjs"
@@ -16,7 +16,8 @@
   "scripts": {
     "build": "node build.mjs",
     "test": "node build.mjs && node --test test/smoke.test.mjs",
-    "prepublishOnly": "node build.mjs"
+    "prepack": "node scripts/clean-tgz.mjs && node build.mjs",
+    "pack:dist": "npm pack --pack-destination ./dist"
   },
   "keywords": [
     "markdown",
@@ -27,9 +28,9 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@mdss/app": "*",
     "@mdss/core": "*",
-    "esbuild": "^0.28.1",
+    "@mdss/app": "*",
+    "esbuild": "^0.24.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "yaml": "^2.5.0",
