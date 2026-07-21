@@ -3,6 +3,33 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [cli-v0.4.1] - 2026-07-22
+
+### 変更｜CLIパッケージ名を `mdss-convert` に統一し、配布まわりを整備
+
+`@mdss/cli`（スコープ付き）として実装した変換CLIを、コマンド名 `mdss-convert` と一致する
+スコープなしパッケージ名に変更。あわせて配布用tarball生成の自動化とREADMEの英語化を実施。
+
+- パッケージ名を `@mdss/cli` から `mdss-convert` に変更。npm registryで名前の空きを確認済み
+  （`mdss` は既存だが `mdss-convert` は未使用）。`npm install -g mdss-convert` だけで
+  導入でき、コマンド名とパッケージ名が一致してわかりやすくなった。
+- `description` を簡潔な英文に変更。
+- `README.md` を英語に翻訳して差し替え。
+- `prepack` フックから `scripts/clean-tgz.mjs` を呼び出し、`dist/` 配下に残った古い `.tgz`
+  を自動削除してから再ビルドするようにした（tarball-in-tarball混入の防止）。
+- `pack:dist` スクリプトを追加し、`npm pack --pack-destination ./dist` で配布用tarballを
+  `dist/` 配下に生成できるようにした（`prepublishOnly` は `prepack` に統合・廃止）。
+
+### ファイル構成の変更
+```
+新規:
+  packages/cli/scripts/clean-tgz.mjs
+変更:
+  packages/cli/package.json（name / description / scripts）
+  packages/cli/README.md（英訳に差し替え）
+```
+
+---
 ## [cli:v0.4.0] - 2026-07-21
 
 ### 追加｜MD→スタンドアロンHTML変換CLI `@mdss/cli`（core+SlideRenderer再利用）
