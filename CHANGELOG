@@ -3,6 +3,70 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [cli-v0.4.2] - 2026-07-23
+
+### 追加｜スキル連携用オプション5種（--print-spec / --sample-md / --extract-md / --guide-prompt / --strict）
+
+`websearch-slide-ja` スキルのCLI委譲（skill v0.8.0）に必要な入出力をCLI側に用意した。
+いずれも既存の変換挙動には非破壊で、オプション未指定時の出力はv0.4.1とバイト等価。
+
+- `--print-spec`：スライドMD記法の仕様書（Markdown）を出力。type別の1行説明・制約数値は
+  schemaの`.meta()`から生成し（新設`core/src/spec/markdownSpec.ts`）、各typeの記法サンプルは
+  **仕様書に再掲せず**`--sample-md`へ委譲して三重管理を回避
+- `--sample-md`：全16type網羅のサンプル原稿をfrontmatter付きで出力。`themeCss.ts`と同方式で
+  `build.mjs`が`src/generated/sampleMd.ts`へインライン化（配布物だけで完結）
+- `--extract-md <html>`：スタンドアロンHTMLに同梱された`DECK_MD`を取り出す。CLI出力・Web版の
+  HTMLエクスポートのどちらからも原稿MDをバイト等価で復元できる（HTML→MDが推論不要に）
+- `--guide-prompt`：Webアプリ「AIプロンプト」ボタンと同一のAI原稿作成プロンプトを出力。
+  実装（`buildDraftAssistPrompt`）を`packages/app`から`core/src/prompt/`へ移設し、両者が
+  1実装を共有する形にした（appは薄いre-exportのみ）。「# テーマ」節を末尾へ移動し、
+  冒頭では「テーマを後述してます。」と予告するのみに変更（ユーザー入力なしのCLI向け）
+- `--strict`：lintに`error`がある場合、**HTMLを書き出さず**`exit 3`。不完全な成果物を配らない
+- 上記4つのテキスト出力オプションは相互排他（同時指定は`exit 2`）。終了コードを拡張：
+  `3`=strict違反 / `4`=原稿MDを抽出できない
+- `DECK_LEVEL_RULES`（デッキ全体ルール）をapp `helpContent.ts`からcoreへ移設し、
+  ヘルプ表示とCLI仕様書生成で同一の配列を参照するようにした（文言は不変）
+
+### 修正｜packages/cli の型チェック・lintの穴
+
+- `@types/node`が未導入で、クリーンなインストール環境では`npm run lint`が`process`参照により
+  40 errorsになっていた問題を修正（devDependenciesに追加）
+- `packages/cli`が`tsc`の対象外だったため、`tsconfig.json`の`lib`に`DOM`を追加したうえで
+  ルートの`typecheck`・`test`に`packages/cli`を追加（CLIの型エラーがCIで検知される状態に）
+- `node --test test/`（ディレクトリ指定）がNode 22で解決に失敗するため`test/*.test.mjs`へ変更
+- `.prettierignore`に`packages/cli/src/generated`を追加（自動生成物を整形対象外に）
+
+### ファイル構成の変更
+
+```
+新規:
+  packages/core/src/spec/markdownSpec.ts
+  packages/core/src/spec/markdownSpec.test.ts
+  packages/core/src/prompt/draftAssistPrompt.ts
+  packages/core/src/prompt/draftAssistPrompt.test.ts
+  packages/cli/src/extract.ts
+  packages/cli/src/generated/sampleMd.ts
+  packages/cli/test/features.test.mjs
+  packages/cli/test/guidePrompt.test.mjs
+変更:
+  packages/core/src/index.ts
+  packages/app/src/help/helpContent.ts
+  packages/app/src/ai/draftAssistPrompt.ts（全文置換・re-exportのみに）
+  packages/cli/src/cli.ts
+  packages/cli/build.mjs
+  packages/cli/package.json
+  packages/cli/tsconfig.json
+  packages/cli/README.md
+  package.json
+  .prettierignore
+```
+
+---
+## [cli:v0.4.1] - 2026-07-22
+
+### 修正：CLIパッケージのコマンド名変更（`mdss-convert`へ変更）
+
+---
 ## [cli:v0.4.0] - 2026-07-21
 
 ### 追加｜MD→スタンドアロンHTML変換CLI `@mdss/cli`（core+SlideRenderer再利用）
