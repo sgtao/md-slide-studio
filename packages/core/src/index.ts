@@ -37,3 +37,5 @@ export {
 
 // --- 座標計算・数値整形の純関数 ---
 export { donutSegmentPath, formatValue } from './geometry/chart';
+// --- AI原稿作成プロンプト（app「AIプロンプト」ボタン / CLI --guide-prompt 共用） ---
+export { buildDraftAssistPrompt, MINIMAL_EXAMPLE } from './prompt/draftAssistPrompt';

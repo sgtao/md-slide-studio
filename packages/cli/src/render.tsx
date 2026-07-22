@@ -49,16 +49,10 @@ function renderSections(deck: SlideDeck): string {
   const total = deck.slides.length;
   return deck.slides
     .map((slide, i) => {
-      const inner = renderToStaticMarkup(
-        createElement(SlideRenderer, { slide, index: i + 1 }),
-      );
+      const inner = renderToStaticMarkup(createElement(SlideRenderer, { slide, index: i + 1 }));
       const cls = slideSectionClass(slide, i === 0); // 先頭のみ active（外装JSがlist/heroで管理）
       const dataNum = `${i + 1} / ${total}`;
-      return (
-        `<section id="s${i + 1}" class="${cls}" data-num="${dataNum}">` +
-        inner +
-        `</section>`
-      );
+      return `<section id="s${i + 1}" class="${cls}" data-num="${dataNum}">` + inner + `</section>`;
     })
     .join('\n');
 }

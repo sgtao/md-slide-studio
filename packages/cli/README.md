@@ -43,6 +43,7 @@ mdss-convert slide.md -o slide.html
 | `--print-spec` | Print the slide-Markdown syntax spec (Markdown) and exit — no conversion |
 | `--sample-md` | Print the bundled all-type sample deck (`sample.md`) and exit — no conversion |
 | `--extract-md <file>` | Extract the source Markdown embedded in a standalone HTML (`-` for stdin) |
+| `--guide-prompt` | Print the AI draft-assist prompt (same text as the web app "AI Prompt" button) and exit |
 | `-h, --help` / `-v, --version` | Help / version |
 
 Exit codes: `0` = success / `1` = I/O error / `2` = argument error / `3` = strict violation (lint error) / `4` = no embedded Markdown found. Following the parser's non-crashing convention, unknown values or malformed blocks never cause a hard error — they're surfaced instead as warnings (`warnings` / `lint` in `--json`/`--json-only`).

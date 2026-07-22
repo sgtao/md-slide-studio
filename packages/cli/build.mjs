@@ -64,7 +64,6 @@ writeFileSync(
 );
 console.log(`sampleMd.ts generated (${sampleMd.length} chars)`);
 
-
 // --- 2) esbuild バンドル ---
 const pkg = JSON.parse(readFileSync(resolve(here, 'package.json'), 'utf-8'));
 
@@ -83,7 +82,7 @@ await esbuild.build({
   // 実 require を createRequire で注入（esbuild ESM+node の定番対処）。shebangも同時付与。
   banner: {
     js:
-      "#!/usr/bin/env node\n" +
+      '#!/usr/bin/env node\n' +
       "import { createRequire as __mdssCreateRequire } from 'node:module';\n" +
       'const require = __mdssCreateRequire(import.meta.url);',
   },

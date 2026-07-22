@@ -6,6 +6,7 @@
  *   mdss-convert --print-spec [-o spec.md]
  *   mdss-convert --sample-md  [-o sample.md]
  *   mdss-convert --extract-md <deck.html|-> [-o deck.md]
+ *   mdss-convert --guide-prompt [-o prompt.md]
  *
  * options:
  *   -o, --out <path>     出力パス（省略時は stdout）
@@ -18,13 +19,14 @@
  *       --print-spec     スライドMD記法の仕様書(Markdown)を出力（変換しない）
  *       --sample-md      全type網羅のサンプル原稿を出力（変換しない）
  *       --extract-md <f> スタンドアロンHTMLから原稿MDを取り出す（変換しない）
+ *       --guide-prompt   AI原稿作成プロンプト（Webアプリ「AIプロンプト」ボタンと同一）を出力
  *   -h, --help / -v, --version
  *
  * 終了コード:
  *   0=正常 / 1=入出力エラー / 2=引数エラー / 3=strict違反(lint error) / 4=原稿MDを抽出できない
  */
 import { readFileSync, writeFileSync } from 'node:fs';
-import { buildMarkdownSpec } from '@mdss/core';
+import { buildDraftAssistPrompt, buildMarkdownSpec } from '@mdss/core';
 import { convertMarkdown } from './render';
 import { extractDeckMd } from './extract';
 import { SAMPLE_MD } from './generated/sampleMd';
@@ -45,6 +47,7 @@ interface Args {
   printSpec: boolean;
   sampleMd: boolean;
   extractMd?: string;
+  guidePrompt: boolean;
   help: boolean;
   version: boolean;
 }
@@ -57,6 +60,7 @@ function parseArgs(argv: string[]): Args {
     strict: false,
     printSpec: false,
     sampleMd: false,
+    guidePrompt: false,
     help: false,
     version: false,
   };
@@ -90,6 +94,9 @@ function parseArgs(argv: string[]): Args {
         break;
       case '--sample-md':
         a.sampleMd = true;
+        break;
+      case '--guide-prompt':
+        a.guidePrompt = true;
         break;
       case '--extract-md': {
         const v = argv[++i];
@@ -128,6 +135,7 @@ const HELP = `mdss-convert v${VERSION} — スライドMD → スタンドアロ
   mdss-convert --print-spec [-o markdown-format.md]
   mdss-convert --sample-md  [-o sample.md]
   mdss-convert --extract-md <deck.html> [-o deck.md]
+  mdss-convert --guide-prompt [-o prompt.md]
 
 options:
   -o, --out <path>   出力パス（省略時は stdout へ）
@@ -140,6 +148,7 @@ options:
       --print-spec   スライドMD記法の仕様書(Markdown)を出力（変換しない）
       --sample-md    全type網羅のサンプル原稿を出力（変換しない）
       --extract-md <f> スタンドアロンHTMLから原稿MDを取り出す（変換しない・stdinは -）
+      --guide-prompt AI原稿作成プロンプトを出力（Webアプリ「AIプロンプト」ボタンと同一。テーマ未指定のプレースホルダー版）
   -h, --help / -v, --version
 
 終了コード: 0=正常 / 1=入出力エラー / 2=引数エラー / 3=strict違反 / 4=原稿MDを抽出できない
@@ -174,12 +183,17 @@ function writeTextOutput(text: string, args: Args, label: string): void {
  * 3つは相互排他。処理したら true を返す。
  */
 function runTextMode(args: Args): boolean {
-  const modes = [args.printSpec, args.sampleMd, args.extractMd !== undefined].filter(
-    Boolean,
-  ).length;
+  const modes = [
+    args.printSpec,
+    args.sampleMd,
+    args.guidePrompt,
+    args.extractMd !== undefined,
+  ].filter(Boolean).length;
   if (modes === 0) return false;
   if (modes > 1) {
-    process.stderr.write('--print-spec / --sample-md / --extract-md は同時に指定できません\n');
+    process.stderr.write(
+      '--print-spec / --sample-md / --guide-prompt / --extract-md は同時に指定できません\n',
+    );
     process.exit(2);
   }
   if (args.input !== undefined) {
@@ -193,6 +207,13 @@ function runTextMode(args: Args): boolean {
   }
   if (args.sampleMd) {
     writeTextOutput(SAMPLE_MD, args, 'sample');
+    return true;
+  }
+  if (args.guidePrompt) {
+    // CLIはユーザー入力（テーマ）をその場で受け取らないため、常にプレースホルダー版を出す。
+    // テーマはプロンプト末尾の「# テーマ」節に、ユーザー自身が書き足す運用（Webアプリの
+    // 「AIプロンプト」ボタンでテーマ欄が空のときと同一の出力）。
+    writeTextOutput(buildDraftAssistPrompt(), args, 'prompt');
     return true;
   }
 
