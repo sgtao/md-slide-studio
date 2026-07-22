@@ -1,6 +1,6 @@
 {
   "name": "mdss-convert",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "CLI that converts MD-Slide-Studio markdown into standalone HTML",
   "type": "module",
   "bin": {
@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "node build.mjs",
-    "test": "node build.mjs && node --test test/smoke.test.mjs",
+    "test": "node build.mjs && node --test test/*.test.mjs",
     "prepack": "node scripts/clean-tgz.mjs && node build.mjs",
     "pack:dist": "npm pack --pack-destination ./dist"
   },
@@ -28,9 +28,10 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@mdss/core": "*",
     "@mdss/app": "*",
-    "esbuild": "^0.24.0",
+    "@mdss/core": "*",
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.28.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "yaml": "^2.5.0",

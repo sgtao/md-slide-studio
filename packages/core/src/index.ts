@@ -26,5 +26,14 @@ export {
 export { buildTypeReferenceTable, buildConstraintRules } from './schema/describe';
 export { getAllSlideTypeMeta, type SlideTypeMeta } from './schema/registry';
 
+// --- 記法仕様書の生成（--print-spec / 外部ドキュメント向け） ---
+export {
+  buildMarkdownSpec,
+  DECK_LEVEL_RULES,
+  MINIMAL_DECK_EXAMPLE,
+  SLIDE_MD_SPEC_VERSION,
+  type MarkdownSpecOptions,
+} from './spec/markdownSpec';
+
 // --- 座標計算・数値整形の純関数 ---
 export { donutSegmentPath, formatValue } from './geometry/chart';
