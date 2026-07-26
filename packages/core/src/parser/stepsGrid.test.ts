@@ -7,7 +7,8 @@ const fm = (body: string) => `---\ntitle: テスト\npalette: ocean\n---\n${body
 const stepsGridMd = (block: string) =>
   fm(`<!-- slide: steps, layout: grid -->\n## 手順\n\`\`\`steps\n${block}\n\`\`\``);
 
-const stepsPlainMd = (block: string) => fm(`<!-- slide: steps -->\n## 手順\n\`\`\`steps\n${block}\n\`\`\``);
+const stepsPlainMd = (block: string) =>
+  fm(`<!-- slide: steps -->\n## 手順\n\`\`\`steps\n${block}\n\`\`\``);
 
 describe('steps: layout: grid', () => {
   it('ディレクティブで layout: grid を読む', () => {

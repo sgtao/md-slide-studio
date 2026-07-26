@@ -40,13 +40,13 @@ test('steps(layout: grid): 6件のカードが描画され、矢印疑似要素�
   // 2枚目以降のカードに矢印（::before）が表示されていないことを、
   // 疑似要素の content が none であることで確認する。
   const secondItem = active.locator('.steps-item').nth(1);
-  const beforeContent = await secondItem.evaluate(
-    (el) => getComputedStyle(el, '::before').content,
-  );
+  const beforeContent = await secondItem.evaluate((el) => getComputedStyle(el, '::before').content);
   expect(beforeContent === 'none' || beforeContent === '""').toBe(true);
 });
 
-test('steps(layout: grid): flex-wrap により複数列に折り返される（1行に全カードが収まらない）', async ({ page }) => {
+test('steps(layout: grid): flex-wrap により複数列に折り返される（1行に全カードが収まらない）', async ({
+  page,
+}) => {
   await page.goto('/');
   await page.locator('textarea').fill(GRID_DECK);
   const items = page.locator('.slide.active .steps-item');

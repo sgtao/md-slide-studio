@@ -16,7 +16,7 @@ import { Note, SlideHeading } from './common';
 
 export function StepsView({ slide }: { slide: StepsSlide }) {
   return (
-    <div className={`slide-inner${slide.layout === "grid" ? " steps-inner-grid" : ""}`}>
+    <div className={`slide-inner${slide.layout === 'grid' ? ' steps-inner-grid' : ''}`}>
       <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       {slide.items.length > 0 ? (
         <div
