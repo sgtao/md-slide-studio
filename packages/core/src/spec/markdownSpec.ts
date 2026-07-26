@@ -142,6 +142,7 @@ export function buildMarkdownSpec(opts: MarkdownSpecOptions = {}): string {
     '| `lead: 補足文` | 本文の行頭 | 見出し直下のグレー1行 |',
     '| `point: 要点` | 本文の行頭 | スライド下部の強調帯（結論・注意点） |',
     '| `==テキスト==` | 本文中 | アクセント色のハイライト |',
+    '| `<br>` | 見出し中のみ（h1 / 各typeの見出し / feature-showcase左見出し） | 強制改行。本文・リスト・表セル等では無効（文字として表示される） |',
     '| `**太字**` / `[label](url)` | 本文中 | インライン装飾。危険なURLスキームは無効化される |',
     '',
     '生の `<script>` / `<style>` は無視される（MD内に書かない）。',

@@ -27,7 +27,7 @@ export function SlideHeading({
       {(badge || text) && (
         <div className="slide-title-row">
           {badge && <span className="slide-badge">{badge}</span>}
-          {text && <div className="slide-title">{renderInline(text)}</div>}
+          {text && <div className="slide-title">{renderInline(text, { allowBr: true })}</div>}
         </div>
       )}
       {lead && <p className="slide-lead">{renderInline(lead)}</p>}

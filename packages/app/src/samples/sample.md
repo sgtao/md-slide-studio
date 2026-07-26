@@ -1,6 +1,7 @@
 ---
 title: MD Slide Studio デモ
 palette: ocean
+converting-site: https://sgtao.github.io/md-slide-studio/
 ---
 <!-- slide: title -->
 # Markdownから、==スライドを生成する。==
@@ -9,7 +10,7 @@ badges: [全16type網羅サンプル, React + TypeScript, websearch-slide-ja 移
 ---
 <!-- slide: contrast -->
 badge: WHY
-## 「いい感じにして」は、==毎回ちがう答え==を返す
+## 「いい感じにして」は、<br>==毎回ちがう答え==を返す
 ```contrast
 example:
   title: 「この資料をスライドにして」とLLMに頼むと

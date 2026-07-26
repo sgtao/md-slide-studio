@@ -47,7 +47,7 @@ function TitleView({ slide }: { slide: TitleSlide }) {
               <span className="slide-badge">{slide.badge}</span>
             </div>
           )}
-          <h1>{renderInline(slide.heading)}</h1>
+          <h1>{renderInline(slide.heading, { allowBr: true })}</h1>
           {slide.subtitle && <p className="subtitle">{renderInline(slide.subtitle)}</p>}
           {slide.lead && <p className="slide-lead">{renderInline(slide.lead)}</p>}
           {slide.badges.length > 0 && (
@@ -87,7 +87,7 @@ function TitleView({ slide }: { slide: TitleSlide }) {
           <span className="slide-badge">{slide.badge}</span>
         </div>
       )}
-      <h1>{renderInline(slide.heading)}</h1>
+      <h1>{renderInline(slide.heading, { allowBr: true })}</h1>
       {slide.subtitle && <p className="subtitle">{renderInline(slide.subtitle)}</p>}
       {slide.lead && <p className="slide-lead">{renderInline(slide.lead)}</p>}
       {slide.badges.length > 0 && (
@@ -367,7 +367,7 @@ function FeatureShowcaseView({ slide }: { slide: FeatureShowcaseSlide }) {
     <div className="slide-inner">
       <div className="feature-left">
         {left.eyebrow && <div className="eyebrow">{left.eyebrow}</div>}
-        <h2>{renderInline(left.heading)}</h2>
+        <h2>{renderInline(left.heading, { allowBr: true })}</h2>
         {left.lead && <p className="feat-lead">{renderInline(left.lead)}</p>}
       </div>
       <div className="feature-right">
