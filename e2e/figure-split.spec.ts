@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-// v0.4.4: figure の layout: split-image / image-side が実際に左右を入れ替えることを確認する。
+// figure の layout: split-image / image-side が実際に左右を入れ替えることを確認する。
 //
 // 注意: 1テスト内で textarea を連続 fill() すると、2回目以降の fill 直後は
 // デバウンス再描画が終わっていない可能性がある（既存の「エディタ編集はデバウンス後に

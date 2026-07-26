@@ -19,7 +19,9 @@ export function StepsView({ slide }: { slide: StepsSlide }) {
     <div className="slide-inner">
       <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
       {slide.items.length > 0 ? (
-        <div className={`steps-flow steps-${slide.stepStyle}`}>
+        <div
+          className={`steps-flow steps-${slide.stepStyle}${slide.layout === 'grid' ? ' steps-grid' : ''}`}
+        >
           {slide.items.map((it, i) => (
             <div key={i} className={`steps-item${it.tone ? ` steps-item--${it.tone}` : ''}`}>
               {slide.stepStyle === 'circled' && <div className="steps-num">{i + 1}</div>}

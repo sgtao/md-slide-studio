@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-// v0.4.4: feature-showcase の layout: reverse が実際に表示位置を反転させることを確認する。
+// feature-showcase の layout: reverse が実際に表示位置を反転させることを確認する。
 
 const NORMAL_DECK = `---
 title: E2E reverse deck

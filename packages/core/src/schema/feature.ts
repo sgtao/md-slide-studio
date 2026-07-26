@@ -35,5 +35,6 @@ export const zFeatureShowcaseYaml = z
     summary:
       '2カラム紹介。left(eyebrow/heading/lead)とright(num/eyebrow/heading/sub/items[label,desc])をYAMLで記述',
     constraints: [],
+    layouts: ['reverse'],
   });
 export type FeatureShowcaseYaml = z.infer<typeof zFeatureShowcaseYaml>;

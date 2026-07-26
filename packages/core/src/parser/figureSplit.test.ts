@@ -4,7 +4,7 @@ import type { FigureSlide } from './types';
 
 const fm = (body: string) => `---\ntitle: テスト\npalette: ocean\n---\n${body}`;
 
-describe('figure: split-image（v0.4.4）', () => {
+describe('figure: split-image', () => {
   it('image-side: right を読む', () => {
     const md = fm(
       '<!-- slide: figure, layout: split-image -->\n## 見出し\nimage-side: right\n![alt](https://example.com/a.png)\nsource: [出典](https://example.com)',

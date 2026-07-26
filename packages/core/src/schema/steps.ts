@@ -31,8 +31,10 @@ export const zStepsYaml = z
     summary:
       'カード型ステップフロー。style(cards|circled)とitems(icon/title/desc/tone)をYAMLで記述',
     constraints: [
-      'items は2〜5個（1個以下は警告・6件目以降は切り捨て）',
+      'items は2〜6個（1個以下は警告・7件目以降は切り捨て）',
       '任意の ratio でセグメント比率帯を描画可（合計100を推奨）',
+      'layout: grid で矢印を非表示にし複数列へ折り返し表示できる',
     ],
+    layouts: ['grid'],
   });
 export type StepsYaml = z.infer<typeof zStepsYaml>;

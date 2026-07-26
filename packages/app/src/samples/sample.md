@@ -172,6 +172,23 @@ ratio:
 ```
 point: 残る3割は「何を言うか」。==機械化しないと決めた領域==です
 ---
+<!-- slide: steps, layout: grid -->
+badge: グリッド表示
+## items が6個なら、==layout: grid==で並べる
+lead: 矢印つきのカードフローが、矢印なしの複数列カードに切り替わる
+```steps
+style: cards
+items:
+  - { icon: "📝", title: 箇条書き, desc: pointsで要点を整理 }
+  - { icon: "📊", title: グラフ, desc: chartで数値を可視化 }
+  - { icon: "🔀", title: 図解, desc: diagramで構造を示す }
+  - { icon: "🖼️", title: 画像, desc: figureで出典付きに }
+  - { icon: "🪜", title: 手順, desc: stepsで流れを説明 }
+  - { icon: "⚖️", title: 対比, desc: contrastで結論を導く }
+```
+> items は2〜6個。列数の指定は不要、flex-wrapで自動的に折り返す
+point: 5個以下では通常どおり矢印つき。==grid==は6個に増えたときだけ選べばいい
+---
 <!-- slide: diagram-timeline -->
 ## 記法は増える。既存のMDは動き続ける
 lead: 後方互換を前提に、type・layoutを段階的に追加していきます

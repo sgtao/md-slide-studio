@@ -90,6 +90,7 @@ const LAYOUTS: LayoutVariant[] = [
   'side-list',
   'split-image',
   'reverse',
+  'grid',
 ];
 
 // ---------------------------------------------------------------------------
@@ -804,7 +805,7 @@ function parseFigure(body: string, warnings: string[]) {
     warnings.push(`画像URLの拡張子が画像ではない可能性があります: ${img[2]}`);
   }
   if (!src) warnings.push('figure に source:（出典）がありません（必須）');
-  // v0.4.4: layout: split-image 用の追加キー
+  // layout: split-image 用の追加キー
   const sideMatch = body.match(/^image-side:\s*(left|right)\s*$/m);
   const imageSide = sideMatch ? (sideMatch[1] as 'left' | 'right') : undefined;
   if (/^image:\s*\S+/m.test(body)) {
@@ -864,7 +865,7 @@ function parseFeatureShowcase(body: string, warnings: string[]) {
 // --- steps（v0.2.0: カード型ステップフロー） ---
 
 const STEP_STYLES: StepStyle[] = ['cards', 'circled'];
-const STEPS_MAX_ITEMS = 5;
+const STEPS_MAX_ITEMS = 6;
 
 function parseStepsSlide(body: string, warnings: string[]) {
   const fence = extractFence(body, 'steps');

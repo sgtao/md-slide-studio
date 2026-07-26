@@ -15,7 +15,7 @@ right:
   items:
     - { label: X, desc: Y }`;
 
-describe('feature-showcase: layout reverse（v0.4.4）', () => {
+describe('feature-showcase: layout reverse', () => {
   it('layout: reverse をパースできる', () => {
     const md = fm(`<!-- slide: feature-showcase, layout: reverse -->\n${baseYaml}`);
     const s = parseSlideMarkdown(md).slides[0] as FeatureShowcaseSlide;

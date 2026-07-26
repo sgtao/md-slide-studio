@@ -458,14 +458,14 @@ table.layout-compact td {
   margin: 0;
 }
 
-/* feature-showcase: 左右反転（v0.4.4）
+/* feature-showcase: 左右反転
  * データ（left:/right:）の意味は変えず、表示位置だけを入れ替える。
  * 既存の .feature-showcase .slide-inner と詳細度が同点にならないよう明示的に上げている。 */
 .slide.feature-showcase .slide-inner.layout-reverse {
   flex-direction: row-reverse;
 }
 
-/* figure: 分割レイアウト（v0.4.4） */
+/* figure: 分割レイアウト*/
 .figure-split {
   display: flex;
   gap: 2rem;

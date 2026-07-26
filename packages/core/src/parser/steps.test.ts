@@ -72,12 +72,12 @@ describe('steps: 正常系', () => {
 });
 
 describe('steps: 異常系（落ちないパーサー）', () => {
-  it('items 6件超は先頭5件に切り捨てて警告する', () => {
-    const items = Array.from({ length: 7 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
+  it('items 7件超は先頭6件に切り捨てて警告する', () => {
+    const items = Array.from({ length: 8 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
     const md = stepsMd(`items:\n${items}`);
     const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
-    expect(s.items).toHaveLength(5);
-    expect(s.warnings.some((w) => w.includes('上限5件'))).toBe(true);
+    expect(s.items).toHaveLength(6);
+    expect(s.warnings.some((w) => w.includes('上限6件'))).toBe(true);
   });
 
   it('未知の style は cards にフォールバックして警告する', () => {

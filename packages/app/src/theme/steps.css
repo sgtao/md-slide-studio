@@ -281,3 +281,18 @@
     print-color-adjust: exact;
   }
 }
+
+/* ==========================================================================
+ * steps: layout: grid
+ * 矢印（::before）を非表示にし、flex-wrap で複数列に折り返す。
+ * style（cards/circled）とは直交する概念のため、既存クラスと併用する。
+ * ========================================================================== */
+.steps-grid {
+  flex-wrap: wrap;
+}
+.steps-grid .steps-item {
+  flex: 1 1 220px;
+}
+.steps-grid .steps-item + .steps-item::before {
+  content: none;
+}
