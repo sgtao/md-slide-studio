@@ -298,3 +298,13 @@
 .steps-grid .steps-item + .steps-item::before {
   content: none;
 }
+
+/* v0.4.5-grid-top-padding: steps, layout: grid のみ上部余白を縮小。
+ * .slide-inner の padding: 52px 72px + justify-content: center を、
+ * このバリアントだけ padding-top: 26px（半分）+ 上詰めに上書きする。
+ * セレクタは .slide-inner.steps-inner-grid（詳細度0,2,0）で
+ * ベースの .slide-inner（0,1,0）より確実に優先させる。 */
+.slide-inner.steps-inner-grid {
+  padding-top: 26px;
+  justify-content: flex-start;
+}
