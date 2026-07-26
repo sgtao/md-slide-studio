@@ -3,6 +3,40 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.4.3] - 2026-07-26
+
+### 追加｜見出し内の強制改行（<br>）
+
+見出し用途に限定して `<br>` を改行として解釈できるようにした。本文・リスト・
+テーブルセル・note・point帯など、それ以外の箇所では従来通り文字列として
+扱われる（挙動変更なし）。
+
+- `renderInline(text, { allowBr: true })` を呼んだ箇所のみ有効
+- 対象: `title` の `<h1>`（通常/split-imageレイアウト両方）、`SlideHeading`
+  共通コンポーネントの `.slide-title`（ほぼ全typeの `##` 見出し）、
+  `feature-showcase` 左側の `<h2>`
+- `dangerouslySetInnerHTML` は不使用。固定リテラル `<br>` を正規表現で
+  トークン化し `<br />` へ写像するのみ（XSS面での変更なし）
+- Vitest 4件追加（`inline-br.test.tsx`）、Playwright E2E 1件追加（`title-br.spec.ts`）
+
+### 変更｜package.jsonの`version`タグ見直し
+- package.jsonファイルの`version`: root/cliのみ更新、core/appは凍結
+
+### ファイル構成の変更
+
+```
+新規:
+  packages/app/src/parser/inline-br.test.tsx
+  e2e/title-br.spec.ts
+変更:
+  packages/app/src/parser/inline.tsx
+  packages/app/src/components/slides/common.tsx
+  packages/app/src/components/slides/SlideRenderer.tsx
+  packages/core/src/spec/markdownSpec.ts
+  packages/app/src/samples/sample.md
+```
+
+---
 ## [cli-v0.4.2] - 2026-07-23
 
 ### 追加｜スキル連携用オプション5種（--print-spec / --sample-md / --extract-md / --guide-prompt / --strict）
