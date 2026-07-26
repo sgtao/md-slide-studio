@@ -9,7 +9,7 @@ const stepsGridMd = (block: string) =>
 
 const stepsPlainMd = (block: string) => fm(`<!-- slide: steps -->\n## 手順\n\`\`\`steps\n${block}\n\`\`\``);
 
-describe('steps: layout: grid（v0.4.5）', () => {
+describe('steps: layout: grid', () => {
   it('ディレクティブで layout: grid を読む', () => {
     const d = parseDirective('<!-- slide: steps, layout: grid -->')!;
     expect(d.type).toBe('steps');

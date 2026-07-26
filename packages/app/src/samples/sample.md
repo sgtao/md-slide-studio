@@ -174,8 +174,8 @@ point: 残る3割は「何を言うか」。==機械化しないと決めた領�
 ---
 <!-- slide: steps, layout: grid -->
 badge: グリッド表示
-## items が6個なら、==layout: grid==で並べる
-lead: 矢印つきのカードフローが、矢印なしの複数列カードに切り替わる
+## items が8個でも、==layout: grid==なら並ぶ
+lead: 矢印つきのカードフローが、矢印なしの4列カードに切り替わる
 ```steps
 style: cards
 items:
@@ -185,9 +185,11 @@ items:
   - { icon: "🖼️", title: 画像, desc: figureで出典付きに }
   - { icon: "🪜", title: 手順, desc: stepsで流れを説明 }
   - { icon: "⚖️", title: 対比, desc: contrastで結論を導く }
+  - { icon: "📐", title: 表, desc: tableで数値を並べる }
+  - { icon: "⏳", title: タイムライン, desc: diagram-timelineで時系列を示す }
 ```
-> items は2〜6個。列数の指定は不要、flex-wrapで自動的に折り返す
-point: 5個以下では通常どおり矢印つき。==grid==は6個に増えたときだけ選べばいい
+> items は cards/circled が2〜6個、==layout: grid==のみ2〜8個まで拡張（4列x2行固定）
+point: 5個以下では通常どおり矢印つき。==grid==なら最大8個まで4列で並べられる
 ---
 <!-- slide: diagram-timeline -->
 ## 記法は増える。既存のMDは動き続ける
@@ -287,5 +289,6 @@ source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemu
 ---
 <!-- slide: sources -->
 ## 出典・参考リンク
-- [websearch-slide-ja スキル](https://github.com/) — 本アプリの移植元スキル（スライドMD仕様 v0.7）
-- [MD Slide Studio リポジトリ](https://github.com/) — ソースコード・Issue はこちら
+- [websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja) — 本アプリの移植元スキル（スライドMD仕様 v0.7）
+- [MD Slide Studio リポジトリ](https://github.com/sgtao/md-slide-studio) — ソースコード・Issue はこちら
+- [MD Slide Studio デモアプリ](https://sgtao.github.io/md-slide-studio/) — デモアプリサイト
