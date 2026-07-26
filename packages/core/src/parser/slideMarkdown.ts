@@ -267,7 +267,7 @@ function parseSlide(raw: string): Slide | null {
     case 'feature-showcase':
       return { ...base, type: 'feature-showcase', ...parseFeatureShowcase(body, d.warnings) };
     case 'steps':
-      return { ...base, type: 'steps', ...parseStepsSlide(body, d.warnings) };
+      return { ...base, type: 'steps', ...parseStepsSlide(body, d.warnings, d.layout) };
     case 'contrast':
       return { ...base, type: 'contrast', ...parseContrastSlide(body, d.warnings) };
     case 'sources':
@@ -866,8 +866,9 @@ function parseFeatureShowcase(body: string, warnings: string[]) {
 
 const STEP_STYLES: StepStyle[] = ['cards', 'circled'];
 const STEPS_MAX_ITEMS = 6;
+const STEPS_MAX_ITEMS_GRID = 9;
 
-function parseStepsSlide(body: string, warnings: string[]) {
+function parseStepsSlide(body: string, warnings: string[], layout?: LayoutVariant) {
   const fence = extractFence(body, 'steps');
   const { heading, note } = pickHeadingAndNote(fence ? fence.rest : body);
   const empty = { heading, note, stepStyle: 'cards' as StepStyle, items: [] as StepItem[] };
@@ -904,14 +905,15 @@ function parseStepsSlide(body: string, warnings: string[]) {
       }
       return { icon: r.icon, title: r.title, desc: r.desc, tone };
     });
+  const maxItems = layout === 'grid' ? STEPS_MAX_ITEMS_GRID : STEPS_MAX_ITEMS;
   if (items.length === 0) {
     warnings.push('steps の items が空です');
   } else if (items.length === 1) {
     warnings.push('steps の items は2個以上を推奨します');
   }
-  if (items.length > STEPS_MAX_ITEMS) {
+  if (items.length > maxItems) {
     warnings.push(
-      `steps の items が ${items.length} 件あります（上限${STEPS_MAX_ITEMS}件・${STEPS_MAX_ITEMS + 1}件目以降は切り捨て）`,
+      `steps の items が ${items.length} 件あります（上限${maxItems}件・${maxItems + 1}件目以降は切り捨て）`,
     );
   }
 
@@ -932,7 +934,7 @@ function parseStepsSlide(body: string, warnings: string[]) {
     }
   }
 
-  return { heading, note, stepStyle, items: items.slice(0, STEPS_MAX_ITEMS), ratio };
+  return { heading, note, stepStyle, items: items.slice(0, maxItems), ratio };
 }
 
 // --- contrast（v0.2.3: 例示 vs 結論の対比） ---

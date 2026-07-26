@@ -71,7 +71,7 @@ const LAYOUT_TABLE: string[] = [
   '| `chart-bar` / `chart-line` | `side-list` | グラフの横に前提条件パネルを併記する |',
   '| `feature-showcase` | `reverse` | コンセプト面と詳細面の表示位置を入れ替える（データの意味は不変） |',
   '| `figure` | `split-image` | 画像とテキストパネル（見出し・箇条書き・出典）を左右に分割する。`image-side:` で画像側を指定 |',
-  '| `steps` | `grid` | カード間の矢印を非表示にし、複数列に折り返して表示する（列数は自動） |',
+  '| `steps` | `grid` | カード間の矢印を非表示にし、複数列に折り返して表示する（列数は自動・items上限も2〜9個に拡張） |',
 ];
 
 export interface MarkdownSpecOptions {

@@ -7,7 +7,9 @@ const fm = (body: string) => `---\ntitle: テスト\npalette: ocean\n---\n${body
 const stepsGridMd = (block: string) =>
   fm(`<!-- slide: steps, layout: grid -->\n## 手順\n\`\`\`steps\n${block}\n\`\`\``);
 
-describe('steps: layout: grid', () => {
+const stepsPlainMd = (block: string) => fm(`<!-- slide: steps -->\n## 手順\n\`\`\`steps\n${block}\n\`\`\``);
+
+describe('steps: layout: grid（v0.4.5）', () => {
   it('ディレクティブで layout: grid を読む', () => {
     const d = parseDirective('<!-- slide: steps, layout: grid -->')!;
     expect(d.type).toBe('steps');
@@ -31,22 +33,6 @@ describe('steps: layout: grid', () => {
     expect(s.items).toHaveLength(4);
   });
 
-  it('items が6個までは切り捨てられない（上限緩和・style指定なし=cards既定でも同様）', () => {
-    const items = Array.from({ length: 6 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
-    const md = stepsGridMd(`items:\n${items}`);
-    const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
-    expect(s.items).toHaveLength(6);
-    expect(s.warnings.some((w) => w.includes('上限'))).toBe(false);
-  });
-
-  it('items が7個以上は先頭6個に切り捨てて警告する（layout: grid でも steps 共通ルールが適用される）', () => {
-    const items = Array.from({ length: 7 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
-    const md = stepsGridMd(`items:\n${items}`);
-    const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
-    expect(s.items).toHaveLength(6);
-    expect(s.warnings.some((w) => w.includes('上限6件'))).toBe(true);
-  });
-
   it('layout: grid は style（cards/circled）と直交する（circled + grid も成立する）', () => {
     const md = fm(
       '<!-- slide: steps, layout: grid -->\n## 手順\n```steps\nstyle: circled\nitems:\n  - { title: A }\n  - { title: B }\n```',
@@ -54,5 +40,38 @@ describe('steps: layout: grid', () => {
     const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
     expect(s.layout).toBe('grid');
     expect(s.stepStyle).toBe('circled');
+  });
+});
+
+describe('steps: items上限（layout: grid のみ 2〜9個・cards/circledは2〜6個）', () => {
+  it('layout: grid では items が9個までは切り捨てられない', () => {
+    const items = Array.from({ length: 9 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
+    const md = stepsGridMd(`items:\n${items}`);
+    const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
+    expect(s.items).toHaveLength(9);
+    expect(s.warnings.some((w) => w.includes('上限'))).toBe(false);
+  });
+
+  it('layout: grid で items が10個以上は先頭9個に切り捨てて警告する', () => {
+    const items = Array.from({ length: 10 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
+    const md = stepsGridMd(`items:\n${items}`);
+    const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
+    expect(s.items).toHaveLength(9);
+    expect(s.warnings.some((w) => w.includes('上限9件'))).toBe(true);
+  });
+
+  it('layout未指定（cards既定）では、items 7個で従来どおり上限6件の警告が出る（gridの拡張は継承しない）', () => {
+    const items = Array.from({ length: 7 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
+    const md = stepsPlainMd(`items:\n${items}`);
+    const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
+    expect(s.items).toHaveLength(6);
+    expect(s.warnings.some((w) => w.includes('上限6件'))).toBe(true);
+  });
+
+  it('layout: grid でも items が9個を超えなければ deckLint相当の警告は出ない（回帰確認）', () => {
+    const items = Array.from({ length: 6 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
+    const md = stepsGridMd(`items:\n${items}`);
+    const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
+    expect(s.warnings.some((w) => w.includes('上限'))).toBe(false);
   });
 });
