@@ -233,6 +233,9 @@ export interface FigureSlide extends SlideBase {
   alt: string;
   url: string;
   source?: SourceLink;
+  // v0.4.4 追加（layout: split-image 時のみ有効）
+  imageSide?: 'left' | 'right';
+  items?: PointItem[];
 }
 
 export interface FeatureShowcaseSlide extends SlideBase {

@@ -325,6 +325,50 @@ function DiagramView({ slide, index }: { slide: DiagramSlide; index: number }) {
 // --- figure ---
 
 function FigureView({ slide }: { slide: FigureSlide }) {
+  if (slide.layout === 'split-image') {
+    return (
+      <div className={`figure-split${slide.imageSide === 'right' ? ' figure-split--right' : ''}`}>
+        <div className="figure-split-image">
+          {slide.url ? (
+            <img
+              src={safeUrl(slide.url)}
+              alt={slide.alt}
+              onError={(e) => {
+                const el = e.currentTarget;
+                el.style.display = 'none';
+              }}
+            />
+          ) : null}
+        </div>
+        <div className="figure-split-body">
+          <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />
+          {slide.items && slide.items.length > 0 && (
+            <ul className="points">
+              {slide.items.map((item, i) => (
+                <li key={i}>
+                  {item.lead && (
+                    <>
+                      <strong>{item.lead}</strong>：
+                    </>
+                  )}
+                  {renderInline(item.text)}
+                </li>
+              ))}
+            </ul>
+          )}
+          {slide.source && (
+            <figcaption>
+              出典:{' '}
+              <a href={safeUrl(slide.source.url)} target="_blank" rel="noreferrer">
+                {slide.source.label}
+              </a>
+            </figcaption>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="slide-inner">
       <SlideHeading text={slide.heading} badge={slide.badge} lead={slide.lead} />

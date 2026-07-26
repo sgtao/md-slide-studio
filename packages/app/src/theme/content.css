@@ -465,3 +465,41 @@ table.layout-compact td {
 .slide.feature-showcase .slide-inner.layout-reverse {
   flex-direction: row-reverse;
 }
+
+
+/* figure: 分割レイアウト（v0.4.4） */
+.figure-split {
+  display: flex;
+  gap: 2rem;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+.figure-split--right {
+  flex-direction: row-reverse;
+}
+.figure-split-image {
+  flex: 0 0 48%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--bg-surface);
+}
+.figure-split-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.figure-split-body {
+  flex: 1 1 48%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.75rem;
+}
+.figure-split-body figcaption {
+  margin-top: auto;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}

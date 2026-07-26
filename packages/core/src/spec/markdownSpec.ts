@@ -70,6 +70,7 @@ const LAYOUT_TABLE: string[] = [
   '| `summary` / `table` | `compact` | 余白を詰めて高密度に描画する |',
   '| `chart-bar` / `chart-line` | `side-list` | グラフの横に前提条件パネルを併記する |',
   '| `feature-showcase` | `reverse` | コンセプト面と詳細面の表示位置を入れ替える（データの意味は不変） |',
+  '| `figure` | `split-image` | 画像とテキストパネル（見出し・箇条書き・出典）を左右に分割する。`image-side:` で画像側を指定 |',
 ];
 
 export interface MarkdownSpecOptions {

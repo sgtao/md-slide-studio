@@ -797,11 +797,20 @@ function parseFigure(body: string, warnings: string[]) {
     warnings.push(`画像URLの拡張子が画像ではない可能性があります: ${img[2]}`);
   }
   if (!src) warnings.push('figure に source:（出典）がありません（必須）');
+  // v0.4.4: layout: split-image 用の追加キー
+  const sideMatch = body.match(/^image-side:\s*(left|right)\s*$/m);
+  const imageSide = sideMatch ? (sideMatch[1] as 'left' | 'right') : undefined;
+  if (/^image:\s*\S+/m.test(body)) {
+    warnings.push('figure の画像は ![alt](url) で指定します（image: は title の split-image 専用キーです）');
+  }
+  const items = parseListBody(body, 'bullet').items;
   return {
     heading,
     alt: img?.[1] ?? '',
     url: img?.[2] ?? '',
     source: src ? { label: src[1], url: src[2] } : undefined,
+    imageSide,
+    items: items.length > 0 ? items : undefined,
   };
 }
 

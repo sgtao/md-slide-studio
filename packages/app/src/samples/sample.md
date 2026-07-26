@@ -248,6 +248,24 @@ nodes: [計画, 実装, 計測, 改善]
 ![image](https://upload.wikimedia.org/wikipedia/commons/c/c3/Chrysanthemum01s3872.jpg)
 source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemum01s3872.jpg)
 ---
+<!-- slide: figure, layout: split-image, image-side: left -->
+badge: 分割レイアウト
+## 画像を左、要点を右に配置する
+lead: layout: split-image と image-side: left（既定値）の組み合わせ
+![image](https://upload.wikimedia.org/wikipedia/commons/c/c3/Chrysanthemum01s3872.jpg)
+- **画像位置**：`image-side: left`（省略時の既定値）
+- **テキスト側**：見出し・箇条書き・出典を通常の figure と同じ記法で書ける
+source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemum01s3872.jpg)
+---
+<!-- slide: figure, layout: split-image, image-side: right -->
+badge: 分割レイアウト
+## 画像を右、要点を左に配置する
+lead: image-side: right を指定すると画像とテキストが左右反転する
+![image](https://upload.wikimedia.org/wikipedia/commons/c/c3/Chrysanthemum01s3872.jpg)
+- **画像位置**：`image-side: right`
+- **用途**：直前のスライドと対にして視線誘導のリズムを作る
+source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemum01s3872.jpg)
+---
 <!-- slide: sources -->
 ## 出典・参考リンク
 - [websearch-slide-ja スキル](https://github.com/) — 本アプリの移植元スキル（スライドMD仕様 v0.7）
