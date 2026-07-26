@@ -25,7 +25,8 @@ export function buildDraftAssistPrompt(theme: string = '（ここにテーマを
 - 各スライドの先頭行はディレクティブ: \`<!-- slide: <type>[, fit][, layout: ...][, tone: dark] -->\`
   - \`tone: dark\` はそのスライドだけ地色を反転する（強調したい1〜2枚のみに使用）
 - 使用可能な type（全16種）:
-  - \`title\`: \`# 見出し\` + \`subtitle:\` + \`badges: [a, b]\`。
+  - \`title\`: \`# 見出し\` + \`subtitle:\` + \`badges: [a, b]\`。見出し内で改行したい場合は
+    \`<br>\` を使う（通常のMarkdown改行は使えない）。
     \`layout: title-xl\`（大見出し）／\`layout: split-image\`（右半分に画像。\`image:\` にURL指定。
     外部画像はPNG出力時にCORS失敗の可能性があるため多用しない）
   - \`points\`: \`## 見出し\` + \`- **リード**：説明\` の箇条書き（末尾 \`>\` 行は補足ノート）。
@@ -42,12 +43,16 @@ export function buildDraftAssistPrompt(theme: string = '（ここにテーマを
   - \`steps\`: 手順・プロセス・ワークフローのカード型フロー。\`\`\`steps フェンスに
     style（cards|circled）と items（icon / title / desc、任意で tone: dark|outline）をYAMLで記述
     （items数の上限は下記「型別の詳細仕様」参照）。任意の ratio（label, value の配列）で
-    セグメント比率帯を描画（合計は100を推奨）。**手順の説明には diagram-flow より steps を優先する**
+    セグメント比率帯を描画（合計は100を推奨）。**手順の説明には diagram-flow より steps を優先する**。
+    \`layout: grid\` で矢印を非表示にし、4列×2行の固定グリッド表示に切り替えられる
+    （items上限も拡張。詳細は下記「型別の詳細仕様」参照）
   - \`contrast\`: 「思い込み・誤解 → 実際の強み/弱点」のような**対比構造**を示す専用type。
     \`\`\`contrast フェンスに example（title, rows[tag, text]）と verdict（label/text/tone、
     または connector）をYAMLで記述（example の要否は下記「型別の詳細仕様」参照）。**頻用しない**：
     単なる比較にはcomparison-chart、単なる列挙にはpointsを優先し、対比構造が明確な場合のみ使う
-  - \`figure\`: \`![alt](画像URL)\` + \`source: [出典名](URL)\`（source必須）
+  - \`figure\`: \`![alt](画像URL)\` + \`source: [出典名](URL)\`（source必須）。
+    \`layout: split-image\` で画像とテキストパネル（見出し・箇条書き・出典）を左右分割表示できる
+    （\`image-side: left|right\` を本文の独立行として指定。既定は left）
   - \`feature-showcase\`: left（eyebrow / heading / lead）とright
     （num / eyebrow / heading / sub / items[label, desc]）のYAML
   - \`comparison-chart\`: \`\`\`comparison フェンスに left/right（title, items[]）をYAML
