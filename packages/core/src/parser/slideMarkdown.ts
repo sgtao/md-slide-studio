@@ -83,7 +83,7 @@ const SLIDE_TYPES: SlideType[] = [
   'contrast',
   'sources',
 ];
-const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact', 'side-list', 'split-image'];
+const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact', 'side-list', 'split-image', 'reverse'];
 
 // ---------------------------------------------------------------------------
 // エントリポイント

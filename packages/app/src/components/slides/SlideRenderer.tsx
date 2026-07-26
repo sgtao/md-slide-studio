@@ -364,7 +364,7 @@ function FigureView({ slide }: { slide: FigureSlide }) {
 function FeatureShowcaseView({ slide }: { slide: FeatureShowcaseSlide }) {
   const { left, right } = slide;
   return (
-    <div className="slide-inner">
+    <div className={`slide-inner${slide.layout === 'reverse' ? ' layout-reverse' : ''}`}>
       <div className="feature-left">
         {left.eyebrow && <div className="eyebrow">{left.eyebrow}</div>}
         <h2>{renderInline(left.heading, { allowBr: true })}</h2>

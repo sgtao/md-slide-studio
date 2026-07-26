@@ -69,6 +69,7 @@ const LAYOUT_TABLE: string[] = [
   '| `points` / `summary` | `two-col` | 本文を2カラム化する |',
   '| `summary` / `table` | `compact` | 余白を詰めて高密度に描画する |',
   '| `chart-bar` / `chart-line` | `side-list` | グラフの横に前提条件パネルを併記する |',
+  '| `feature-showcase` | `reverse` | コンセプト面と詳細面の表示位置を入れ替える（データの意味は不変） |',
 ];
 
 export interface MarkdownSpecOptions {

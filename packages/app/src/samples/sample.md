@@ -117,6 +117,20 @@ right:
     - label: 決定論的レンダリング
       desc: 貼り付ければ常に同じ見た目に
 ---
+<!-- slide: feature-showcase, layout: reverse -->
+left:
+  eyebrow: SUPPLEMENT
+  heading: "layout: reverse で表示位置を入れ替える"
+  lead: left/right の意味はそのまま。見た目だけが反転する
+right:
+  num: "02"
+  eyebrow: NOTE
+  heading: 使いどころ
+  sub: 直前のスライドと対で使うと効果的
+  items:
+    - { label: 連続スライド, desc: 同じ2カラム構成を左右交互にして単調さを避ける }
+    - { label: 視線誘導, desc: 直前スライドの続きだと錯覚させず、新しい話題の切り替えを示す }
+---
 <!-- slide: steps -->
 badge: HOW
 ## 使い方は、==4ステップ==
