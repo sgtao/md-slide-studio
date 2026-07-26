@@ -83,7 +83,14 @@ const SLIDE_TYPES: SlideType[] = [
   'contrast',
   'sources',
 ];
-const LAYOUTS: LayoutVariant[] = ['two-col', 'title-xl', 'compact', 'side-list', 'split-image', 'reverse'];
+const LAYOUTS: LayoutVariant[] = [
+  'two-col',
+  'title-xl',
+  'compact',
+  'side-list',
+  'split-image',
+  'reverse',
+];
 
 // ---------------------------------------------------------------------------
 // エントリポイント
@@ -801,7 +808,9 @@ function parseFigure(body: string, warnings: string[]) {
   const sideMatch = body.match(/^image-side:\s*(left|right)\s*$/m);
   const imageSide = sideMatch ? (sideMatch[1] as 'left' | 'right') : undefined;
   if (/^image:\s*\S+/m.test(body)) {
-    warnings.push('figure の画像は ![alt](url) で指定します（image: は title の split-image 専用キーです）');
+    warnings.push(
+      'figure の画像は ![alt](url) で指定します（image: は title の split-image 専用キーです）',
+    );
   }
   const items = parseListBody(body, 'bullet').items;
   return {

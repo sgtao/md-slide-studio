@@ -30,7 +30,8 @@ export type SlideType =
   | 'contrast'
   | 'sources';
 
-export type LayoutVariant = 'two-col' | 'title-xl' | 'compact' | 'side-list' | 'split-image' | 'reverse';
+export type LayoutVariant =
+  'two-col' | 'title-xl' | 'compact' | 'side-list' | 'split-image' | 'reverse';
 
 /** スライド単位の地色反転（v0.2.0）。未知値はディレクティブ解析時に無視される */
 export type SlideTone = 'dark';

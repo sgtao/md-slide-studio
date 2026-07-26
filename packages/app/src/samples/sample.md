@@ -251,6 +251,7 @@ source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemu
 <!-- slide: figure, layout: split-image, image-side: left -->
 badge: 分割レイアウト
 ## 画像を左、要点を右に配置する
+image-side: left
 lead: layout: split-image と image-side: left（既定値）の組み合わせ
 ![image](https://upload.wikimedia.org/wikipedia/commons/c/c3/Chrysanthemum01s3872.jpg)
 - **画像位置**：`image-side: left`（省略時の既定値）
@@ -260,6 +261,7 @@ source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemu
 <!-- slide: figure, layout: split-image, image-side: right -->
 badge: 分割レイアウト
 ## 画像を右、要点を左に配置する
+image-side: right
 lead: image-side: right を指定すると画像とテキストが左右反転する
 ![image](https://upload.wikimedia.org/wikipedia/commons/c/c3/Chrysanthemum01s3872.jpg)
 - **画像位置**：`image-side: right`
