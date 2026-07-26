@@ -43,21 +43,21 @@ describe('steps: layout: grid（v0.4.5）', () => {
   });
 });
 
-describe('steps: items上限（layout: grid のみ 2〜9個・cards/circledは2〜6個）', () => {
-  it('layout: grid では items が9個までは切り捨てられない', () => {
-    const items = Array.from({ length: 9 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
+describe('steps: items上限（layout: grid のみ 2〜8個・cards/circledは2〜6個）', () => {
+  it('layout: grid では items が8個までは切り捨てられない（2行x4列を想定）', () => {
+    const items = Array.from({ length: 8 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
     const md = stepsGridMd(`items:\n${items}`);
     const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
-    expect(s.items).toHaveLength(9);
+    expect(s.items).toHaveLength(8);
     expect(s.warnings.some((w) => w.includes('上限'))).toBe(false);
   });
 
-  it('layout: grid で items が10個以上は先頭9個に切り捨てて警告する', () => {
-    const items = Array.from({ length: 10 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
+  it('layout: grid で items が9個以上は先頭8個に切り捨てて警告する', () => {
+    const items = Array.from({ length: 9 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
     const md = stepsGridMd(`items:\n${items}`);
     const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
-    expect(s.items).toHaveLength(9);
-    expect(s.warnings.some((w) => w.includes('上限9件'))).toBe(true);
+    expect(s.items).toHaveLength(8);
+    expect(s.warnings.some((w) => w.includes('上限8件'))).toBe(true);
   });
 
   it('layout未指定（cards既定）では、items 7個で従来どおり上限6件の警告が出る（gridの拡張は継承しない）', () => {
@@ -66,12 +66,5 @@ describe('steps: items上限（layout: grid のみ 2〜9個・cards/circledは2�
     const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
     expect(s.items).toHaveLength(6);
     expect(s.warnings.some((w) => w.includes('上限6件'))).toBe(true);
-  });
-
-  it('layout: grid でも items が9個を超えなければ deckLint相当の警告は出ない（回帰確認）', () => {
-    const items = Array.from({ length: 6 }, (_, i) => `  - { title: S${i + 1} }`).join('\n');
-    const md = stepsGridMd(`items:\n${items}`);
-    const s = parseSlideMarkdown(md).slides[0] as StepsSlide;
-    expect(s.warnings.some((w) => w.includes('上限'))).toBe(false);
   });
 });

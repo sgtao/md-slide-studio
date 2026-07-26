@@ -866,7 +866,7 @@ function parseFeatureShowcase(body: string, warnings: string[]) {
 
 const STEP_STYLES: StepStyle[] = ['cards', 'circled'];
 const STEPS_MAX_ITEMS = 6;
-const STEPS_MAX_ITEMS_GRID = 9;
+const STEPS_MAX_ITEMS_GRID = 8;
 
 function parseStepsSlide(body: string, warnings: string[], layout?: LayoutVariant) {
   const fence = extractFence(body, 'steps');

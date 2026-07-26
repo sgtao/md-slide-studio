@@ -31,7 +31,7 @@ export const zStepsYaml = z
     summary:
       'カード型ステップフロー。style(cards|circled)とitems(icon/title/desc/tone)をYAMLで記述',
     constraints: [
-      'items は2〜6個（1個以下は警告・7件目以降は切り捨て）。layout: grid のみ2〜9個まで拡張（10件目以降は切り捨て）',
+      'items は2〜6個（1個以下は警告・7件目以降は切り捨て）。layout: grid のみ2〜8個まで拡張（9件目以降は切り捨て・4列x2行を想定）',
       '任意の ratio でセグメント比率帯を描画可（合計100を推奨）',
       'layout: grid で矢印を非表示にし複数列へ折り返し表示できる',
     ],

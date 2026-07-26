@@ -288,10 +288,12 @@
  * style（cards/circled）とは直交する概念のため、既存クラスと併用する。
  * ========================================================================== */
 .steps-grid {
-  flex-wrap: wrap;
-}
-.steps-grid .steps-item {
-  flex: 1 1 220px;
+  /* v0.4.5-grid4col: flex-wrapの実測px依存をやめ、CSS Gridで4列固定にする。
+   * hero view は 960x540px 固定・overflow: hidden（slide-fit は list view のみ有効）
+   * のため、items上限8個（2行x4列）を前提に設計している。 */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 .steps-grid .steps-item + .steps-item::before {
   content: none;
