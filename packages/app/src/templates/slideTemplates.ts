@@ -1,7 +1,7 @@
 /**
  * slideTemplates.ts — テンプレート挿入機能で使うスライドMDスニペット集。
  * 内容は sample.md（v0.2.5統合版）・types.ts（v0.2.3拡張）の記法と同期させている。
- * 全17 typeを網羅し、バリエーションのあるtype（title / steps / chart-bar）は
+ * 全18 typeを網羅し、バリエーションのあるtype（title / steps / chart-bar / svg-figure）は
  * 複数テンプレートとして登録する。
  */
 export interface SlideTemplate {
@@ -274,5 +274,39 @@ right:
   items:
     - label: 項目1
       desc: 説明`,
+  },
+
+  // ─── svg-figure（v0.4.6） ───
+  {
+    id: 'svg-figure-journey',
+    label: 'ジャーニーマップ（svg-figure）',
+    category: 'diagram',
+    snippet: `<!-- slide: svg-figure -->
+## 見出し
+\`\`\`mermaid
+journey
+  section セクション1
+    タスク1: 4: User
+    タスク2: 5: User
+\`\`\`
+notes:
+  - 補足1
+  - 補足2`,
+  },
+  {
+    id: 'svg-figure-gantt',
+    label: 'ガントチャート（svg-figure）',
+    category: 'diagram',
+    snippet: `<!-- slide: svg-figure -->
+## 見出し
+\`\`\`mermaid
+gantt
+  title プロジェクト計画
+  dateFormat YYYY-MM-DD
+  section フェーズ1
+    タスクA :a1, 2026-01-01, 3d
+  section フェーズ2
+    タスクB :after a1, 5d
+\`\`\``,
   },
 ];

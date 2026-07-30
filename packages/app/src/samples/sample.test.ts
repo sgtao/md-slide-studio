@@ -17,7 +17,7 @@ describe('sample.md（v0.2.5 統合デッキ）', () => {
     expect(deck.slides[deck.slides.length - 1].type).toBe('sources');
   });
 
-  it('全16 type が最低1回は登場する', () => {
+  it('全17 type が最低1回は登場する', () => {
     const deck = parseSlideMarkdown(sampleMd);
     const types = new Set(deck.slides.map((s) => s.type));
     const expected = [
@@ -38,6 +38,7 @@ describe('sample.md（v0.2.5 統合デッキ）', () => {
       'steps',
       'contrast',
       'sources',
+      'svg-figure',
     ] as const;
     for (const t of expected) {
       expect(types.has(t), `type "${t}" が sample.md に含まれていません`).toBe(true);

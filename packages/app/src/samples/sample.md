@@ -6,7 +6,7 @@ converting-site: https://sgtao.github.io/md-slide-studio/
 <!-- slide: title -->
 # Markdownから、==スライドを生成する。==
 subtitle: MD Slide Studio — 内容はMarkdownで書き、見た目はレンダラが決める
-badges: [全16type網羅サンプル, React + TypeScript, websearch-slide-ja 移植]
+badges: [全17type網羅サンプル, React + TypeScript, websearch-slide-ja 移植]
 ---
 <!-- slide: contrast -->
 badge: WHY
@@ -48,7 +48,7 @@ labels: ["人が書く", "落ちない", "判別共用体", "座標は固定", "
 point: 未知の値は==警告してフォールバック==。原稿の途中でもプレビューは壊れない
 ---
 <!-- slide: table -->
-## 宣言的に書ける範囲＝16type
+## 宣言的に書ける範囲＝17type
 lead: 「どう描くか」ではなく「何のスライドか」を宣言する。描画はtypeが引き受ける
 | type | 用途 | 記法 |
 |---|---|---|
@@ -56,6 +56,7 @@ lead: 「どう描くか」ではなく「何のスライドか」を宣言す�
 | table | 比較表 | Markdownテーブル |
 | chart-bar / line / donut | グラフ | ` ```chart ` ブロック |
 | diagram-flow / layer / cycle / timeline | 図解・タイムライン | ` ```diagram ` ブロック |
+| svg-figure | ジャーニーマップ・ガントチャート | ` ```mermaid ` ブロック |
 | steps | 手順カードフロー | ` ```steps ` ブロック |
 | contrast / comparison-chart | 対比・前後比較 | 専用ブロック |
 | figure / feature-showcase / sources | 画像・機能紹介・出典 | 専用記法 |
@@ -261,6 +262,25 @@ nodes: [[プレゼンテーション層], [アプリケーション層], [デー
 type: cycle
 nodes: [計画, 実装, 計測, 改善]
 ```
+---
+<!-- slide: svg-figure -->
+## AI下書き支援の利用体験（svg-figure: journey）
+lead: LLMプロンプト取得から書き出しまでの満足度推移
+```mermaid
+journey
+  title AI下書き支援フロー
+  section 準備
+    プロンプト取得: 4: User
+  section 活用
+    LLMに下書きさせる: 5: User
+    貼り付けて手直し: 4: User
+  section 完了
+    書き出す: 5: User
+```
+notes:
+  - 「手直し」フェーズでも満足度は大きく落ちない
+  - 最終工程（書き出す）が最高スコア
+point: 一連の体験で最も満足度が落ちにくいのは==LLMに下書きさせる==工程
 ---
 <!-- slide: figure -->
 ## 図版と出典（figure）

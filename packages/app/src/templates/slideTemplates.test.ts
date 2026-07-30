@@ -8,8 +8,8 @@ import { SLIDE_TEMPLATES } from './slideTemplates';
 // 単体スライドのみのデッキになるため、deckLint側の「先頭title」「最終sources」等の
 // 構成的な warn/info は出うるが、error（構文・必須項目の欠落）は0件であることを確認する。
 describe('SLIDE_TEMPLATES', () => {
-  it('20テンプレートが登録されている（全17type網羅・一部typeは複数バリエーション）', () => {
-    expect(SLIDE_TEMPLATES.length).toBeGreaterThanOrEqual(17);
+  it('22テンプレートが登録されている（全18type網羅・一部typeは複数バリエーション）', () => {
+    expect(SLIDE_TEMPLATES.length).toBeGreaterThanOrEqual(18);
   });
 
   it.each(SLIDE_TEMPLATES)('$id: パース・lintでerrorが出ない', ({ snippet }) => {
