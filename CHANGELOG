@@ -3,6 +3,37 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## v0.4.7（2026-07-31）
+
+### 追加｜
+- 左サイドメニューを新設し、表示モード（2分割／編集のみ／プレビューのみ）を切り替えられるようにした。選択状態はリロード後も保持される
+  新規: `packages/app/src/layout/layoutMode.ts`, `packages/app/src/layout/layoutMode.test.ts`, `packages/app/src/components/SideMenu.tsx`, `packages/app/src/theme/app-shell.css`
+  変更: `packages/app/src/App.tsx`, `packages/app/src/main.tsx`, `packages/app/src/hooks/hooks.ts`
+
+- 左サイドメニューの「AIプロンプト」をポップアップからメインパネル表示に変更し、テーマ入力を複数行（5行表示・スクロール対応）にした。ヘッダーの🤖ボタンは従来どおりポップアップのまま
+  新規: `packages/app/src/ai/promptComposer.tsx`, `packages/app/src/components/AiPromptPanel.tsx`
+  変更: `packages/app/src/App.tsx`, `packages/app/src/components/SideMenu.tsx`, `packages/app/src/theme/app-shell.css`
+
+### 変更｜
+- `ControlCluster` を `.preview-pane` の外（`.workspace` 直下）へ移設し、「編集のみ」レイアウトや AIプロンプトパネル表示中もテーマ・パレット操作を維持できるようにした。ビュー切替・エクスポートはこれらの状態でのみ無効化
+  変更: `packages/app/src/App.tsx`, `packages/app/src/components/ControlCluster.tsx`
+
+- ヘルプのショートカット説明を修正（「V」＝プレビュー表示切替に訂正）し、表示モード切替（1/2/3）を追記
+  変更: `packages/app/src/help/helpContent.ts`
+
+- `--print-spec` の type一覧を全16→全17に更新し、`svg-figure` の記法説明を追記（v0.4.6バックログの解消）
+  変更: `packages/core/src/spec/markdownSpec.ts`
+
+### 修正｜
+- `ControlCluster` のメニュー開閉処理で effect 内から直接 `setState` していた箇所を、レンダリング時の導出値に置き換えて解消（`react-hooks/set-state-in-effect`）
+  変更: `packages/app/src/components/ControlCluster.tsx`
+
+- E2E「1 / 2 / 3 キーで切り替わる」がまれに失敗する問題を修正。アプリのマウント完了（`.side-menu` の表示）を待ってからキー入力を送るように変更
+  変更: `e2e/layout.spec.ts`
+
+新規テスト: `e2e/layout.spec.ts`（8件）, `e2e/ai-prompt-panel.spec.ts`（7件）, `packages/app/src/layout/layoutMode.test.ts`（10件）
+
+---
 ## [v0.4.6] - 2026-07-30
 
 ### 追加｜新規スライドtype `svg-figure`（mermaid journey / gantt を独自SVGで描画）
