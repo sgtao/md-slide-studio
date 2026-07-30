@@ -1,0 +1,108 @@
+/* svg-figure.css
+ * svg-figure type（v0.4.6〜）: mermaid journey / gantt 記法の独自SVG描画。
+ * 色は必ず theme-vars.css の --chart-* / --text-* / --accent 経由（ハードコード禁止規約に準拠）。
+ * main.tsx で contrast.css の後に import する。
+ */
+
+.svg-figure-body {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+}
+.svg-figure-body .svg-figure-diagram {
+  flex: 1; /* notes無しなら全幅 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+.svg-figure-body.with-notes .svg-figure-diagram {
+  flex: 2; /* notes有りなら左2/3 */
+}
+.svg-figure-body .svg-figure-notes {
+  flex: 1; /* 右1/3 */
+  min-width: 0;
+  font-size: 0.9em;
+}
+.svg-figure-body .svg-figure-notes ul.points li {
+  font-size: 0.82rem;
+}
+
+.svg-figure-svg {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  overflow: visible;
+  display: block;
+}
+
+/* ─── journey ─── */
+.svg-journey-band {
+  fill: var(--bg-surface);
+}
+.svg-journey-band--alt {
+  fill: var(--accent-light);
+}
+.svg-journey-section-label {
+  fill: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+}
+.svg-journey-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.svg-journey-dot {
+  stroke: var(--bg-slide);
+  stroke-width: 1.5;
+}
+.svg-journey-task-label {
+  fill: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+}
+
+/* ─── gantt ─── */
+.svg-gantt-section-label {
+  fill: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+}
+.svg-gantt-row-label {
+  fill: var(--text-secondary);
+  font-size: 11px;
+  font-family: inherit;
+}
+.svg-gantt-bar {
+  opacity: 0.9;
+}
+.svg-gantt-bar--done {
+  opacity: 0.4;
+}
+.svg-gantt-bar--active {
+  opacity: 1;
+  stroke: var(--bg-slide);
+  stroke-width: 1;
+}
+.svg-gantt-bar--crit {
+  stroke: var(--chart-4);
+  stroke-width: 2;
+}
+.svg-gantt-milestone {
+  stroke: var(--bg-slide);
+  stroke-width: 1;
+}
+
+/* ─── 印刷（PDF）: 色を維持 ─── */
+@media print {
+  .svg-journey-dot,
+  .svg-gantt-bar,
+  .svg-gantt-milestone {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

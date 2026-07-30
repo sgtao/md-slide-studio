@@ -37,5 +37,7 @@ export {
 
 // --- 座標計算・数値整形の純関数 ---
 export { donutSegmentPath, formatValue } from './geometry/chart';
+// --- svg-figure（journey/gantt）の日数換算（app側SVG座標計算で再利用） ---
+export { parseDuration } from './parser/svgFigure';
 // --- AI原稿作成プロンプト（app「AIプロンプト」ボタン / CLI --guide-prompt 共用） ---
 export { buildDraftAssistPrompt, MINIMAL_EXAMPLE } from './prompt/draftAssistPrompt';

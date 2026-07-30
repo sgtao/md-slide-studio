@@ -22,10 +22,11 @@ const ALL_TYPES = [
   'figure',
   'feature-showcase',
   'sources',
+  'svg-figure',
 ];
 
 describe('buildDraftAssistPrompt', () => {
-  it('全16 type名がプロンプトに含まれる', () => {
+  it('全17 type名がプロンプトに含まれる', () => {
     const prompt = buildDraftAssistPrompt('テストテーマ');
     for (const type of ALL_TYPES) {
       expect(prompt).toContain(type);

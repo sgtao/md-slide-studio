@@ -28,7 +28,8 @@ export type SlideType =
   | 'feature-showcase'
   | 'steps'
   | 'contrast'
-  | 'sources';
+  | 'sources'
+  | 'svg-figure';
 
 export type LayoutVariant =
   'two-col' | 'title-xl' | 'compact' | 'side-list' | 'split-image' | 'reverse' | 'grid';
@@ -98,6 +99,47 @@ export interface TimelineBlock {
   start: string;
   milestones: { label: string; when: string }[];
 }
+
+/** journey 型（v0.4.6）: mermaid journey 記法から生成する感情推移グラフ */
+export interface JourneyTask {
+  label: string;
+  score: number;
+  actors: string[];
+}
+
+export interface JourneySection {
+  name: string;
+  tasks: JourneyTask[];
+}
+
+export interface JourneyBlock {
+  type: 'journey';
+  title?: string;
+  sections: JourneySection[];
+}
+
+/** gantt 型（v0.4.7）: mermaid gantt 記法から生成する簡易ガントチャート */
+export interface GanttTask {
+  label: string;
+  id?: string;
+  tags: string[];
+  start?: string;
+  duration?: string;
+}
+
+export interface GanttSection {
+  name: string;
+  tasks: GanttTask[];
+}
+
+export interface GanttBlock {
+  type: 'gantt';
+  title?: string;
+  dateFormat?: string;
+  sections: GanttSection[];
+}
+
+export type SvgFigureBlock = JourneyBlock | GanttBlock;
 
 export interface FeatureShowcaseLeft {
   eyebrow?: string;
@@ -286,6 +328,15 @@ export interface SourcesSlide extends SlideBase {
   links: SourceLink[];
 }
 
+/** svg-figure（v0.4.6）: mermaid journey/gantt 記法を独自SVGで描画する専用type */
+export interface SvgFigureSlide extends SlideBase {
+  type: 'svg-figure';
+  heading?: InlineText;
+  figure?: SvgFigureBlock;
+  notes?: string[];
+  note?: InlineText;
+}
+
 export type Slide =
   | TitleSlide
   | PointsSlide
@@ -299,7 +350,8 @@ export type Slide =
   | FeatureShowcaseSlide
   | StepsSlide
   | ContrastSlide
-  | SourcesSlide;
+  | SourcesSlide
+  | SvgFigureSlide;
 
 export interface SlideDeck {
   frontmatter: Frontmatter;

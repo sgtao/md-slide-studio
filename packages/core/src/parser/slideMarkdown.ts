@@ -12,6 +12,7 @@
 // zod-applied
 import YAML from 'yaml';
 import { parseSlideHeader } from './slideHeader';
+import { parseMermaidGantt, parseMermaidJourney } from './svgFigure';
 import {
   zChartYaml,
   zChartDataItem,
@@ -49,6 +50,8 @@ import type {
   FeatureShowcaseLeft,
   FeatureShowcaseRight,
   Frontmatter,
+  GanttBlock,
+  JourneyBlock,
   LayoutVariant,
   Palette,
   PointItem,
@@ -82,6 +85,7 @@ const SLIDE_TYPES: SlideType[] = [
   'steps',
   'contrast',
   'sources',
+  'svg-figure',
 ];
 const LAYOUTS: LayoutVariant[] = [
   'two-col',
@@ -272,6 +276,8 @@ function parseSlide(raw: string): Slide | null {
       return { ...base, type: 'contrast', ...parseContrastSlide(body, d.warnings) };
     case 'sources':
       return { ...base, type: 'sources', ...parseSources(body) };
+    case 'svg-figure':
+      return { ...base, type: 'svg-figure', ...parseSvgFigureSlide(body, d.warnings) };
   }
 }
 
@@ -581,6 +587,29 @@ function parseComparisonLeft(rest: string, warnings: string[]): ComparisonLeft {
 
 // --- diagram（diagram ブロック / mermaid サブセット） ---
 
+/**
+ * ```mermaid フェンスの中身の先頭行を見て、行き先を振り分ける（v0.4.6）。
+ * graph LR/TD 等は既存の parseMermaidSubset() へそのまま委譲し、中身は一切変更しない。
+ * journey / gantt は svg-figure 専用の新パーサーへ振り分ける。
+ */
+function dispatchMermaidFence(
+  src: string,
+  warnings: string[],
+):
+  | { kind: 'legacy'; diagram: DiagramBlock | null }
+  | { kind: 'journey'; figure: JourneyBlock | null }
+  | { kind: 'gantt'; figure: GanttBlock | null } {
+  const head =
+    src
+      .split('\n')
+      .map((l) => l.trim())
+      .find(Boolean) ?? '';
+  if (/^journey\b/.test(head))
+    return { kind: 'journey', figure: parseMermaidJourney(src, warnings) };
+  if (/^gantt\b/.test(head)) return { kind: 'gantt', figure: parseMermaidGantt(src, warnings) };
+  return { kind: 'legacy', diagram: parseMermaidSubset(src, warnings) };
+}
+
 function parseDiagramSlide(body: string, slideType: string, warnings: string[]) {
   const expected = slideType.replace('diagram-', '') as DiagramBlock['type'];
   let fence = extractFence(body, 'diagram');
@@ -594,7 +623,14 @@ function parseDiagramSlide(body: string, slideType: string, warnings: string[]) 
     fence = extractFence(body, 'mermaid');
     if (fence) {
       rest = fence.rest;
-      diagram = parseMermaidSubset(fence.content, warnings) ?? undefined;
+      const dispatched = dispatchMermaidFence(fence.content, warnings);
+      if (dispatched.kind === 'legacy') {
+        diagram = dispatched.diagram ?? undefined;
+      } else {
+        warnings.push(
+          `"${slideType}" では journey / gantt は未対応です（svg-figure を使ってください）`,
+        );
+      }
     } else {
       warnings.push('```diagram / ```mermaid ブロックが見つかりません');
     }
@@ -743,6 +779,40 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
     return null;
   }
   return { type: 'layer', nodes: nodeLabels };
+}
+
+// --- svg-figure（v0.4.6: journey / gantt を独自SVGで描画） ---
+
+/** `notes:\n  - a\n  - b` 形式の箇条書きを string[] としてパースする。 */
+function parseNotesList(body: string): string[] | undefined {
+  const m = body.match(/^notes:\s*\n((?:\s*-\s+.+\n?)+)/m);
+  if (!m) return undefined;
+  const items = m[1]
+    .split('\n')
+    .map((l) => l.match(/^\s*-\s+(.+)$/))
+    .filter((mm): mm is RegExpMatchArray => mm !== null)
+    .map((mm) => mm[1].trim());
+  return items.length ? items : undefined;
+}
+
+function parseSvgFigureSlide(body: string, warnings: string[]) {
+  const fence = extractFence(body, 'mermaid');
+  let figure: JourneyBlock | GanttBlock | undefined;
+  let rest = body;
+  if (fence) {
+    rest = fence.rest;
+    const dispatched = dispatchMermaidFence(fence.content, warnings);
+    if (dispatched.kind === 'legacy') {
+      warnings.push('svg-figure は journey / gantt のみ対応です');
+    } else {
+      figure = dispatched.figure ?? undefined;
+    }
+  } else {
+    warnings.push('```mermaid ブロックが見つかりません');
+  }
+  const { heading, note } = pickHeadingAndNote(rest);
+  const notes = parseNotesList(rest);
+  return { heading, note, figure, notes };
 }
 
 // --- diagram-timeline（v0.2.1: タイムライン図） ---

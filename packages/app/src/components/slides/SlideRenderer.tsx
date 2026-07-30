@@ -33,6 +33,7 @@ import {
 } from '../diagrams/Diagrams';
 import { Note, PointBand, SlideHeading } from './common';
 import { StepsView } from './StepsView';
+import { SvgFigureView } from './SvgFigureView';
 
 // --- title ---
 
@@ -568,6 +569,8 @@ function renderSlideBody(slide: Slide, index: number) {
       return <ContrastView slide={slide} />;
     case 'sources':
       return <SourcesView slide={slide} />;
+    case 'svg-figure':
+      return <SvgFigureView slide={slide} index={index} />;
   }
 }
 

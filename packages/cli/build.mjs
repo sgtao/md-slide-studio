@@ -1,7 +1,7 @@
 /**
  * build.mjs — @mdss/cli のビルド。
  *
- * 1) theme配下13枚のCSSを main.tsx と同一順で連結し src/generated/themeCss.ts を生成
+ * 1) theme配下14枚のCSSを main.tsx と同一順で連結し src/generated/themeCss.ts を生成
  *    ＋ app の sample.md を src/generated/sampleMd.ts として文字列化（--sample-md 用）
  *    （npx公開時に手元へ実CSSファイルが無くても動くよう、文字列としてバンドルへ取り込む）
  * 2) esbuild で src/cli.ts を dist/cli.mjs へ自己完結バンドル
@@ -34,6 +34,7 @@ const CSS_ORDER = [
   'steps',
   'timeline-sidelist',
   'contrast',
+  'svg-figure',
 ];
 const themeDir = resolve(appSrc, 'theme');
 const cssParts = CSS_ORDER.map((name) => {
