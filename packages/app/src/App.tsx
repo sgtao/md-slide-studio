@@ -10,9 +10,11 @@ import { LintPanel } from './components/LintPanel';
 import type { Palette } from '@mdss/core';
 import { SlideDeckView, type SlideDeckHandle } from './components/SlideDeck';
 import { ControlCluster } from './components/ControlCluster';
+import { SideMenu } from './components/SideMenu';
 import { TemplateMenu } from './components/TemplateMenu';
 import { HelpModal } from './components/HelpModal';
 import { useKeyboardNav, usePersistentState } from './hooks/hooks';
+import { canExportFromDom, resolveLayout, type LayoutMode } from './layout/layoutMode';
 import {
   exportAllToZip,
   exportHtml,
@@ -69,6 +71,13 @@ export default function App() {
 
   // --- 表示状態 ---
   const [mode, setMode] = usePersistentState<'edit' | 'present'>('mdss-mode', 'edit');
+  // v0.4.7: 表示モード（2分割／編集のみ／プレビューのみ）。present 中は 'preview' へ
+  // 一時上書きするが保存値は変えない（プレゼンから戻ったとき作業レイアウトへ復帰させる）。
+  const [layoutStored, setLayout] = usePersistentState<LayoutMode>('mdss-layout', 'split');
+  const [menuOpen, setMenuOpen] = usePersistentState<'0' | '1'>('mdss-menu-expanded', '1');
+  const effectiveLayout = resolveLayout(layoutStored, mode);
+  // 'editor' では .preview-pane がアンマウントされ、DOM実体を必要とする書き出しが成立しない。
+  const canExport = canExportFromDom(effectiveLayout);
   const [theme, setTheme] = usePersistentState<'light' | 'dark'>('slide-theme', 'light');
   const [view, setView] = usePersistentState<'hero' | 'list'>('slide-view', 'hero');
   const [paletteOverride, setPaletteOverride] = useState<Palette | ''>(() => {
@@ -167,16 +176,27 @@ export default function App() {
     if (el) void exportHtml(el, title, md);
   }, [title, md]);
 
+  // present 中は表示モードを変えない（サイドメニュー自体もCSSで隠れている）。
+  const onSetLayoutByKey = useCallback(
+    (m: LayoutMode) => {
+      if (mode === 'edit') setLayout(m);
+    },
+    [mode, setLayout],
+  );
+
+  // 'editor' ではボタンだけでなくショートカットも無効化する。
+  // 無効化しないと P キーで白紙PDFが出るなどの無言failureになるため。
   useKeyboardNav(
     useMemo(
       () => ({
         onNavigate: navigate,
         onToggleView: toggleView,
-        onExportPdf: doPdf,
-        onExportPng: doPng,
-        onExportZip: doZip,
+        onSetLayout: onSetLayoutByKey,
+        onExportPdf: canExport ? doPdf : undefined,
+        onExportPng: canExport ? doPng : undefined,
+        onExportZip: canExport ? doZip : undefined,
       }),
-      [navigate, toggleView, doPdf, doPng, doZip],
+      [navigate, toggleView, onSetLayoutByKey, canExport, doPdf, doPng, doZip],
     ),
     true,
   );
@@ -224,8 +244,22 @@ export default function App() {
         </button>
       </header>
 
-      <div className="workspace">
-        {mode === 'edit' && (
+      <div className="workspace" data-layout={effectiveLayout}>
+        <SideMenu
+          layout={effectiveLayout}
+          expanded={menuOpen === '1'}
+          onSetLayout={setLayout}
+          onToggleExpanded={() => setMenuOpen(menuOpen === '1' ? '0' : '1')}
+          onStartPresent={() => setMode('present')}
+          onOpenPrompt={() => setPromptOpen(true)}
+          onLoadSample={() => setMd(sampleMd)}
+          onOpenHelp={() => {
+            setHelpOpen(true);
+            setHelpSeen('seen');
+          }}
+        />
+
+        {effectiveLayout !== 'preview' && (
           <div className="editor-pane">
             <div className="editor-toolbar">
               <TemplateMenu onInsert={insertSnippet} />
@@ -260,41 +294,45 @@ export default function App() {
           </div>
         )}
 
-        <div className="preview-pane">
-          {deck.slides.length > 0 ? (
-            <SlideDeckView
-              ref={deckRef}
-              deck={deck}
-              current={clampedCurrent}
-              view={view}
-              onSelect={(i) => {
-                setCurrent(i);
-                setView('hero');
-              }}
-              onNavigate={navigate}
-            />
-          ) : (
-            <div className="empty-deck">
-              スライドがありません。
-              <br />
-              frontmatter と <code>&lt;!-- slide: type --&gt;</code>{' '}
-              ディレクティブを記述してください。
-            </div>
-          )}
-          <ControlCluster
-            theme={theme}
-            view={view}
-            palette={palette}
-            onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            onToggleView={toggleView}
-            onSetPalette={setPalette}
-            onExportHtml={doHtml}
-            onExportPdf={doPdf}
-            onExportPng={doPng}
-            onExportZip={doZip}
-            onExportMd={doMd}
-          />
-        </div>
+        {effectiveLayout !== 'editor' && (
+          <div className="preview-pane">
+            {deck.slides.length > 0 ? (
+              <SlideDeckView
+                ref={deckRef}
+                deck={deck}
+                current={clampedCurrent}
+                view={view}
+                onSelect={(i) => {
+                  setCurrent(i);
+                  setView('hero');
+                }}
+                onNavigate={navigate}
+              />
+            ) : (
+              <div className="empty-deck">
+                スライドがありません。
+                <br />
+                frontmatter と <code>&lt;!-- slide: type --&gt;</code>{' '}
+                ディレクティブを記述してください。
+              </div>
+            )}
+          </div>
+        )}
+
+        <ControlCluster
+          theme={theme}
+          view={view}
+          palette={palette}
+          disabled={effectiveLayout === 'editor'}
+          onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          onToggleView={toggleView}
+          onSetPalette={setPalette}
+          onExportHtml={doHtml}
+          onExportPdf={doPdf}
+          onExportPng={doPng}
+          onExportZip={doZip}
+          onExportMd={doMd}
+        />
       </div>
 
       {promptOpen && <PromptModal onClose={() => setPromptOpen(false)} />}

@@ -4,6 +4,7 @@
  * theme-toggle.js・palette-toggle.js → usePersistentState（data属性はApp側で反映）
  */
 import { useCallback, useEffect, useState, type RefObject } from 'react';
+import { layoutModeFromKey, type LayoutMode } from '../layout/layoutMode';
 
 /**
  * useFitSlide — コンテナ幅・高さに合わせて .slide-scaler をスケーリング。
@@ -31,6 +32,8 @@ export function useFitSlide(containerRef: RefObject<HTMLElement | null>, enabled
 export interface KeyboardNavHandlers {
   onNavigate: (dir: 1 | -1) => void;
   onToggleView: () => void;
+  /** v0.4.7: 表示モード切替（1/2/3）。未指定ならキーを無視する。 */
+  onSetLayout?: (m: LayoutMode) => void;
   onExportPdf?: () => void;
   onExportPng?: () => void;
   onExportZip?: () => void;
@@ -39,6 +42,7 @@ export interface KeyboardNavHandlers {
 /**
  * useKeyboardNav — navigation.js のショートカット移植。
  * ← / → / Space / F（フルスクリーン） / V（ビュー切替） /
+ * 1 / 2 / 3（表示モード切替・v0.4.7） /
  * P（PDF） / Shift+S（PNG） / Shift+P（ZIP）
  * 入力フィールド内・Ctrl/Cmd 押下時は無効（ブラウザ標準を尊重）。
  */
@@ -67,6 +71,15 @@ export function useKeyboardNav(handlers: KeyboardNavHandlers, enabled: boolean) 
       if (e.key === 'v' || e.key === 'V') {
         handlers.onToggleView();
         return;
+      }
+      // v0.4.7: 1/2/3 で表示モード切替。Shift併用時は e.key が記号になるため衝突しない。
+      if (!e.shiftKey && handlers.onSetLayout) {
+        const layoutMode = layoutModeFromKey(e.key);
+        if (layoutMode) {
+          e.preventDefault();
+          handlers.onSetLayout(layoutMode);
+          return;
+        }
       }
       if (e.shiftKey && e.key === 'P') {
         e.preventDefault();

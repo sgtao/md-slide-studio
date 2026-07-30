@@ -1,0 +1,112 @@
+/* app-shell.css
+ * v0.4.7: 左サイドメニューと表示モード（2分割／編集のみ／プレビューのみ）。
+ *
+ * このファイルはアプリ専用UIのため、packages/cli/build.mjs の CSS_ORDER には
+ * 追加しない（書き出しHTML／CLI出力に不要なバイトを載せないため）。
+ * main.tsx では app.css より後に読み込むこと（.editor-pane の flex 指定を上書きする）。
+ *
+ * サイドメニューは .workspace（display:flex）の最初の子として置かれる。
+ * 専用のラッパー要素は設けていない。
+ */
+
+/* ─── 左サイドメニュー ─── */
+.side-menu {
+  flex: 0 0 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 6px;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  transition: flex-basis 0.16s ease;
+}
+.side-menu[data-expanded='true'] {
+  flex-basis: 184px;
+}
+
+.side-menu__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.side-menu__toggle,
+.side-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.78rem;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.side-menu__toggle:hover,
+.side-menu__item:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+[data-theme='dark'] .side-menu__toggle:hover,
+[data-theme='dark'] .side-menu__item:hover {
+  background: var(--accent-dim);
+}
+.side-menu__item[aria-checked='true'] {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.side-menu__ico {
+  flex: 0 0 1.3em;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1;
+}
+.side-menu__label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 畳んでいる間はラベルを隠す（アイコンレール状態） */
+.side-menu:not([data-expanded='true']) .side-menu__label {
+  display: none;
+}
+
+/* ─── 表示モード別のワークスペース ─── */
+/* 'split' は app.css の既定（.editor-pane: flex 0 0 44%）をそのまま使う。 */
+.workspace[data-layout='editor'] .editor-pane {
+  flex: 1 1 auto;
+  border-right: none;
+}
+/* 'editor' では .control-cluster（position:fixed）がテキスト先頭行に重なるため
+   上余白を広げる。スクロール時に文字がボタンの下へ潜る点は残るが、
+   ヘッダーとコントロールの整理を行う v0.4.8 で解消する。 */
+.workspace[data-layout='editor'] .editor-pane textarea {
+  padding-top: 36px;
+}
+
+/* ─── present モードではサイドメニューを隠す ─── */
+html[data-mode='present'] .side-menu {
+  display: none;
+}
+
+/* ─── 印刷時はアプリUIを隠す（app.css の @media print と同じ方針） ─── */
+@media print {
+  .side-menu {
+    display: none !important;
+  }
+}
