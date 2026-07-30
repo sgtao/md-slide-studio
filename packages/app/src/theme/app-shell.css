@@ -63,7 +63,8 @@
 [data-theme='dark'] .side-menu__item:hover {
   background: var(--accent-dim);
 }
-.side-menu__item[aria-checked='true'] {
+.side-menu__item[aria-checked='true'],
+.side-menu__item[aria-pressed='true'] {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);
@@ -97,6 +98,35 @@
    ヘッダーとコントロールの整理を行う v0.4.8 で解消する。 */
 .workspace[data-layout='editor'] .editor-pane textarea {
   padding-top: 36px;
+}
+
+/* ─── AIプロンプトパネル（左サイドメニュー版・v0.4.7）─── */
+/* ヘッダーの🤖ポップアップ（.modal-head / .modal-body / .modal-foot・app.css）と
+   同じ内側スタイルを流用しつつ、.workspace の中に直接置くため
+   .modal-backdrop / .modal（オーバーレイ用の固定幅・box-shadow等）は使わない。 */
+.ai-prompt-pane {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-slide);
+  overflow: hidden;
+}
+.ai-prompt-pane__theme {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.ai-prompt-pane__theme textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  padding: 0.5em 0.7em;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 /* ─── present モードではサイドメニューを隠す ─── */

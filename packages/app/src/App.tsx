@@ -22,7 +22,8 @@ import {
   exportToPdf,
   exportToPng,
 } from './export/exporters';
-import { buildDraftAssistPrompt } from './ai/draftAssistPrompt';
+import { usePromptComposer, PromptExplanation } from './ai/promptComposer';
+import { AiPromptPanel } from './components/AiPromptPanel';
 import sampleMd from './samples/sample.md?raw';
 
 const MD_STORAGE_KEY = 'mdss-draft';
@@ -75,9 +76,14 @@ export default function App() {
   // 一時上書きするが保存値は変えない（プレゼンから戻ったとき作業レイアウトへ復帰させる）。
   const [layoutStored, setLayout] = usePersistentState<LayoutMode>('mdss-layout', 'split');
   const [menuOpen, setMenuOpen] = usePersistentState<'0' | '1'>('mdss-menu-expanded', '1');
+  // v0.4.7: 左サイドメニュー版AIプロンプト（メインパネル表示）。ヘッダーの🤖ポップアップ
+  // （promptOpen、後述）とは独立させた一時state（非永続）。プレゼン中は無視してプレビュー優先。
+  const [aiPromptPanelOpen, setAiPromptPanelOpen] = useState(false);
+  const showAiPromptPanel = aiPromptPanelOpen && mode === 'edit';
   const effectiveLayout = resolveLayout(layoutStored, mode);
   // 'editor' では .preview-pane がアンマウントされ、DOM実体を必要とする書き出しが成立しない。
-  const canExport = canExportFromDom(effectiveLayout);
+  // AIプロンプトパネル表示中も同様（editor-pane/preview-paneどちらも無い）。
+  const canExport = canExportFromDom(effectiveLayout) && !showAiPromptPanel;
   const [theme, setTheme] = usePersistentState<'light' | 'dark'>('slide-theme', 'light');
   const [view, setView] = usePersistentState<'hero' | 'list'>('slide-view', 'hero');
   const [paletteOverride, setPaletteOverride] = useState<Palette | ''>(() => {
@@ -176,12 +182,22 @@ export default function App() {
     if (el) void exportHtml(el, title, md);
   }, [title, md]);
 
+  // v0.4.7: レイアウトを選ぶ操作（クリック・キーボード共通）は、開いていれば
+  // AIプロンプトパネルを閉じてから反映する（editor-pane/preview-paneと排他のDOM関係のため）。
+  const applyLayout = useCallback(
+    (m: LayoutMode) => {
+      setAiPromptPanelOpen(false);
+      setLayout(m);
+    },
+    [setLayout],
+  );
+
   // present 中は表示モードを変えない（サイドメニュー自体もCSSで隠れている）。
   const onSetLayoutByKey = useCallback(
     (m: LayoutMode) => {
-      if (mode === 'edit') setLayout(m);
+      if (mode === 'edit') applyLayout(m);
     },
-    [mode, setLayout],
+    [mode, applyLayout],
   );
 
   // 'editor' ではボタンだけでなくショートカットも無効化する。
@@ -248,10 +264,11 @@ export default function App() {
         <SideMenu
           layout={effectiveLayout}
           expanded={menuOpen === '1'}
-          onSetLayout={setLayout}
+          onSetLayout={applyLayout}
           onToggleExpanded={() => setMenuOpen(menuOpen === '1' ? '0' : '1')}
           onStartPresent={() => setMode('present')}
-          onOpenPrompt={() => setPromptOpen(true)}
+          aiPromptOpen={showAiPromptPanel}
+          onOpenPromptPanel={() => setAiPromptPanelOpen(true)}
           onLoadSample={() => setMd(sampleMd)}
           onOpenHelp={() => {
             setHelpOpen(true);
@@ -259,7 +276,9 @@ export default function App() {
           }}
         />
 
-        {effectiveLayout !== 'preview' && (
+        {showAiPromptPanel && <AiPromptPanel onClose={() => setAiPromptPanelOpen(false)} />}
+
+        {!showAiPromptPanel && effectiveLayout !== 'preview' && (
           <div className="editor-pane">
             <div className="editor-toolbar">
               <TemplateMenu onInsert={insertSnippet} />
@@ -294,7 +313,7 @@ export default function App() {
           </div>
         )}
 
-        {effectiveLayout !== 'editor' && (
+        {!showAiPromptPanel && effectiveLayout !== 'editor' && (
           <div className="preview-pane">
             {deck.slides.length > 0 ? (
               <SlideDeckView
@@ -323,7 +342,7 @@ export default function App() {
           theme={theme}
           view={view}
           palette={palette}
-          disabled={effectiveLayout === 'editor'}
+          disabled={effectiveLayout === 'editor' || showAiPromptPanel}
           onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
           onToggleView={toggleView}
           onSetPalette={setPalette}
@@ -353,18 +372,7 @@ export default function App() {
 }
 
 function PromptModal({ onClose }: { onClose: () => void }) {
-  const [themeText, setThemeText] = useState('');
-  const [copied, setCopied] = useState(false);
-  const prompt = buildDraftAssistPrompt(themeText || undefined);
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(prompt);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1600);
-    } catch {
-      alert('コピーに失敗しました。テキストを選択して手動でコピーしてください。');
-    }
-  };
+  const { themeText, setThemeText, prompt, copied, copy } = usePromptComposer();
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -377,20 +385,7 @@ function PromptModal({ onClose }: { onClose: () => void }) {
           />
         </div>
         <div className="modal-body">
-          <p
-            style={{
-              fontSize: '0.78rem',
-              color: 'var(--text-secondary)',
-              marginBottom: 10,
-              lineHeight: 1.7,
-            }}
-          >
-            このプロンプトを Claude / ChatGPT 等のLLMに送ると、本アプリの仕様に準拠した
-            スライドMDが返ってきます。返ってきたMDを左のエディタに貼り付けてください。
-            <br />
-            なお、アプリ自体にはスライド枚数の上限はありません。8〜16枚は
-            AIへ依頼する際の読みやすさの目安です。
-          </p>
+          <PromptExplanation />
           <pre>{prompt}</pre>
         </div>
         <div className="modal-foot">

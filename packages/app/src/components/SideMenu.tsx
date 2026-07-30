@@ -22,7 +22,9 @@ interface Props {
   onSetLayout: (m: LayoutMode) => void;
   onToggleExpanded: () => void;
   onStartPresent: () => void;
-  onOpenPrompt: () => void;
+  /** v0.4.7: メインパネル版AIプロンプトが表示中か（ボタンの選択状態表示に使う） */
+  aiPromptOpen: boolean;
+  onOpenPromptPanel: () => void;
   onLoadSample: () => void;
   onOpenHelp: () => void;
 }
@@ -85,8 +87,9 @@ export function SideMenu(props: Props) {
         <button
           type="button"
           className="side-menu__item"
-          onClick={props.onOpenPrompt}
-          title="LLM用の原稿作成プロンプトを表示"
+          aria-pressed={props.aiPromptOpen}
+          onClick={props.onOpenPromptPanel}
+          title="AIプロンプトをメインパネルに表示（複数行のテーマ入力に対応）"
         >
           <span className="side-menu__ico" aria-hidden="true">
             🤖
