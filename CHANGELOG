@@ -3,6 +3,45 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.4.6] - 2026-07-30
+
+### 追加｜新規スライドtype `svg-figure`（mermaid journey / gantt を独自SVGで描画）
+
+新設のスライドtype `svg-figure` を追加。mermaid公式の `journey` / `gantt` 記法をそのまま```mermaidフェンスに書くと、外部レンダリングエンジン（mermaid.js等）を一切使わず、独自パーサー＋独自SVGレンダラーで感情推移グラフ／簡易ガントチャートを描画する。
+
+- **パーサー**：`svgFigure.ts`（新規）に `parseMermaidJourney()` / `parseMermaidGantt()` / `parseDuration()` を実装。既存の `parseMermaidSubset()`（graph LR/TD専用）には一切手を加えず、```mermaidフェンスの中身の先頭行を見て振り分ける `dispatchMermaidFence()` を新設し、`parseDiagramSlide()` 側だけを薄くラップした
+- **記法統一の副作用**：`diagram-flow/layer/cycle` のスライドで```mermaidフェンスにjourney/gantt記法を書いた場合は「svg-figureを使ってください」という警告を出し、`svg-figure`側でgraph LR/TD記法を書いた場合も同様に警告を出す（スライドtypeとフェンス内容の不一致を検出。既存 `graph LR/TD` の挙動は完全に無変更であることをE2E含め回帰確認済み）
+- **Lint**：既存の`flow:5 / layer:4 / cycle:4`と同じ思想で、セクション数（上限4）・セクション毎タスク数（上限4）・総タスク数（上限12）・ラベル長（20文字）を検証。超過分は警告＋切り捨て（ラベル長は警告のみ）
+- **レイアウト**：左2/3に独自SVG、右1/3に`notes:`（箇条書き、任意）。`feature-showcase`と同じく比率固定。`notes`省略時はSVGが全幅に広がる
+- **色**：すべて既存の`--chart-1〜5`等CSS変数経由（ハードコード禁止規約に準拠）。決定論的に割当されるため事後の色置換は不要
+- **CLI波及**：`packages/cli/build.mjs`の`CSS_ORDER`に`svg-figure`を追加。`themeCss.ts`の連結対象が13→14ファイルに増加し、`mdss-convert`のSSR出力にも自動的に反映される（core/appのロジックをそのまま再利用するため、CLI側の追加実装は不要）
+- **AIプロンプト**：`draftAssistPrompt.ts`に`svg-figure`の記法例を追記（全16種→全17種）
+- **デモ原稿・テンプレート・ヘルプ**：`sample.md`に journey 版のデモスライドを追加（全16→全17type網羅に更新）。テンプレート挿入メニュー（`slideTemplates.ts`）に journey / gantt の2テンプレートを追加（20→22件・全17→18type網羅）。HelpModalの「記法チートシート」タブは`SLIDE_TEMPLATES`をそのまま再利用する設計のため、テンプレート追加のみで自動的に反映される（`helpContent.ts`自体の変更は不要）
+
+### ファイル構成の変更
+```
+新規:
+  packages/core/src/parser/svgFigure.ts
+  packages/core/src/parser/svgFigure.test.ts
+  packages/app/src/components/slides/SvgFigureView.tsx
+  packages/app/src/theme/svg-figure.css
+  e2e/svg-figure.spec.ts
+変更:
+  packages/core/src/parser/types.ts
+  packages/core/src/parser/slideMarkdown.ts
+  packages/core/src/index.ts
+  packages/core/src/prompt/draftAssistPrompt.ts
+  packages/core/src/prompt/draftAssistPrompt.test.ts
+  packages/app/src/components/slides/SlideRenderer.tsx
+  packages/app/src/main.tsx
+  packages/app/src/samples/sample.md
+  packages/app/src/samples/sample.test.ts
+  packages/app/src/templates/slideTemplates.ts
+  packages/app/src/templates/slideTemplates.test.ts
+  packages/cli/build.mjs
+```
+
+---
 ## [v0.4.5] - 2026-07-26
 
 ### 追加｜stepsに新レイアウト（layout: grid）
