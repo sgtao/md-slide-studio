@@ -14,12 +14,12 @@
 
 const PALETTE_META_STANDALONE: { id: string; icon: string; label: string }[] = [
   { id: 'ocean', icon: '🌊', label: 'Ocean（既定）' },
+  { id: 'ruby', icon: '🔶', label: 'Ruby' },
   { id: 'forest', icon: '🌲', label: 'Forest' },
   { id: 'sunset', icon: '🌅', label: 'Sunset' },
   { id: 'plum', icon: '🍇', label: 'Plum' },
-  { id: 'graphite', icon: '⬛', label: 'Graphite' },
-  { id: 'ruby', icon: '💎', label: 'Ruby' },
   { id: 'gold', icon: '✨', label: 'Gold' },
+  { id: 'graphite', icon: '⬛', label: 'Graphite' },
 ];
 
 function escapeHtml(s: string): string {

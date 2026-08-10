@@ -19,12 +19,12 @@ const DISABLED_TITLE = '「編集のみ」表示中は使用できません';
 
 const PALETTE_META: { id: Palette; icon: string; label: string }[] = [
   { id: 'ocean', icon: '🌊', label: 'Ocean（既定）' },
+  { id: 'ruby', icon: '🔶', label: 'Ruby' },
   { id: 'forest', icon: '🌲', label: 'Forest' },
   { id: 'sunset', icon: '🌅', label: 'Sunset' },
   { id: 'plum', icon: '🍇', label: 'Plum' },
-  { id: 'graphite', icon: '⬛', label: 'Graphite' },
-  { id: 'ruby', icon: '💎', label: 'Ruby' },
   { id: 'gold', icon: '✨', label: 'Gold' },
+  { id: 'graphite', icon: '⬛', label: 'Graphite' },
 ];
 
 interface Props {
