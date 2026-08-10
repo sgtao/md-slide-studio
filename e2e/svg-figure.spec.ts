@@ -87,3 +87,56 @@ test('svg-figure: notes 省略時は with-notes クラスが付かない', async
   await expect(active.locator('.svg-figure-body.with-notes')).toHaveCount(0);
   await expect(active.locator('.svg-figure-svg')).toBeVisible();
 });
+
+const rawSvgDeck = `---
+title: E2E svg-figure raw deck
+palette: ocean
+---
+<!-- slide: svg-figure -->
+## 手描き図解
+\`\`\`svg
+<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="80" height="60" fill="#4f8ff7" />
+  <circle cx="150" cy="40" r="20" fill="#f76c4f" />
+</svg>
+\`\`\`
+---
+<!-- slide: sources -->
+## 出典
+- [example](https://example.com)
+`;
+
+const scriptInjectionDeck = `---
+title: E2E svg-figure script injection deck
+palette: ocean
+---
+<!-- slide: svg-figure -->
+## 攻撃想定
+\`\`\`svg
+<svg viewBox="0 0 10 10"><script>window.__pwned = true;</script><rect x="0" y="0" width="5" height="5" /></svg>
+\`\`\`
+---
+<!-- slide: sources -->
+## 出典
+- [example](https://example.com)
+`;
+
+test('svg-figure(raw): ```svg 原稿でSVGが描画される', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('textarea').fill(rawSvgDeck);
+  const active = page.locator('.slide.active');
+  await expect(active.locator('.svg-figure-svg')).toBeVisible();
+  await expect(active.locator('.svg-figure-svg rect')).toHaveCount(1);
+  await expect(active.locator('.svg-figure-svg circle')).toHaveCount(1);
+});
+
+test('svg-figure(raw): セキュリティ回帰 — <script>入りSVGを貼ってもscriptタグは増えない', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const before = await page.locator('script').count();
+  await page.locator('textarea').fill(scriptInjectionDeck);
+  const active = page.locator('.slide.active');
+  await expect(active.locator('.svg-figure-svg')).toBeVisible();
+  await expect(page.locator('script')).toHaveCount(before);
+});

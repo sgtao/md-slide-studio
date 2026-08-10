@@ -57,7 +57,7 @@ const PLAIN_TYPE_NOTATION: string[] = [
   '- `summary`: `points` と同じ記法で `1.` の番号付きリストを使う（番号バッジ付きで描画）',
   '- `table`: `## 見出し` ＋ 標準のMarkdownテーブル（5列以下を推奨）',
   '- `figure`: `## 見出し` ＋ `![alt](画像URL)` ＋ `source: [出典名](URL)`（`source:` は必須）',
-  '- `svg-figure`: `## 見出し` ＋ ` ```mermaid ` ブロック（`journey` / `gantt` 記法）を独自SVGで描画',
+  '- `svg-figure`: `## 見出し` ＋ ` ```svg `（任意SVG）または ` ```mermaid `（`journey`/`gantt`記法）ブロックを独自SVGで描画',
   '- `sources`: `- [タイトル](URL) — 補足` のリンクリスト（最終スライドに置く）',
 ];
 

@@ -18,7 +18,7 @@ Markdown原稿（スライドMD）から **HTMLスライド／PDF／PNG** を生
 - **エディタ＋プレビュー2ペイン**: MDを編集すると右のスライドに即時反映（300msデバウンス）
 - **全17スライドtype対応**: title / points / summary / table / chart-bar / chart-line /
   chart-donut / comparison-chart / diagram-flow / diagram-layer / diagram-cycle /
-  diagram-timeline / figure / feature-showcase / steps / contrast / sources
+  diagram-timeline / figure / feature-showcase / steps / contrast / sources / svg-figure
 - **決定論的レンダリング**: 同じMDからは常に同じスライドが生成される
   （グラフ・図解は座標テーブル準拠のSVG生成関数。外部グラフライブラリ不使用）
 - **テーマ・パレット**: ライト/ダーク × 5パレット（ocean / forest / sunset / plum / graphite）。
@@ -56,6 +56,8 @@ Vite の `base: './'`（相対パス）でビルドするため、リポジト�
   two-col / title-xl / compact / side-list / split-image
 - 図解は ```diagram（type: flow / layer / cycle / timeline）または
     mermaidサブセット（`graph LR/TD` の直線・循環のみ）
+- `svg-figure` type: ```svg ブロックに任意のSVGを直接貼り付けるか、```mermaid ブロックに
+    mermaid公式の `journey` / `gantt` 記法を書くと独自SVGで描画（優先順位は svg > journey/gantt）
 - 制約: 枚数の厳密な上限はなし（AIへ依頼する際の目安は8〜16枚）/ 1スライド1グラフ /
   最終スライドは sources・先頭は title を推奨 / 生の `<script>` `<style>` は無視される
 - 全typeで共通ヘッダキーが使える: `badge:`（見出し左のピル）/ `lead:`（補足1行）/

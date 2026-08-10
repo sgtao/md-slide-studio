@@ -309,4 +309,21 @@ gantt
     タスクB :after a1, 5d
 \`\`\``,
   },
+  {
+    id: 'svg-figure-raw',
+    label: '任意SVG（svg-figure）',
+    category: 'diagram',
+    snippet: `<!-- slide: svg-figure -->
+## 見出し
+lead: 補足1行
+\`\`\`svg
+<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="80" height="60" fill="#4f8ff7" />
+  <circle cx="150" cy="40" r="20" fill="#f76c4f" />
+</svg>
+\`\`\`
+notes:
+  - 補足1
+  - 補足2`,
+  },
 ];

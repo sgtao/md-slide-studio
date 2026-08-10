@@ -13,6 +13,7 @@
 import YAML from 'yaml';
 import { parseSlideHeader } from './slideHeader';
 import { parseMermaidGantt, parseMermaidJourney } from './svgFigure';
+import { parseRawSvg } from './svgRaw';
 import {
   zChartYaml,
   zChartDataItem,
@@ -55,6 +56,7 @@ import type {
   LayoutVariant,
   Palette,
   PointItem,
+  RawSvgBlock,
   Slide,
   SlideDeck,
   SlideTone,
@@ -796,19 +798,27 @@ function parseNotesList(body: string): string[] | undefined {
 }
 
 function parseSvgFigureSlide(body: string, warnings: string[]) {
-  const fence = extractFence(body, 'mermaid');
-  let figure: JourneyBlock | GanttBlock | undefined;
+  // v0.4.8: ```svg フェンスがあれば最優先（journey/gantt判定は行わない）。
+  // 無ければ既存の ```mermaid 判定（journey/gantt）にフォールバックする（後方互換）。
+  const svgFence = extractFence(body, 'svg');
+  let figure: JourneyBlock | GanttBlock | RawSvgBlock | undefined;
   let rest = body;
-  if (fence) {
-    rest = fence.rest;
-    const dispatched = dispatchMermaidFence(fence.content, warnings);
-    if (dispatched.kind === 'legacy') {
-      warnings.push('svg-figure は journey / gantt のみ対応です');
-    } else {
-      figure = dispatched.figure ?? undefined;
-    }
+  if (svgFence) {
+    rest = svgFence.rest;
+    figure = parseRawSvg(svgFence.content, warnings) ?? undefined;
   } else {
-    warnings.push('```mermaid ブロックが見つかりません');
+    const fence = extractFence(body, 'mermaid');
+    if (fence) {
+      rest = fence.rest;
+      const dispatched = dispatchMermaidFence(fence.content, warnings);
+      if (dispatched.kind === 'legacy') {
+        warnings.push('svg-figure は journey / gantt のみ対応です');
+      } else {
+        figure = dispatched.figure ?? undefined;
+      }
+    } else {
+      warnings.push('```svg / ```mermaid ブロックが見つかりません');
+    }
   }
   const { heading, note } = pickHeadingAndNote(rest);
   const notes = parseNotesList(rest);

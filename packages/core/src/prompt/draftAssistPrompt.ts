@@ -40,9 +40,11 @@ export function buildDraftAssistPrompt(theme: string = '（ここにテーマを
   - \`diagram-flow\` / \`diagram-layer\` / \`diagram-cycle\` / \`diagram-timeline\`: \`\`\`diagram
     フェンスに type（flow|layer|cycle|timeline）と nodes 配列（ノード数上限は下記「型別の詳細仕様」参照）。
     **抽象的な処理の流れはflow、階層構造はlayer、循環プロセスはcycle、時系列・ロードマップはtimeline**
-  - \`svg-figure\`: mermaid公式の \`journey\` / \`gantt\` 記法をそのまま \`\`\`mermaid フェンスに書くと、
+  - \`svg-figure\`: mermaid公式の \`journey\` / \`gantt\` 記法を \`\`\`mermaid フェンスに書くと、
     独自SVGで感情推移グラフ・簡易ガントチャートを描画する（右に\`notes:\`箇条書きを任意併記）。
-    **体験の時系列変化はjourney、スケジュール・工程表はgantt**
+    決まった記法がない手描き図解は \`\`\`svg フェンスにSVGをそのまま貼り付けても表示できる
+    （\`\`\`svgがあればjourney/gantt判定より優先）。
+    **体験の時系列変化はjourney、スケジュール・工程表はgantt、自由な手描き図解はsvg直書き**
   - \`steps\`: 手順・プロセス・ワークフローのカード型フロー。\`\`\`steps フェンスに
     style（cards|circled）と items（icon / title / desc、任意で tone: dark|outline）をYAMLで記述
     （items数の上限は下記「型別の詳細仕様」参照）。任意の ratio（label, value の配列）で

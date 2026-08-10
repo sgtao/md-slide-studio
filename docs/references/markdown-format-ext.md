@@ -151,3 +151,57 @@ v0.2.0 の新規スタイルは `src/theme/steps.css` に集約（main.tsx で�
 
 色はすべてCSS変数経由（§1 の変数定義自体を除きハードコード禁止）。
 印刷（PDF）時は `print-color-adjust: exact` で帯・カード面の背景色を維持する。
+
+## 6. 新type: `svg-figure`（mermaid journey/gantt・任意SVG）
+
+`svg-figure` type は `## 見出し` の下に専用フェンスを1つだけ書く。フェンスの種類によって
+描画方式が変わる（優先順位: ` ```svg ` > ` ```mermaid `）。
+
+### 6-1. ` ```svg `（任意SVG・v0.4.8〜）
+
+手書き・簡易ツールで作成したSVGをそのまま貼り付けられる。
+
+```markdown
+<!-- slide: svg-figure -->
+## 見出し
+lead: 補足1行
+```svg
+<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="80" height="60" fill="#4f8ff7" />
+  <circle cx="150" cy="40" r="20" fill="#f76c4f" />
+</svg>
+```
+notes:
+  - 補足1
+  - 補足2
+```
+
+- 許可された要素・属性のみを木構造として保持し、React要素として再構築する
+  （`dangerouslySetInnerHTML` は使わない）。許可リスト外の要素はサブツリーごと除去され警告になる
+- `on*` 属性・`style` 属性は常に除去。`href` / `xlink:href` は内部フラグメント参照
+  （`#id` 形式）のみ許可し、それ以外（`javascript:` / `data:` / `http(s):` 等）は除外する
+- `viewBox` が無い場合は `width` / `height` から自動補完する。元の `width` / `height`
+  属性自体は描画に使わない（CSSで100%スケール表示するため）
+- ライト/ダークテーマ切替には追従しない（原稿に書かれた色がそのまま使われる）
+- フェンス内容が20,000文字を超えると警告（非ブロッキング。パースは継続）
+
+### 6-2. ` ```mermaid `（journey / gantt・v0.4.6〜）
+
+mermaid公式の `journey` / `gantt` 記法をそのまま書くと、外部レンダリングエンジン
+（mermaid.js等）を使わず独自SVGで感情推移グラフ・簡易ガントチャートを描画する。
+
+```markdown
+<!-- slide: svg-figure -->
+## 見出し
+```mermaid
+journey
+  section セクション1
+    タスク1: 4: User
+```
+```
+
+### 6-3. 共通仕様
+
+- `heading` / `lead:` / `note`（`>`） / `notes:` はフェンスの種類によらず共通
+- 有効な図解ブロックが無い（フェンス自体が無い／不正なXML／journey・gantt解析失敗）場合は
+  lint **error**（`svg-figure-missing`）になり、CLIの `--strict` は exit 3 でブロックする

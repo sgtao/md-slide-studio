@@ -90,6 +90,15 @@ function lintSlideRules(deck: SlideDeck): LintResult[] {
       }
     }
 
+    if (slide.type === 'svg-figure' && !slide.figure) {
+      results.push({
+        level: 'error',
+        slideIndex: i,
+        rule: 'svg-figure-missing',
+        message: '有効な図解ブロック（```svg または journey/gantt）がありません',
+      });
+    }
+
     if (slide.type === 'steps' && slide.ratio && slide.ratio.length > 0) {
       const sum = slide.ratio.reduce((acc, r) => acc + r.value, 0);
       if (Math.round(sum) !== 100) {

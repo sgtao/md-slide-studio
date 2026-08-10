@@ -5,8 +5,14 @@
  * 外部レンダリングエンジンなしで独自SVGとして描画する。座標計算は決定論的。
  * 色は theme-vars.css の CSS変数（--chart-* 等）経由のみ（ハードコード禁止規約に準拠）。
  */
-import { Fragment } from 'react';
-import type { GanttBlock, GanttTask, JourneyBlock, SvgFigureSlide } from '@mdss/core';
+import { createElement, Fragment, type ReactNode } from 'react';
+import type {
+  GanttBlock,
+  GanttTask,
+  JourneyBlock,
+  SvgElementNode,
+  SvgFigureSlide,
+} from '@mdss/core';
 import { parseDuration } from '@mdss/core';
 import { renderInline } from '../../parser/inline';
 import { Note, SlideHeading } from './common';
@@ -254,6 +260,46 @@ function GanttSvg({ gantt, slideIndex }: { gantt: GanttBlock; slideIndex: number
   );
 }
 
+// ─── raw（v0.4.8）: ```svg フェンスに貼り付けた任意SVGの描画 ───
+// dangerouslySetInnerHTML は使わず、サニタイズ済みツリーからReact要素を再構築する。
+const SVG_ATTR_TO_PROP: Record<string, string> = {
+  'stroke-width': 'strokeWidth',
+  'stroke-dasharray': 'strokeDasharray',
+  'font-size': 'fontSize',
+  'text-anchor': 'textAnchor',
+  'stop-color': 'stopColor',
+  'stop-opacity': 'stopOpacity',
+  class: 'className',
+};
+
+function renderSvgNode(node: SvgElementNode | { text: string }, key: number): ReactNode {
+  if ('text' in node) return node.text;
+  const props: Record<string, string> = { key: String(key) };
+  for (const [k, v] of Object.entries(node.attrs)) {
+    props[SVG_ATTR_TO_PROP[k] ?? k] = v;
+  }
+  return createElement(
+    node.tag,
+    props,
+    node.children.map((c, i) => renderSvgNode(c, i)),
+  );
+}
+
+function RawSvgFigure({ root, slideIndex }: { root: SvgElementNode; slideIndex: number }) {
+  const { viewBox } = root.attrs; // width/height属性は使わない（CSSでスケール）
+  return (
+    <svg
+      viewBox={viewBox}
+      xmlns="http://www.w3.org/2000/svg"
+      className="svg-figure-svg"
+      id={`svg-figure-svg-s${slideIndex}`}
+      role="img"
+    >
+      {root.children.map((c, i) => renderSvgNode(c, i))}
+    </svg>
+  );
+}
+
 export function SvgFigureView({ slide, index }: { slide: SvgFigureSlide; index: number }) {
   const fig = slide.figure;
   const hasNotes = !!slide.notes && slide.notes.length > 0;
@@ -265,9 +311,11 @@ export function SvgFigureView({ slide, index }: { slide: SvgFigureSlide; index: 
         <div className="svg-figure-diagram">
           {fig?.type === 'journey' && <JourneySvg journey={fig} slideIndex={index} />}
           {fig?.type === 'gantt' && <GanttSvg gantt={fig} slideIndex={index} />}
+          {fig?.type === 'raw' && <RawSvgFigure root={fig.root} slideIndex={index} />}
           {!fig && (
             <p className="note">
-              （mermaid ブロックを解析できませんでした。journey / gantt のみ対応です）
+              （```svg / ```mermaid ブロックを解析できませんでした。有効なSVG、または journey /
+              gantt 記法が必要です）
             </p>
           )}
         </div>

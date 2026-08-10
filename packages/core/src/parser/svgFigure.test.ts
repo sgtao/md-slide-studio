@@ -281,4 +281,27 @@ describe('parseSvgFigureSlide（parseSlideMarkdown経由）', () => {
     const s = parseSlideMarkdown(md).slides[0];
     expect(s.warnings.some((w) => w.includes('svg-figure'))).toBe(true);
   });
+
+  it('```svg フェンスが優先される（```mermaidと併記してもjourney/gantt判定を行わない）', () => {
+    const md = fm(
+      [
+        '<!-- slide: svg-figure -->',
+        '## 見出し',
+        '```svg',
+        '<svg viewBox="0 0 10 10"><rect x="0" y="0" width="5" height="5" /></svg>',
+        '```',
+      ].join('\n'),
+    );
+    const s = parseSlideMarkdown(md).slides[0] as SvgFigureSlide;
+    expect(s.figure?.type).toBe('raw');
+  });
+
+  it('```svg が不正なXMLの場合は figure: undefined で警告になる', () => {
+    const md = fm(
+      ['<!-- slide: svg-figure -->', '## 見出し', '```svg', '<svg><rect></svg>', '```'].join('\n'),
+    );
+    const s = parseSlideMarkdown(md).slides[0] as SvgFigureSlide;
+    expect(s.figure).toBeUndefined();
+    expect(s.warnings.some((w) => w.includes('XMLが不正'))).toBe(true);
+  });
 });

@@ -139,7 +139,19 @@ export interface GanttBlock {
   sections: GanttSection[];
 }
 
-export type SvgFigureBlock = JourneyBlock | GanttBlock;
+export type SvgFigureBlock = JourneyBlock | GanttBlock | RawSvgBlock;
+
+/** raw 型（v0.4.8）: ```svg フェンスに直接貼り付けた任意SVGを許可リスト経由で保持するツリー */
+export interface SvgElementNode {
+  tag: string;
+  attrs: Record<string, string>;
+  children: (SvgElementNode | { text: string })[];
+}
+
+export interface RawSvgBlock {
+  type: 'raw';
+  root: SvgElementNode;
+}
 
 export interface FeatureShowcaseLeft {
   eyebrow?: string;
