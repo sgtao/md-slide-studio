@@ -56,7 +56,7 @@ lead: 「どう描くか」ではなく「何のスライドか」を宣言す�
 | table | 比較表 | Markdownテーブル |
 | chart-bar / line / donut | グラフ | ` ```chart ` ブロック |
 | diagram-flow / layer / cycle / timeline | 図解・タイムライン | ` ```diagram ` ブロック |
-| svg-figure | ジャーニーマップ・ガントチャート | ` ```mermaid ` ブロック |
+| svg-figure | 図解・ジャーニーマップ・ガントチャート | ` ```svg ` / ` ```mermaid ` ブロック |
 | steps | 手順カードフロー | ` ```steps ` ブロック |
 | contrast / comparison-chart | 対比・前後比較 | 専用ブロック |
 | figure / feature-showcase / sources | 画像・機能紹介・出典 | 専用記法 |
@@ -281,6 +281,16 @@ notes:
   - 「手直し」フェーズでも満足度は大きく落ちない
   - 最終工程（書き出す）が最高スコア
 point: 一連の体験で最も満足度が落ちにくいのは==LLMに下書きさせる==工程
+---
+<!-- slide: svg-figure -->
+## 手描き図解も直接貼れる（svg-figure: raw）
+lead: mermaid記法を使わず、SVGコードをそのまま貼るだけで表示できる
+```svg
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="50,10 90,90 10,90" fill="#6366f1" />
+</svg>
+```
+point: 図形描画ツールで作った簡単なSVGも、コピペするだけでスライドになる
 ---
 <!-- slide: figure -->
 ## 図版と出典（figure）

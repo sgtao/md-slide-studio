@@ -166,9 +166,8 @@ v0.2.0 の新規スタイルは `src/theme/steps.css` に集約（main.tsx で�
 ## 見出し
 lead: 補足1行
 ```svg
-<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-  <rect x="10" y="10" width="80" height="60" fill="#4f8ff7" />
-  <circle cx="150" cy="40" r="20" fill="#f76c4f" />
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="50,10 90,90 10,90" fill="#6366f1" />
 </svg>
 ```
 notes:

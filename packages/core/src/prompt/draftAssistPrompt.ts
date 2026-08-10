@@ -45,6 +45,7 @@ export function buildDraftAssistPrompt(theme: string = '（ここにテーマを
     決まった記法がない手描き図解は \`\`\`svg フェンスにSVGをそのまま貼り付けても表示できる
     （\`\`\`svgがあればjourney/gantt判定より優先）。
     **体験の時系列変化はjourney、スケジュール・工程表はgantt、自由な手描き図解はsvg直書き**
+    例: \`<svg viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="#6366f1" /></svg>\`
   - \`steps\`: 手順・プロセス・ワークフローのカード型フロー。\`\`\`steps フェンスに
     style（cards|circled）と items（icon / title / desc、任意で tone: dark|outline）をYAMLで記述
     （items数の上限は下記「型別の詳細仕様」参照）。任意の ratio（label, value の配列）で
