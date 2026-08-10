@@ -136,6 +136,8 @@ const PALETTE_META_STANDALONE: { id: string; icon: string; label: string }[] = [
   { id: 'sunset', icon: '🌅', label: 'Sunset' },
   { id: 'plum', icon: '🍇', label: 'Plum' },
   { id: 'graphite', icon: '⬛', label: 'Graphite' },
+  { id: 'ruby', icon: '💎', label: 'Ruby' },
+  { id: 'gold', icon: '✨', label: 'Gold' },
 ];
 
 /**
@@ -224,7 +226,7 @@ function buildInlineScript(deckTitleJson: string, deckMdJson: string): string {
   return `
 const DECK_TITLE = ${deckTitleJson};
 const DECK_MD = ${deckMdJson};
-const PALETTES = ['ocean', 'forest', 'sunset', 'plum', 'graphite'];
+const PALETTES = ['ocean', 'forest', 'sunset', 'plum', 'graphite', 'ruby', 'gold'];
 
 const slides = document.querySelectorAll('.slide');
 const total = slides.length;

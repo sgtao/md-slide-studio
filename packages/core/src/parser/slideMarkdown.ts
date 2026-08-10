@@ -68,7 +68,7 @@ import type {
   TimelineBlock,
 } from './types';
 
-const PALETTES: Palette[] = ['ocean', 'forest', 'sunset', 'plum', 'graphite'];
+const PALETTES: Palette[] = ['ocean', 'forest', 'sunset', 'plum', 'graphite', 'ruby', 'gold'];
 const SLIDE_TYPES: SlideType[] = [
   'title',
   'points',

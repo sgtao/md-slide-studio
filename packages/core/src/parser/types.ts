@@ -8,7 +8,7 @@
  * v0.2.3: TitleSlide.image（layout: split-image）・ContrastSlide（新type）
  */
 
-export type Palette = 'ocean' | 'forest' | 'sunset' | 'plum' | 'graphite';
+export type Palette = 'ocean' | 'forest' | 'sunset' | 'plum' | 'graphite' | 'ruby' | 'gold';
 export type Purpose = 'self-study' | 'team-share' | 'outreach';
 
 export type SlideType =

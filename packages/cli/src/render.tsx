@@ -17,7 +17,7 @@ import { SlideRenderer, slideSectionClass } from '@mdss/app-ssr';
 import { THEME_CSS } from './generated/themeCss';
 import { assembleStandaloneHtml } from './standalone';
 
-const PALETTES = ['ocean', 'forest', 'sunset', 'plum', 'graphite'] as const;
+const PALETTES = ['ocean', 'forest', 'sunset', 'plum', 'graphite', 'ruby', 'gold'] as const;
 export type Palette = (typeof PALETTES)[number];
 export type Theme = 'light' | 'dark';
 

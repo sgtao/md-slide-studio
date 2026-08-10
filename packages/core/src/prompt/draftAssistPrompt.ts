@@ -20,7 +20,7 @@ export function buildDraftAssistPrompt(theme: string = '（ここにテーマを
   return `あなたはプレゼン資料の構成作家です。以下の仕様に**厳密に**準拠した「スライドMD」を生成してください。テーマを後述してます。
 
 # 出力仕様（スライドMD v0.7 + Studio拡張 v0.2.3）
-- 先頭に YAML frontmatter: \`title\`（必須）, \`palette\`（ocean / forest / sunset / plum / graphite）
+- 先頭に YAML frontmatter: \`title\`（必須）, \`palette\`（ocean / forest / sunset / plum / graphite / ruby / gold）
 - スライドは行全体が \`---\` の行で区切る
 - 各スライドの先頭行はディレクティブ: \`<!-- slide: <type>[, fit][, layout: ...][, tone: dark] -->\`
   - \`tone: dark\` はそのスライドだけ地色を反転する（強調したい1〜2枚のみに使用）

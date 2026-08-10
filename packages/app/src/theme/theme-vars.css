@@ -146,3 +146,27 @@
   --accent-light: #202834;
   --accent-dim: #2b3648;
 }
+
+/* ─── 💎 Ruby（情熱・警告に寄らない鮮やかな赤） ─── */
+[data-palette='ruby'] {
+  --accent: #dc2626;
+  --accent-light: #fef2f2;
+  --accent-dim: #fee2e2;
+}
+[data-palette='ruby'][data-theme='dark'] {
+  --accent: #f87171;
+  --accent-light: #341414;
+  --accent-dim: #4a1c1c;
+}
+
+/* ─── ✨ Gold（高級感・信頼） ─── */
+[data-palette='gold'] {
+  --accent: #d97706;
+  --accent-light: #fffbeb;
+  --accent-dim: #fef3c7;
+}
+[data-palette='gold'][data-theme='dark'] {
+  --accent: #fbbf24;
+  --accent-light: #372910;
+  --accent-dim: #4f3a17;
+}

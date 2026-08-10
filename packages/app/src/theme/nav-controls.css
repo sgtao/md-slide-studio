@@ -242,6 +242,12 @@
 .control-cluster .palette-dropdown button.pal-graphite {
   color: #334155;
 }
+.control-cluster .palette-dropdown button.pal-ruby {
+  color: #dc2626;
+}
+.control-cluster .palette-dropdown button.pal-gold {
+  color: #d97706;
+}
 [data-theme='dark'] .control-cluster .palette-dropdown button.pal-ocean {
   color: #58a6ff;
 }
@@ -256,6 +262,12 @@
 }
 [data-theme='dark'] .control-cluster .palette-dropdown button.pal-graphite {
   color: #94a3b8;
+}
+[data-theme='dark'] .control-cluster .palette-dropdown button.pal-ruby {
+  color: #f87171;
+}
+[data-theme='dark'] .control-cluster .palette-dropdown button.pal-gold {
+  color: #fbbf24;
 }
 /* ホバーは背景のみ変更（固有色を保持するため color は指定しない） */
 .control-cluster .palette-dropdown button:hover {
@@ -299,4 +311,10 @@ html[data-mode='edit'] .control-cluster {
 }
 .swatch-graphite {
   background: #334155;
+}
+.swatch-ruby {
+  background: #dc2626;
+}
+.swatch-gold {
+  background: #d97706;
 }

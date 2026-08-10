@@ -1,6 +1,6 @@
 {
   "name": "mdss-convert",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "CLI that converts MD-Slide-Studio markdown into standalone HTML",
   "type": "module",
   "bin": {

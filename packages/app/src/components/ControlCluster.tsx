@@ -23,6 +23,8 @@ const PALETTE_META: { id: Palette; icon: string; label: string }[] = [
   { id: 'sunset', icon: '🌅', label: 'Sunset' },
   { id: 'plum', icon: '🍇', label: 'Plum' },
   { id: 'graphite', icon: '⬛', label: 'Graphite' },
+  { id: 'ruby', icon: '💎', label: 'Ruby' },
+  { id: 'gold', icon: '✨', label: 'Gold' },
 ];
 
 interface Props {

@@ -10,7 +10,7 @@
  *
  * options:
  *   -o, --out <path>     出力パス（省略時は stdout）
- *       --palette <id>   ocean|forest|sunset|plum|graphite（frontmatterより優先）
+ *       --palette <id>   ocean|forest|sunset|plum|graphite|ruby|gold（frontmatterより優先）
  *       --theme <id>     light|dark（既定 light）
  *       --json           HTMLを書き出しつつ、メタ情報(JSON)を stdout に出す
  *       --json-only      HTMLを生成せずメタ情報(JSON)のみ stdout（title/警告/lint確認用）
@@ -139,7 +139,7 @@ const HELP = `mdss-convert v${VERSION} — スライドMD → スタンドアロ
 
 options:
   -o, --out <path>   出力パス（省略時は stdout へ）
-      --palette <id> ocean|forest|sunset|plum|graphite（frontmatterより優先）
+      --palette <id> ocean|forest|sunset|plum|graphite|ruby|gold（frontmatterより優先）
       --theme <id>   light|dark（既定 light）
       --json         HTMLを書き出しつつメタ情報(JSON)を stdout に出す
       --json-only    HTMLを生成せずメタ情報(JSON)のみ出力
