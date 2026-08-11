@@ -103,7 +103,7 @@ test.describe('表示モード切替（左サイドメニュー）', () => {
     await page.locator('[data-layout-opt="editor"]').click();
     await expect(page.locator('.workspace')).toHaveAttribute('data-layout', 'editor');
 
-    await page.locator('.app-header button.primary').click();
+    await page.locator('.side-menu__item', { hasText: 'プレゼン' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-mode', 'present');
     await expect(page.locator('.workspace')).toHaveAttribute('data-layout', 'preview');
     await expect(page.locator('.editor-pane')).toHaveCount(0);
@@ -113,5 +113,21 @@ test.describe('表示モード切替（左サイドメニュー）', () => {
     await expect(page.locator('.workspace')).toHaveAttribute('data-layout', 'editor');
 
     await page.locator('[data-layout-opt="split"]').click();
+  });
+
+  test('edit モードのヘッダーには操作ボタンが無い（サイドメニューへ集約）', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.app-header button')).toHaveCount(0);
+  });
+
+  test('present モードのヘッダーには「編集に戻る」ボタンのみ表示される', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side-menu__item', { hasText: 'プレゼン' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-mode', 'present');
+    const headerButtons = page.locator('.app-header button');
+    await expect(headerButtons).toHaveCount(1);
+    await expect(headerButtons.first()).toHaveText('✎ 編集に戻る');
+    await headerButtons.first().click();
+    await expect(page.locator('html')).toHaveAttribute('data-mode', 'edit');
   });
 });

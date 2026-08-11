@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 
 test('ヘルプ: ❓ボタンでモーダルが開き、タブを切り替えられる', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: '❓ ヘルプ' }).click();
+  await page.locator('.side-menu__item', { hasText: 'ヘルプ' }).click();
 
   // 既存のエクスポートドロップダウン（#export-dropdown）にも同じショートカット文言
   // （Shift+P等）が表示されているため、検索対象をヘルプモーダル内に限定する。

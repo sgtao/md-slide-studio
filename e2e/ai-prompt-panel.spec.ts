@@ -5,7 +5,6 @@ import { expect, test } from '@playwright/test';
  *
  * 確認すること:
  *   - サイドメニューから開くと editor-pane/preview-pane の代わりにパネルが出る
- *   - ヘッダーの🤖ボタンは従来どおりポップアップのまま（回帰確認）
  *   - パネル表示中は view切替・エクスポートが無効、テーマ・パレットは有効
  *   - 複数行のテーマ入力がプロンプト内容に反映される
  *   - 「閉じる」／表示モード切替でパネルが閉じる
@@ -28,17 +27,6 @@ test.describe('AIプロンプト（左サイドメニュー・メインパネル
 
     // 後始末
     await page.locator('[data-layout-opt="split"]').click();
-  });
-
-  test('ヘッダーの🤖ボタンは従来どおりポップアップのまま', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('.app-header button', { hasText: 'AIプロンプト' }).click();
-
-    await expect(page.locator('.modal-backdrop')).toBeVisible();
-    await expect(page.locator('.ai-prompt-pane')).toHaveCount(0);
-
-    await page.locator('.modal-foot button', { hasText: '閉じる' }).click();
-    await expect(page.locator('.modal-backdrop')).toHaveCount(0);
   });
 
   test('パネル表示中はビュー切替・エクスポートが無効、テーマ・パレットは有効', async ({ page }) => {

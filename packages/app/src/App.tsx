@@ -266,24 +266,11 @@ export default function App() {
         <span className="deck-title">
           {title} ・ {deck.slides.length}枚
         </span>
-        <button onClick={() => setPromptOpen(true)} title="LLM用の原稿作成プロンプトを表示">
-          🤖 AIプロンプト
-        </button>
-        <button onClick={() => setMd(sampleMd)} title="サンプル原稿を読み込む">
-          サンプル
-        </button>
-        <button
-          onClick={() => {
-            setHelpOpen(true);
-            setHelpSeen('seen');
-          }}
-          title="記法チートシート・ショートカット・制約ルールを表示"
-        >
-          ❓ ヘルプ
-        </button>
-        <button className="primary" onClick={() => setMode(mode === 'edit' ? 'present' : 'edit')}>
-          {mode === 'edit' ? '▶ プレゼン' : '✎ 編集に戻る'}
-        </button>
+        {mode === 'present' && (
+          <button className="primary" onClick={() => setMode('edit')}>
+            ✎ 編集に戻る
+          </button>
+        )}
       </header>
 
       <div className="workspace" data-layout={effectiveLayout}>
