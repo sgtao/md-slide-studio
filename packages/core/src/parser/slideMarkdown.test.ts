@@ -253,6 +253,18 @@ describe('mermaid サブセット', () => {
     expect(d).toBeNull();
     expect(warnings.length).toBeGreaterThan(0);
   });
+  it('ラベル付きエッジ（-->|ラベル|）は解析を通し、ラベルは破棄する', () => {
+    const d = parseMermaidSubset('graph LR\n  A[入力] -->|OK| B[出力]', []);
+    expect(d?.type).toBe('flow');
+    expect(d?.nodes).toEqual(['入力', '出力']);
+  });
+  it('ラベル付きエッジがあってもレイヤー図・サイクル図の判定は変わらない', () => {
+    const cycle = parseMermaidSubset(
+      'graph LR\n  A[計画] -->|次| B[実行]\n  B -->|次| C[評価]\n  C -->|戻る| A',
+      [],
+    );
+    expect(cycle?.type).toBe('cycle');
+  });
 });
 
 describe('figure / sources / feature-showcase', () => {

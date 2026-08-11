@@ -738,9 +738,9 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
     return null;
   }
   const dir = headMatch[1];
-  const unsupported = /subgraph|sequenceDiagram|classDiagram|\|/;
+  const unsupported = /subgraph|sequenceDiagram|classDiagram/;
   if (lines.slice(1).some((l) => unsupported.test(l))) {
-    warnings.push('mermaid の分岐・subgraph・ラベル付きエッジは未対応です');
+    warnings.push('mermaid の分岐・subgraphは未対応です');
     return null;
   }
   // ノード定義 A[ラベル] とエッジ A --> B を収集
@@ -748,7 +748,9 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
   const edges: [string, string][] = [];
   for (const line of lines.slice(1)) {
     // チェーン A[x] --> B[y] --> C[z] を分解
-    const parts = line.split(/--+>/).map((p) => p.trim());
+    // v0.4.11: -->|ラベル| 形式のラベルは解析前に除去（ラベル自体は保持しない）
+    const unlabeled = line.replace(/\|[^|]*\|/g, '');
+    const parts = unlabeled.split(/--+>/).map((p) => p.trim());
     const ids: string[] = [];
     for (const part of parts) {
       const m = part.match(/^([A-Za-z0-9_]+)(?:\[([^\]]*)\])?$/);
