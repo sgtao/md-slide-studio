@@ -146,6 +146,25 @@ export default function App() {
     el.scrollTo({ top: computeTextareaScrollTop(el, line, 'top'), behavior: 'smooth' });
   }, [current, clampedCurrent, mode, effectiveLayout, view, slideStartLines]);
 
+  // v0.4.10: preview → editor / split の遷移時に、現在スライドの先頭行へ
+  // エディタをスクロールする。textarea は preview からの遷移で再マウントされるため
+  // rAF で1フレーム待ってから scrollTo する。
+  const prevLayoutForJumpRef = useRef<LayoutMode>(effectiveLayout);
+  useEffect(() => {
+    const prev = prevLayoutForJumpRef.current;
+    prevLayoutForJumpRef.current = effectiveLayout;
+    if (mode !== 'edit') return;
+    if (view !== 'hero') return;
+    if (prev !== 'preview' || effectiveLayout === 'preview') return;
+    const line = slideStartLines[clampedCurrent];
+    if (line === undefined) return;
+    requestAnimationFrame(() => {
+      const el = textareaRef.current;
+      if (!el) return;
+      el.scrollTo({ top: computeTextareaScrollTop(el, line, 'top'), behavior: 'smooth' });
+    });
+  }, [effectiveLayout, mode, view, clampedCurrent, slideStartLines]);
+
   const setPalette = (p: Palette) => {
     setPaletteOverride(p);
     try {
