@@ -39,6 +39,9 @@ test.describe('エクスポート', () => {
   });
 
   test('Shift+P で全スライドのZIPダウンロードが起動する', async ({ page }) => {
+    // 25枚分の html2canvas レンダリング + JSZip 圧縮を行うため、他テストと並列実行時の
+    // CPU/描画競合で既定の30秒を超えることがある（既知のflaky事情）。このテストだけ延長する。
+    test.setTimeout(60_000);
     await page.goto('/');
     await focusPreview(page);
     const downloadPromise = page.waitForEvent('download');
