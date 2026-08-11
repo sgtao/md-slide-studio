@@ -112,7 +112,7 @@ export function buildMarkdownSpec(opts: MarkdownSpecOptions = {}): string {
     '（2枚目の内容）',
     '```',
     '',
-    '- 先頭に YAML frontmatter、以降は**行全体が `---` の行**でスライドを区切る',
+    '- 先頭に YAML frontmatter、以降は**行全体が `---` の行**でスライドを区切る（`***` / `___` / 4個以上の `-` 等、CommonMarkのthematic break相当の行も区切りとして解釈される）',
     '- frontmatter 内・コードフェンス内の `---` は区切りとみなさない',
     '- 各スライドの先頭行はスライドディレクティブ（HTMLコメント）',
     '',

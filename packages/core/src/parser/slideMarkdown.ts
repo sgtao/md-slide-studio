@@ -3,7 +3,8 @@
  *
  * 仕様の要点:
  * - 先頭に YAML frontmatter、以降は行全体が `---` の行でスライド区切り
- *   （frontmatter 内・コードフェンス内の `---` は区切りとみなさない）
+ *   （v0.4.11: `***` / `___` / 4個以上の `-` 等、CommonMark thematic break相当の行も区切りとして解釈する。
+ *   frontmatter 内・コードフェンス内の `---` は区切りとみなさない）
  * - 各スライド先頭行は `<!-- slide: <type>[, fit][, layout: x][, tone: dark] -->`
  * - chart / diagram / mermaid（サブセット）/ steps / contrast フェンスブロックを構造化
  * - 全typeで共通ヘッダキー（badge / lead / point）を受け付ける（slideHeader.ts）
