@@ -1,5 +1,5 @@
 /**
- * guidePrompt.test.mjs — v0.4.2 で追加した --guide-prompt の統合テスト。
+ * guidePrompt.test.mjs — --guide-prompt の統合テスト。
  * 既存の smoke.test.mjs / features.test.mjs は変更せず、別ファイルとして追加している。
  *
  *   実行: node --test test/*.test.mjs   （事前に build.mjs 済みであること）

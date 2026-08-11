@@ -1,5 +1,5 @@
 /**
- * svgFigure.ts — mermaid journey / gantt 記法の独自パーサー（v0.4.6〜）。
+ * svgFigure.ts — mermaid journey / gantt 記法の独自パーサー。
  *
  * 対象は `svg-figure` type専用。既存の `parseMermaidSubset()`（graph LR/TD）とは
  * 完全に独立した実装で、既存ロジックには一切影響しない。

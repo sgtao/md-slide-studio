@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { buildDraftAssistPrompt, MINIMAL_EXAMPLE } from './draftAssistPrompt';
 
-// v0.4.2: draftAssistPrompt を app から core へ移設した際の回帰テスト。
+// draftAssistPrompt を app から core へ移設した際の回帰テスト。
 // v0.2.6 由来の「全16 type名を含む」検証はそのまま維持し、加えて
-// v0.4.2 で変更した節の並び順（テーマを末尾へ）を検証する。
+// 節の並び順（テーマを末尾へ）を検証する。
 const ALL_TYPES = [
   'title',
   'points',

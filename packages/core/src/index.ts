@@ -44,7 +44,7 @@ export {
 export { donutSegmentPath, formatValue } from './geometry/chart';
 // --- svg-figure（journey/gantt）の日数換算（app側SVG座標計算で再利用） ---
 export { parseDuration } from './parser/svgFigure';
-// --- svg-figure（v0.4.8: 任意SVG）のパース・サニタイズ ---
+// --- svg-figure（任意SVG）のパース・サニタイズ ---
 export { parseRawSvg } from './parser/svgRaw';
 // --- AI原稿作成プロンプト（app「AIプロンプト」ボタン / CLI --guide-prompt 共用） ---
 export { buildDraftAssistPrompt, MINIMAL_EXAMPLE } from './prompt/draftAssistPrompt';

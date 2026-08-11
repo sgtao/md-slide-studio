@@ -1,5 +1,5 @@
 /**
- * SideMenu.tsx — 左サイドメニュー（v0.4.7 追加）。
+ * SideMenu.tsx — 左サイドメニュー。
  *
  * 役割分担:
  *   左（このコンポーネント） … 「どの画面を、どう出すか」＋ドキュメント操作
@@ -11,8 +11,8 @@
  * 配置は .workspace の最初の子。.workspace は既に display:flex（横並び）なので、
  * 専用のラッパー要素は設けていない。present モード中は app-shell.css 側で非表示。
  *
- * ヘッダーの 🤖 / サンプル / ❓ ボタンとは v0.4.7 時点では併存させる
- * （既存E2Eのセレクタを維持するため。整理は v0.4.8 のヘッダー改修とセットで行う）。
+ * ヘッダーの 🤖 / サンプル / ❓ ボタンは併存させる
+ * （既存E2Eのセレクタを維持するため。整理はヘッダー改修とセットで行う）。
  */
 import { LAYOUT_MODES, LAYOUT_MODE_META, type LayoutMode } from '../layout/layoutMode';
 
@@ -22,7 +22,7 @@ interface Props {
   onSetLayout: (m: LayoutMode) => void;
   onToggleExpanded: () => void;
   onStartPresent: () => void;
-  /** v0.4.7: メインパネル版AIプロンプトが表示中か（ボタンの選択状態表示に使う） */
+  /** メインパネル版AIプロンプトが表示中か（ボタンの選択状態表示に使う） */
   aiPromptOpen: boolean;
   onOpenPromptPanel: () => void;
   onLoadSample: () => void;

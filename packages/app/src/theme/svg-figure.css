@@ -1,5 +1,5 @@
 /* svg-figure.css
- * svg-figure type（v0.4.6〜）: mermaid journey / gantt 記法の独自SVG描画。
+ * svg-figure type: mermaid journey / gantt 記法の独自SVG描画。
  * 色は必ず theme-vars.css の --chart-* / --text-* / --accent 経由（ハードコード禁止規約に準拠）。
  * main.tsx で contrast.css の後に import する。
  */

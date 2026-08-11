@@ -276,7 +276,7 @@ right:
       desc: 説明`,
   },
 
-  // ─── svg-figure（v0.4.6） ───
+  // ─── svg-figure ───
   {
     id: 'svg-figure-journey',
     label: 'ジャーニーマップ（svg-figure）',

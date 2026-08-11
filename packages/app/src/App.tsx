@@ -83,11 +83,11 @@ export default function App() {
 
   // --- 表示状態 ---
   const [mode, setMode] = usePersistentState<'edit' | 'present'>('mdss-mode', 'edit');
-  // v0.4.7: 表示モード（2分割／編集のみ／プレビューのみ）。present 中は 'preview' へ
+  // 表示モード（2分割／編集のみ／プレビューのみ）。present 中は 'preview' へ
   // 一時上書きするが保存値は変えない（プレゼンから戻ったとき作業レイアウトへ復帰させる）。
   const [layoutStored, setLayout] = usePersistentState<LayoutMode>('mdss-layout', 'split');
   const [menuOpen, setMenuOpen] = usePersistentState<'0' | '1'>('mdss-menu-expanded', '1');
-  // v0.4.7: 左サイドメニュー版AIプロンプト（メインパネル表示）。ヘッダーの🤖ポップアップ
+  // 左サイドメニュー版AIプロンプト（メインパネル表示）。ヘッダーの🤖ポップアップ
   // （promptOpen、後述）とは独立させた一時state（非永続）。プレゼン中は無視してプレビュー優先。
   const [aiPromptPanelOpen, setAiPromptPanelOpen] = useState(false);
   const showAiPromptPanel = aiPromptPanelOpen && mode === 'edit';
@@ -130,7 +130,7 @@ export default function App() {
     document.title = `${deck.frontmatter.title} | MD Slide Studio`;
   }, [deck.frontmatter.title]);
 
-  // v0.4.9: スライド送り/戻しに応じてエディタを対応するMarkdownブロックへスムーズスクロール。
+  // スライド送り/戻しに応じてエディタを対応するMarkdownブロックへスムーズスクロール。
   // clampedCurrent ではなく current を変化トリガーにする — clampedCurrent は
   // deck.slides.length が縮む（＝タイピング中）だけでも変わる派生値のため、
   // それを使うと「編集中に勝手にスクロールされる」事故になる。
@@ -208,7 +208,7 @@ export default function App() {
     if (el) void exportHtml(el, title, md);
   }, [title, md]);
 
-  // v0.4.7: レイアウトを選ぶ操作（クリック・キーボード共通）は、開いていれば
+  // レイアウトを選ぶ操作（クリック・キーボード共通）は、開いていれば
   // AIプロンプトパネルを閉じてから反映する（editor-pane/preview-paneと排他のDOM関係のため）。
   const applyLayout = useCallback(
     (m: LayoutMode) => {

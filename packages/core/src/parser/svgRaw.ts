@@ -1,5 +1,5 @@
 /**
- * svgRaw.ts — svg-figure の RawSvgBlock（v0.4.8〜）を生成する、DOM非依存の
+ * svgRaw.ts — svg-figure の RawSvgBlock を生成する、DOM非依存の
  * 簡易SVGパーサー・サニタイザー。
  *
  * `DOMParser` / `jsdom` には依存せず、正規表現ベースの簡易タグトークナイザーを

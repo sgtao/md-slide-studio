@@ -2,12 +2,12 @@
  * ControlCluster.tsx — 右上コントロール（base-template.html の .control-cluster 移植）。
  * テーマ切替 / ビュー切替 / パレット5色ドロップダウン / エクスポートメニュー。
  *
- * v0.4.7: 配置を .preview-pane の内側から .workspace 直下へ移した。
+ * 配置を .preview-pane の内側から .workspace 直下へ移した。
  *   'editor' レイアウトでは .preview-pane 自体がアンマウントされるため、
  *   内側に置いたままだとテーマ・パレットまで操作できなくなるため。
  *   .control-cluster は position:fixed なので、移しても見た目の位置は変わらない。
  *
- * v0.4.7: disabled — 'editor' レイアウト時に true。DOM実体を必要とする書き出し
+ * disabled — 'editor' レイアウト時に true。DOM実体を必要とする書き出し
  *   （PNG/ZIP/HTML/PDF）と、プレビューの見せ方を変える view 切替を無効化する。
  *   テーマ・パレットはエディタの配色にも効くため有効のままにする。
  */

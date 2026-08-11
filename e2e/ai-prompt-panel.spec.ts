@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * v0.4.7: 左サイドメニュー「AIプロンプト」のメインパネル化。
+ * 左サイドメニュー「AIプロンプト」のメインパネル化。
  *
  * 確認すること:
  *   - サイドメニューから開くと editor-pane/preview-pane の代わりにパネルが出る

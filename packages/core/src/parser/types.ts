@@ -100,7 +100,7 @@ export interface TimelineBlock {
   milestones: { label: string; when: string }[];
 }
 
-/** journey 型（v0.4.6）: mermaid journey 記法から生成する感情推移グラフ */
+/** journey 型: mermaid journey 記法から生成する感情推移グラフ */
 export interface JourneyTask {
   label: string;
   score: number;
@@ -118,7 +118,7 @@ export interface JourneyBlock {
   sections: JourneySection[];
 }
 
-/** gantt 型（v0.4.7）: mermaid gantt 記法から生成する簡易ガントチャート */
+/** gantt 型: mermaid gantt 記法から生成する簡易ガントチャート */
 export interface GanttTask {
   label: string;
   id?: string;
@@ -141,7 +141,7 @@ export interface GanttBlock {
 
 export type SvgFigureBlock = JourneyBlock | GanttBlock | RawSvgBlock;
 
-/** raw 型（v0.4.8）: ```svg フェンスに直接貼り付けた任意SVGを許可リスト経由で保持するツリー */
+/** raw 型: ```svg フェンスに直接貼り付けた任意SVGを許可リスト経由で保持するツリー */
 export interface SvgElementNode {
   tag: string;
   attrs: Record<string, string>;
@@ -340,7 +340,7 @@ export interface SourcesSlide extends SlideBase {
   links: SourceLink[];
 }
 
-/** svg-figure（v0.4.6）: mermaid journey/gantt 記法を独自SVGで描画する専用type */
+/** svg-figure: mermaid journey/gantt 記法を独自SVGで描画する専用type */
 export interface SvgFigureSlide extends SlideBase {
   type: 'svg-figure';
   heading?: InlineText;

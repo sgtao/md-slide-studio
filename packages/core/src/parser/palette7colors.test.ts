@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { parseSlideMarkdown } from './slideMarkdown';
 
-// v0.4.9: パレット5色 -> 7色（Ruby / Gold 追加）。
+// パレット5色 -> 7色（Ruby / Gold 追加）。
 // 既存の palette フォールバックテスト（slideMarkdown.test.ts）とは別ファイルとして新設。
 const fm = (palette: string) =>
   `---\ntitle: テスト\npalette: ${palette}\n---\n<!-- slide: title -->\n# A`;
 
-describe('palette: 7色対応（v0.4.9）', () => {
+describe('palette: 7色対応', () => {
   it('ruby を正しいパレットとして読む', () => {
     const deck = parseSlideMarkdown(fm('ruby'));
     expect(deck.frontmatter.palette).toBe('ruby');

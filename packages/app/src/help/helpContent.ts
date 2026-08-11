@@ -23,7 +23,7 @@ export interface ShortcutItem {
   desc: string;
 }
 
-// v0.4.7: 表示モードのキー・ラベルは layout/layoutMode.ts を単一の情報源とする
+// 表示モードのキー・ラベルは layout/layoutMode.ts を単一の情報源とする
 const LAYOUT_KEYS = LAYOUT_MODES.map((m) => LAYOUT_MODE_META[m].key).join(' / ');
 const LAYOUT_LABELS = LAYOUT_MODES.map((m) => LAYOUT_MODE_META[m].label).join('／');
 
@@ -31,7 +31,7 @@ export const SHORTCUTS: ShortcutItem[] = [
   { keys: '→ / Space', desc: '次のスライドへ' },
   { keys: '←', desc: '前のスライドへ' },
   { keys: 'F', desc: 'フルスクリーン切替' },
-  // v0.4.7: 実装は hero⇔list（プレビューの見せ方）の切替。旧説明
+  // 実装は hero⇔list（プレビューの見せ方）の切替。旧説明
   // 「エディタ⇔プレビュー表示切替」は新設の表示モード（1/2/3）と紛らわしいため修正した。
   { keys: 'V', desc: 'プレビュー表示切替（1枚⇔一覧）' },
   { keys: LAYOUT_KEYS, desc: `表示モード切替（${LAYOUT_LABELS}）` },

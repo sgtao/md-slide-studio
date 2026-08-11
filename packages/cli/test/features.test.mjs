@@ -1,5 +1,5 @@
 /**
- * features.test.mjs — v0.4.2 で追加したスキル連携用オプションの統合テスト。
+ * features.test.mjs —スキル連携用オプションの統合テスト。
  *   --print-spec / --sample-md / --extract-md / --strict
  * 既存の smoke.test.mjs は変更せず、別ファイルとして追加している。
  *

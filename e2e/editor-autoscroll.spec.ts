@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('エディタ自動スクロール（v0.4.9）', () => {
+test.describe('エディタ自動スクロール', () => {
   test('スライドを進めるとエディタのscrollTopが変化する', async ({ page }) => {
     await page.goto('/');
     const textarea = page.locator('.editor-pane textarea');

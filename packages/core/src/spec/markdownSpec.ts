@@ -76,7 +76,7 @@ const LAYOUT_TABLE: string[] = [
 ];
 
 export interface MarkdownSpecOptions {
-  /** 生成元の表示名（例: `mdss-convert v0.4.2`）。AUTO-GENERATED ヘッダに埋め込む */
+  /** 生成元の表示名（例: `mdss-convert`）。AUTO-GENERATED ヘッダに埋め込む */
   generator?: string;
 }
 

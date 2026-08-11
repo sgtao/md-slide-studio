@@ -1,5 +1,5 @@
 /* app-shell.css
- * v0.4.7: 左サイドメニューと表示モード（2分割／編集のみ／プレビューのみ）。
+ * 左サイドメニューと表示モード（2分割／編集のみ／プレビューのみ）。
  *
  * このファイルはアプリ専用UIのため、packages/cli/build.mjs の CSS_ORDER には
  * 追加しない（書き出しHTML／CLI出力に不要なバイトを載せないため）。
@@ -95,12 +95,12 @@
 }
 /* 'editor' では .control-cluster（position:fixed）がテキスト先頭行に重なるため
    上余白を広げる。スクロール時に文字がボタンの下へ潜る点は残るが、
-   ヘッダーとコントロールの整理を行う v0.4.8 で解消する。 */
+   ヘッダーとコントロールの整理を行う。 */
 .workspace[data-layout='editor'] .editor-pane textarea {
   padding-top: 36px;
 }
 
-/* ─── AIプロンプトパネル（左サイドメニュー版・v0.4.7）─── */
+/* ─── AIプロンプトパネル（左サイドメニュー版）─── */
 /* ヘッダーの🤖ポップアップ（.modal-head / .modal-body / .modal-foot・app.css）と
    同じ内側スタイルを流用しつつ、.workspace の中に直接置くため
    .modal-backdrop / .modal（オーバーレイ用の固定幅・box-shadow等）は使わない。 */

@@ -32,7 +32,7 @@ export function useFitSlide(containerRef: RefObject<HTMLElement | null>, enabled
 export interface KeyboardNavHandlers {
   onNavigate: (dir: 1 | -1) => void;
   onToggleView: () => void;
-  /** v0.4.7: 表示モード切替（1/2/3）。未指定ならキーを無視する。 */
+  /** 表示モード切替（1/2/3）。未指定ならキーを無視する。 */
   onSetLayout?: (m: LayoutMode) => void;
   onExportPdf?: () => void;
   onExportPng?: () => void;
@@ -42,7 +42,7 @@ export interface KeyboardNavHandlers {
 /**
  * useKeyboardNav — navigation.js のショートカット移植。
  * ← / → / Space / F（フルスクリーン） / V（ビュー切替） /
- * 1 / 2 / 3（表示モード切替・v0.4.7） /
+ * 1 / 2 / 3（表示モード切替） /
  * P（PDF） / Shift+S（PNG） / Shift+P（ZIP）
  * 入力フィールド内・Ctrl/Cmd 押下時は無効（ブラウザ標準を尊重）。
  */
@@ -72,7 +72,7 @@ export function useKeyboardNav(handlers: KeyboardNavHandlers, enabled: boolean) 
         handlers.onToggleView();
         return;
       }
-      // v0.4.7: 1/2/3 で表示モード切替。Shift併用時は e.key が記号になるため衝突しない。
+      // 1/2/3 で表示モード切替。Shift併用時は e.key が記号になるため衝突しない。
       if (!e.shiftKey && handlers.onSetLayout) {
         const layoutMode = layoutModeFromKey(e.key);
         if (layoutMode) {

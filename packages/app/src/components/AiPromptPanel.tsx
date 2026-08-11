@@ -1,5 +1,5 @@
 /**
- * AiPromptPanel.tsx — 左サイドメニュー「AIプロンプト」から開くメインパネル版（v0.4.7）。
+ * AiPromptPanel.tsx — 左サイドメニュー「AIプロンプト」から開くメインパネル版。
  *
  * ヘッダーの🤖ポップアップとロジックを usePromptComposer() で共有しつつ、
  * テーマ入力を複数行の textarea にする（大量のテーマ文を貼り付けても

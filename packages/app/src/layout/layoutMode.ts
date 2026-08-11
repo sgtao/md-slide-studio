@@ -4,7 +4,7 @@
  * ここを唯一の定義元とし、SideMenuのボタン・キーボードショートカット・
  * ヘルプの説明文をすべて導出する（同じ内容を3箇所に手書きしないための措置）。
  *
- * 軸の関係（v0.4.7）:
+ * 軸の関係:
  *   mode   'edit' | 'present'            … アプリUIを見せるか／全画面発表か
  *   layout 'split'|'editor'|'preview'    … 編集時にどのペインを出すか（このファイル）
  *   view   'hero' | 'list'               … プレビューの見せ方（1枚／一覧）
@@ -80,7 +80,7 @@ export function resolveLayout(stored: unknown, mode: 'edit' | 'present'): Layout
 
 /**
  * DOM実体を html2canvas / window.print() に渡す書き出しが可能か。
- * 'editor' では .preview-pane がアンマウントされているため不可（v0.4.7 決定）。
+ * 'editor' では .preview-pane がアンマウントされているため不可。
  * ボタンだけでなくキーボードショートカット側も、この判定で無効化すること。
  * （無効化しないと P キーで白紙PDFが出るなどの無言failureになる）
  */

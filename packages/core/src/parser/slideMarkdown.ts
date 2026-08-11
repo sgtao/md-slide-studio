@@ -194,7 +194,7 @@ function splitSlides(body: string): string[] {
  * getSlideStartLines — 各スライドの先頭行（0-indexed、frontmatterを含むsrc全体基準）を返す。
  * parseSlideMarkdown(src).slides.length と戻り値の配列長は必ず一致する
  * （splitSlidesWithOffsets と同一の境界判定・空チャンク除外ルールを共有するため）。
- * v0.4.9: エディタパネルの自動スクロール機能で使用。
+ * エディタパネルの自動スクロール機能で使用。
  */
 export function getSlideStartLines(src: string): number[] {
   const m = src.match(FRONTMATTER_RE);
@@ -620,7 +620,7 @@ function parseComparisonLeft(rest: string, warnings: string[]): ComparisonLeft {
 // --- diagram（diagram ブロック / mermaid サブセット） ---
 
 /**
- * ```mermaid フェンスの中身の先頭行を見て、行き先を振り分ける（v0.4.6）。
+ * ```mermaid フェンスの中身の先頭行を見て、行き先を振り分ける。
  * graph LR/TD 等は既存の parseMermaidSubset() へそのまま委譲し、中身は一切変更しない。
  * journey / gantt は svg-figure 専用の新パーサーへ振り分ける。
  */
@@ -813,7 +813,7 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
   return { type: 'layer', nodes: nodeLabels };
 }
 
-// --- svg-figure（v0.4.6: journey / gantt を独自SVGで描画） ---
+// --- svg-figure（journey / gantt を独自SVGで描画） ---
 
 /** `notes:\n  - a\n  - b` 形式の箇条書きを string[] としてパースする。 */
 function parseNotesList(body: string): string[] | undefined {
@@ -828,7 +828,7 @@ function parseNotesList(body: string): string[] | undefined {
 }
 
 function parseSvgFigureSlide(body: string, warnings: string[]) {
-  // v0.4.8: ```svg フェンスがあれば最優先（journey/gantt判定は行わない）。
+  // ```svg フェンスがあれば最優先（journey/gantt判定は行わない）。
   // 無ければ既存の ```mermaid 判定（journey/gantt）にフォールバックする（後方互換）。
   const svgFence = extractFence(body, 'svg');
   let figure: JourneyBlock | GanttBlock | RawSvgBlock | undefined;

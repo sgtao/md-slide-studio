@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { getSlideStartLines, parseSlideMarkdown } from './slideMarkdown';
 
-// v0.4.9: エディタ自動スクロール機能用。getSlideStartLinesの契約
+// エディタ自動スクロール機能用。getSlideStartLinesの契約
 // 「戻り値の配列長は parseSlideMarkdown(src).slides.length と必ず一致する」を中心に検証する。
 
-describe('getSlideStartLines（v0.4.9: エディタ自動スクロール）', () => {
+describe('getSlideStartLines（エディタ自動スクロール）', () => {
   it('複数スライドの先頭行を返す', () => {
     const src = [
       '---',

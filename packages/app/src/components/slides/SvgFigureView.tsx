@@ -1,5 +1,5 @@
 /**
- * SvgFigureView.tsx — svg-figure type（v0.4.6〜）の描画。
+ * SvgFigureView.tsx — svg-figure type の描画。
  *
  * mermaid journey / gantt 記法から生成された JourneyBlock / GanttBlock を、
  * 外部レンダリングエンジンなしで独自SVGとして描画する。座標計算は決定論的。
@@ -260,7 +260,7 @@ function GanttSvg({ gantt, slideIndex }: { gantt: GanttBlock; slideIndex: number
   );
 }
 
-// ─── raw（v0.4.8）: ```svg フェンスに貼り付けた任意SVGの描画 ───
+// ─── raw : ```svg フェンスに貼り付けた任意SVGの描画 ───
 // dangerouslySetInnerHTML は使わず、サニタイズ済みツリーからReact要素を再構築する。
 const SVG_ATTR_TO_PROP: Record<string, string> = {
   'stroke-width': 'strokeWidth',
