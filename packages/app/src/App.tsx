@@ -22,7 +22,6 @@ import {
   exportToPdf,
   exportToPng,
 } from './export/exporters';
-import { usePromptComposer, PromptExplanation } from './ai/promptComposer';
 import { AiPromptPanel } from './components/AiPromptPanel';
 import sampleMd from './samples/sample.md?raw';
 
@@ -87,8 +86,7 @@ export default function App() {
   // 一時上書きするが保存値は変えない（プレゼンから戻ったとき作業レイアウトへ復帰させる）。
   const [layoutStored, setLayout] = usePersistentState<LayoutMode>('mdss-layout', 'split');
   const [menuOpen, setMenuOpen] = usePersistentState<'0' | '1'>('mdss-menu-expanded', '1');
-  // 左サイドメニュー版AIプロンプト（メインパネル表示）。ヘッダーの🤖ポップアップ
-  // （promptOpen、後述）とは独立させた一時state（非永続）。プレゼン中は無視してプレビュー優先。
+  // 左サイドメニュー版AIプロンプト（メインパネル表示、非永続）。プレゼン中は無視してプレビュー優先。
   const [aiPromptPanelOpen, setAiPromptPanelOpen] = useState(false);
   const showAiPromptPanel = aiPromptPanelOpen && mode === 'edit';
   const effectiveLayout = resolveLayout(layoutStored, mode);
@@ -262,8 +260,6 @@ export default function App() {
     true,
   );
 
-  // --- AIプロンプトモーダル ---
-  const [promptOpen, setPromptOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   // 初回訪問時のみトーストを出すためのフラグ。usePersistentStateは文字列限定の型のため
   // 'seen' | 'unseen' で管理する（mode/theme/view と同じ既存パターン）。
@@ -384,7 +380,6 @@ export default function App() {
         )}
       </div>
 
-      {promptOpen && <PromptModal onClose={() => setPromptOpen(false)} />}
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
       {helpSeen === 'unseen' && !helpOpen && (
         <div
@@ -398,38 +393,5 @@ export default function App() {
         </div>
       )}
     </>
-  );
-}
-
-function PromptModal({ onClose }: { onClose: () => void }) {
-  const { themeText, setThemeText, prompt, copied, copy } = usePromptComposer();
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-head">
-          🤖 原稿作成プロンプト
-          <input
-            placeholder="スライドのテーマを入力（例: Claude Codeの社内導入提案）"
-            value={themeText}
-            onChange={(e) => setThemeText(e.target.value)}
-          />
-        </div>
-        <div className="modal-body">
-          <PromptExplanation />
-          <pre>{prompt}</pre>
-        </div>
-        <div className="modal-foot">
-          <button onClick={onClose}>閉じる</button>
-          <button
-            className="primary"
-            onClick={() => {
-              void copy();
-            }}
-          >
-            {copied ? '✓ コピーしました' : 'プロンプトをコピー'}
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
