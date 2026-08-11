@@ -39,6 +39,30 @@ describe('スライド区切り', () => {
     const deck = parseSlideMarkdown(md);
     expect(deck.slides).toHaveLength(2);
   });
+  it('---- (4個以上のダッシュ) でも分割する', () => {
+    const md = fm('<!-- slide: points -->\n## A\n- x\n----\n<!-- slide: points -->\n## B\n- y');
+    expect(parseSlideMarkdown(md).slides).toHaveLength(2);
+  });
+  it('*** (アスタリスク3個) でも分割する', () => {
+    const md = fm('<!-- slide: points -->\n## A\n- x\n***\n<!-- slide: points -->\n## B\n- y');
+    expect(parseSlideMarkdown(md).slides).toHaveLength(2);
+  });
+  it('___ (アンダースコア3個) でも分割する', () => {
+    const md = fm('<!-- slide: points -->\n## A\n- x\n___\n<!-- slide: points -->\n## B\n- y');
+    expect(parseSlideMarkdown(md).slides).toHaveLength(2);
+  });
+  it('- - - (間に空白) でも分割する', () => {
+    const md = fm('<!-- slide: points -->\n## A\n- x\n- - -\n<!-- slide: points -->\n## B\n- y');
+    expect(parseSlideMarkdown(md).slides).toHaveLength(2);
+  });
+  it('-*- のような文字混在は区切りとみなさない', () => {
+    const md = fm('<!-- slide: points -->\n## A\n- x\n-*-\n- y');
+    expect(parseSlideMarkdown(md).slides).toHaveLength(1);
+  });
+  it('frontmatter の区切りは引き続き厳密な --- のみ（緩和対象外）', () => {
+    const deck = parseSlideMarkdown('---\ntitle: t\n---\n<!-- slide: title -->\n# A');
+    expect(deck.frontmatter.title).toBe('t');
+  });
 });
 
 describe('directive', () => {

@@ -168,13 +168,20 @@ interface SlideChunk {
   startLine: number;
 }
 
+/**
+ * CommonMark/GFM の thematic break 規則に準拠したスライド区切り行の判定。
+ * -, *, _ のいずれか同一文字を3個以上（間に半角スペース/タブが入ってもよい）。
+ * 行頭インデントは対象外（区切り行は常に行頭から書く前提を崩さない）。
+ */
+const THEMATIC_BREAK_RE = /^([-*_])[ \t]*(?:\1[ \t]*){2,}$/;
+
 function splitSlidesWithOffsets(body: string): SlideChunk[] {
   const lines = body.split(/\r?\n/);
   const chunks: { lines: string[]; startLine: number }[] = [{ lines: [], startLine: 0 }];
   let inFence = false;
   lines.forEach((line, i) => {
     if (/^\s*```/.test(line)) inFence = !inFence;
-    if (!inFence && /^---\s*$/.test(line)) {
+    if (!inFence && THEMATIC_BREAK_RE.test(line)) {
       chunks.push({ lines: [], startLine: i + 1 });
       return;
     }
