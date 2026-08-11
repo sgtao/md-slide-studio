@@ -34,6 +34,21 @@ test('sample.md → スタンドアロンHTMLを生成できる', () => {
   assert.ok(sections.length >= 10, `スライドが十分に描画される (got ${sections.length})`);
 });
 
+test('.control-clusterはスタンドアロン出力ではposition:fixedに上書きされる（v0.4.10回帰対応）', () => {
+  // 共有テーマCSS（nav-controls.css）はSPAの.preview-pane相対配置を前提に
+  // position: absolute だが、CLIのスタンドアロンHTMLには.preview-paneが無いため
+  // documentスクロール（listビュー等）でControlClusterが画面外へ流れてしまう。
+  // standalone.ts側でposition: fixedへ上書きしていることを確認する。
+  const html = run([SAMPLE, '--quiet']);
+  const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/);
+  assert.ok(styleMatch, '<style>タグが見つかる');
+  const css = styleMatch[1];
+  const lastAbsolute = css.lastIndexOf('.control-cluster {\n  position: absolute;');
+  const overrideIndex = css.indexOf('.control-cluster{position:fixed}');
+  assert.ok(overrideIndex !== -1, 'position:fixed への上書き規則が埋め込まれている');
+  assert.ok(overrideIndex > lastAbsolute, '上書き規則が元のabsolute宣言より後（カスケードで有効）に配置されている');
+});
+
 test('--theme dark --palette forest が html属性に反映される', () => {
   const html = run([SAMPLE, '--quiet', '--theme', 'dark', '--palette', 'forest']);
   assert.match(html, /data-theme="dark"/);

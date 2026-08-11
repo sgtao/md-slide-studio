@@ -364,7 +364,13 @@ export function assembleStandaloneHtml(args: {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
-<style>${css}</style>
+<style>${css}
+/* v0.4.10 Step7回帰対応: 共有テーマCSS（nav-controls.css）はSPAの.preview-pane
+   相対配置を前提にposition: absoluteだが、スタンドアロン出力には.preview-paneが
+   無くdocumentがそのままスクロールする（listビュー等）ため、position: fixedへ
+   戻してビューポートに固定する。 */
+.control-cluster{position:fixed}
+</style>
 </head>
 <body data-view="list">
 ${controlClusterWithTheme}
