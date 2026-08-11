@@ -122,12 +122,14 @@ export function parseSlideMarkdown(src: string): SlideDeck {
 // frontmatter
 // ---------------------------------------------------------------------------
 
+const FRONTMATTER_RE = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
+
 function splitFrontmatter(
   src: string,
   warnings: string[],
 ): { frontmatter: Frontmatter; body: string } {
   const fallback: Frontmatter = { title: 'Untitled', palette: 'ocean' };
-  const m = src.match(/^\uFEFF?---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  const m = src.match(FRONTMATTER_RE);
   if (!m) {
     warnings.push('frontmatter（--- title: ... ---）が見つかりません');
     return { frontmatter: fallback, body: src };
@@ -158,19 +160,47 @@ function splitFrontmatter(
 // スライド区切り（コードフェンス内の --- は無視）
 // ---------------------------------------------------------------------------
 
-function splitSlides(body: string): string[] {
+interface SlideChunk {
+  text: string;
+  startLine: number;
+}
+
+function splitSlidesWithOffsets(body: string): SlideChunk[] {
   const lines = body.split(/\r?\n/);
-  const chunks: string[][] = [[]];
+  const chunks: { lines: string[]; startLine: number }[] = [{ lines: [], startLine: 0 }];
   let inFence = false;
-  for (const line of lines) {
+  lines.forEach((line, i) => {
     if (/^\s*```/.test(line)) inFence = !inFence;
     if (!inFence && /^---\s*$/.test(line)) {
-      chunks.push([]);
-      continue;
+      chunks.push({ lines: [], startLine: i + 1 });
+      return;
     }
-    chunks[chunks.length - 1].push(line);
-  }
-  return chunks.map((c) => c.join('\n').trim()).filter((c) => c.length > 0);
+    chunks[chunks.length - 1].lines.push(line);
+  });
+  return chunks
+    .map((c) => {
+      let blankLines = 0;
+      while (blankLines < c.lines.length && c.lines[blankLines].trim() === '') blankLines++;
+      return { text: c.lines.join('\n').trim(), startLine: c.startLine + blankLines };
+    })
+    .filter((c) => c.text.length > 0);
+}
+
+function splitSlides(body: string): string[] {
+  return splitSlidesWithOffsets(body).map((c) => c.text);
+}
+
+/**
+ * getSlideStartLines — 各スライドの先頭行（0-indexed、frontmatterを含むsrc全体基準）を返す。
+ * parseSlideMarkdown(src).slides.length と戻り値の配列長は必ず一致する
+ * （splitSlidesWithOffsets と同一の境界判定・空チャンク除外ルールを共有するため）。
+ * v0.4.9: エディタパネルの自動スクロール機能で使用。
+ */
+export function getSlideStartLines(src: string): number[] {
+  const m = src.match(FRONTMATTER_RE);
+  const frontmatterLineCount = m ? (m[0].match(/\r?\n/g) ?? []).length : 0;
+  const body = m ? src.slice(m[0].length) : src;
+  return splitSlidesWithOffsets(body).map((c) => c.startLine + frontmatterLineCount);
 }
 
 // ---------------------------------------------------------------------------

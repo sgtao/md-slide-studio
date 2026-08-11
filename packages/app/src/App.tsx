@@ -4,7 +4,7 @@
  * テーマ / パレット / ビューは localStorage に永続化（元スキルの挙動を踏襲）。
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { parseSlideMarkdown } from '@mdss/core';
+import { parseSlideMarkdown, getSlideStartLines } from '@mdss/core';
 import { lintDeck } from '@mdss/core';
 import { LintPanel } from './components/LintPanel';
 import type { Palette } from '@mdss/core';
@@ -38,6 +38,16 @@ function useDebounced<T>(value: T, ms: number): T {
   return debounced;
 }
 
+function computeTextareaScrollTop(
+  el: HTMLTextAreaElement,
+  line: number,
+  align: 'top' | 'center',
+): number {
+  const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 18;
+  const y = line * lineHeight;
+  return align === 'center' ? Math.max(0, y - el.clientHeight / 2) : Math.max(0, y);
+}
+
 export default function App() {
   // --- 原稿（localStorage 復元、初回はサンプル） ---
   const [md, setMd] = useState<string>(() => {
@@ -61,6 +71,7 @@ export default function App() {
   // --- パース（300ms デバウンス） ---
   const debouncedMd = useDebounced(md, 300);
   const deck = useMemo(() => parseSlideMarkdown(debouncedMd), [debouncedMd]);
+  const slideStartLines = useMemo(() => getSlideStartLines(debouncedMd), [debouncedMd]);
   const lintResults = useMemo(() => lintDeck(deck), [deck]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // テンプレート挿入ボタンはtextarea外の要素なので、クリック時には
@@ -119,6 +130,22 @@ export default function App() {
     document.title = `${deck.frontmatter.title} | MD Slide Studio`;
   }, [deck.frontmatter.title]);
 
+  // v0.4.9: スライド送り/戻しに応じてエディタを対応するMarkdownブロックへスムーズスクロール。
+  // clampedCurrent ではなく current を変化トリガーにする — clampedCurrent は
+  // deck.slides.length が縮む（＝タイピング中）だけでも変わる派生値のため、
+  // それを使うと「編集中に勝手にスクロールされる」事故になる。
+  const prevScrollCurrentRef = useRef(current);
+  useEffect(() => {
+    const changed = prevScrollCurrentRef.current !== current;
+    prevScrollCurrentRef.current = current;
+    if (!changed) return;
+    if (mode !== 'edit' || effectiveLayout !== 'split' || view !== 'hero') return;
+    const el = textareaRef.current;
+    const line = slideStartLines[clampedCurrent];
+    if (!el || line === undefined) return;
+    el.scrollTo({ top: computeTextareaScrollTop(el, line, 'top'), behavior: 'smooth' });
+  }, [current, clampedCurrent, mode, effectiveLayout, view, slideStartLines]);
+
   const setPalette = (p: Palette) => {
     setPaletteOverride(p);
     try {
@@ -172,9 +199,8 @@ export default function App() {
       if (!el) return;
       el.focus();
       el.setSelectionRange(newPos, newPos);
-      const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 18;
       const linesBefore = el.value.slice(0, newPos).split('\n').length - 1;
-      el.scrollTop = Math.max(0, linesBefore * lineHeight - el.clientHeight / 2);
+      el.scrollTop = computeTextareaScrollTop(el, linesBefore, 'center');
     });
   }, []);
   const doHtml = useCallback(() => {

@@ -10,7 +10,12 @@
 export * from './parser/types';
 
 // --- パーサー ---
-export { parseSlideMarkdown, parseDirective, parseMermaidSubset } from './parser/slideMarkdown';
+export {
+  parseSlideMarkdown,
+  parseDirective,
+  parseMermaidSubset,
+  getSlideStartLines,
+} from './parser/slideMarkdown';
 export { parseSlideHeader } from './parser/slideHeader';
 
 // --- deckLint ---
