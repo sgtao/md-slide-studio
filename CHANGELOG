@@ -3,6 +3,34 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.4.11] - YYYY-MM-DD
+
+スライドMDパーサーの規約緩和（一般的なMarkdown記法との差異を縮小）
+
+### 変更｜箇条書きマーカーに *, + を追加許可
+
+points/summary本文・chart側パネル・svg-figureのnotes・sourcesリンクで、従来 `-` 固定だった箇条書きマーカー判定をCommonMark/GFM準拠の `-`/`*`/`+` に拡張した。
+
+### 変更｜スライド区切りをCommonMark thematic break規則に準拠
+
+行全体が `-`/`*`/`_` のいずれか同一文字を3個以上（間に空白があってもよい）の行をスライド区切りとして認識するよう緩和した（従来は厳密に3個の `-` のみ）。YAML frontmatterの区切りは対象外で、引き続き厳密な `---` 固定。
+
+### 変更｜mermaidサブセットで標準のラベル付きエッジ記法を許容
+
+`A -->|ラベル| B` 形式の標準Mermaid記法を解析エラーにせず通すようにした。ラベル文字列自体は現状のSVG描画には反映されない（破棄）。分岐・合流は引き続き非対応。
+
+### ファイル構成の変更
+```
+変更:
+  package.json
+  packages/cli/package.json
+  packages/core/src/parser/slideMarkdown.ts
+  packages/core/src/parser/slideMarkdown.test.ts
+  packages/core/src/parser/svgFigure.test.ts
+  packages/core/src/spec/markdownSpec.ts
+```
+
+---
 ## [v0.4.10] - 2026-08-11
 
 アプリのモバイルデバイス対応（表示ボタン整理、UIスタイル調整、自動スクロール機能改修）
