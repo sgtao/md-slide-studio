@@ -3,6 +3,54 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.4.10] - 2026-08-11
+
+アプリのモバイルデバイス対応（表示ボタン整理、UIスタイル調整、自動スクロール機能改修）
+
+### 変更｜ヘッダーとサイドメニューの導線を統一
+
+editモードのヘッダーに残っていた🤖AIプロンプト／サンプル／❓ヘルプ／▶プレゼンの4ボタンを削除し、導線を左サイドメニューへ一本化した。
+
+- edit モードのヘッダーはロゴとデッキタイトルのみに。present モードのヘッダーは「✎ 編集に戻る」プライマリボタンのみを表示（`mode === 'present'`の条件付きレンダリング）
+- ヘッダー🤖ポップアップ専用だった`PromptModal`とその`promptOpen` stateを削除（dead code整理）。サイドメニュー版`AiPromptPanel`／`usePromptComposer`は継続使用
+
+### 変更｜ControlClusterを.preview-pane内部へ移設
+
+右上のテーマ・ビュー切替・エクスポートボタン群（ControlCluster）を、`.workspace`直下から`.preview-pane`の内部へ移設した。
+
+- `position: fixed` → `absolute`（`.preview-pane`基準）。`.preview-pane`自体がヘッダー下に正しく配置されているため、従来必要だった編集モード用のtop座標補正（`html[data-mode='edit'] .control-cluster { top: 56px }`）が不要になった
+- 「編集のみ」レイアウトおよびAIプロンプトパネル表示中は、`.preview-pane`自体がアンマウントされるためControlClusterもDOMごと非表示になる（従来はdisabled propによるグレーアウトのみで、DOM自体は残っていた）
+- 600px以下のモバイル幅ではControlClusterのボタンサイズ・余白を縮小するメディアクエリを追加（36px→32pxボタン、余白圧縮）
+
+### 追加｜preview→editor/split遷移時のエディタ自動スクロール
+
+プレビュー1枚モードでスライドを送ったあと、表示モードをeditor/splitへ切り替えると、エディタが該当スライドの原稿先頭行まで自動的にスムーズスクロールするようにした（`view === 'hero'`限定）。
+
+### 修正｜CLIスタンドアロン出力でControlClusterが画面外へ流れる回帰
+
+ControlClusterのCSS変更（fixed→absolute）がCLI（`mdss-convert`）のスタンドアロンHTML出力にも波及し、`.preview-pane`を持たないCLI出力ではdocumentスクロール時にControlClusterが画面外へ流れて操作不能になる回帰があった。`standalone.ts`側で`.control-cluster`をCLI出力限定で`position: fixed`に上書きして修正。
+
+### ファイル構成の変更
+```
+新規:
+  e2e/editor-autoscroll.spec.ts（追記）
+  e2e/mobile-viewport.spec.ts
+変更:
+  package.json
+  packages/app/src/App.tsx
+  packages/app/src/ai/promptComposer.tsx
+  packages/app/src/theme/app-shell.css
+  packages/app/src/theme/nav-controls.css
+  packages/cli/package.json
+  packages/cli/src/generated/themeCss.ts
+  packages/cli/src/standalone.ts
+  packages/cli/test/smoke.test.mjs
+  e2e/ai-prompt-panel.spec.ts
+  e2e/help.spec.ts
+  e2e/layout.spec.ts
+```
+
+---
 ## [v0.4.9] - 2026-08-11
 
 ### 追加｜カラーパレットを5色→7色に拡張（Ruby / Gold）
