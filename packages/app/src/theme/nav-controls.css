@@ -43,6 +43,20 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* ─── モバイル幅でのControlCluster調整（v0.4.10） ─── */
+@media (max-width: 600px) {
+  .control-cluster {
+    top: 8px;
+    right: 8px;
+    gap: 4px;
+  }
+  .control-cluster button {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+}
+
 /* ─── エクスポートメニュー（Phase 3 追加） ─── */
 /* .control-cluster 内の他のボタンと同じ形状を保ちつつ、
    ドロップダウンメニューを抱える親コンテナ。 */
