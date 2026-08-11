@@ -3,6 +3,58 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.4.9] - 2026-08-11
+
+### 追加｜カラーパレットを5色→7色に拡張（Ruby / Gold）
+
+アプリUIのカラーパレットに赤系のRuby・ゴールド系のGoldを追加し、Ocean / Forest / Sunset / Plum / Graphiteの既存5色から7色構成にした。
+
+- **追加色**：Ruby（`#dc2626` / dark `#f87171`）とGold（`#d97706` / dark `#fbbf24`）。既存5色と同じ「Tailwindの600番台をライトaccent、400番台をダークaccent」の命名規約に統一
+- **CSS変数**：`theme-vars.css`に`[data-palette='ruby']`/`[data-palette='gold']`のライト・ダーク面ブロックを追加（`--accent`/`--accent-light`/`--accent-dim`の3変数のみ差し替える既存方式を踏襲）
+- **ドロップダウン**：`ControlCluster.tsx`の`PALETTE_META`に2色を末尾追加（既存の並び順・localStorage保存値には影響しない）。`nav-controls.css`にドロップダウン文字色・スウォッチ色を追加
+- **意図的な3重定義**：`PALETTE_META`/`PALETTES`配列は`ControlCluster.tsx`・`exporters.ts`（スタンドアロンHTML書き出し）・`standalone.ts`（CLI）の3箇所に独立コピーを持つ既存方針（`standalone.ts`冒頭コメント参照）を踏襲し、一本化はせず3箇所へ同内容を追記
+- **CLI波及**：`cli.ts`のヘルプ文言・`render.tsx`のSSRバリデーション・`themeCss.ts`（自動生成）のパレット列挙も7色に更新
+
+### 追加｜エディタパネルの自動スクロール（スライド送りへの追従）
+
+編集モード・2分割レイアウトでスライドを送る／戻すと、エディタ（Markdownソース）側も対応するブロックへ自動的にスムーズスクロールするようにした。
+
+- **`getSlideStartLines()`**：`packages/core`に新規純関数を追加。`splitSlides()`の境界判定ロジック（フェンス外`---`区切り・空チャンク除外）を内部で共有し、各スライドの先頭行番号（frontmatterを含むsrc全体基準）を返す。`SlideDeck`/`Slide`型自体は変更せず、既存のexporter・CLI・テストへの影響はゼロ
+- **発火条件**：編集モード・split（2分割）レイアウト・hero view（1枚表示）のときのみ有効。プレゼンモード・editor/preview単独レイアウト・一覧viewでは対象外
+- **タイピング中の誤発火防止**：スクロールのトリガーには`clampedCurrent`ではなく生の`current`state（明示的なナビゲーション操作でのみ変化）を使用。Markdown編集でスライド数が変化しても自動スクロールは発火しない
+- **スクロール実装**：対象スライドの先頭行を上端寄せでスムーズスクロール（`scrollTo({ behavior: 'smooth' })`）。行数×lineHeightからscrollTopを算出する既存パターン（テンプレート挿入時のカーソル位置復元）を共通ヘルパーに切り出し、両方から利用
+
+### 修正｜E2E「ZIPダウンロード」がまれにタイムアウトする問題を修正
+
+- `e2e/export.spec.ts`の「Shift+Pで全スライドのZIPダウンロード」テストのみ`test.setTimeout(60_000)`で延長（他55件の挙動には影響しない）
+  変更: `e2e/export.spec.ts`
+
+### ファイル構成の変更
+```
+新規:
+  e2e/editor-autoscroll.spec.ts
+  packages/core/src/parser/slideStartLines.test.ts
+  packages/core/src/parser/palette7colors.test.ts
+変更:
+  package.json
+  packages/app/src/App.tsx
+  packages/app/src/components/ControlCluster.tsx
+  packages/app/src/export/exporters.ts
+  packages/app/src/theme/nav-controls.css
+  packages/app/src/theme/theme-vars.css
+  packages/cli/package.json
+  packages/cli/src/cli.ts
+  packages/cli/src/generated/themeCss.ts
+  packages/cli/src/render.tsx
+  packages/cli/src/standalone.ts
+  packages/core/src/index.ts
+  packages/core/src/parser/slideMarkdown.ts
+  packages/core/src/parser/types.ts
+  packages/core/src/prompt/draftAssistPrompt.ts
+  e2e/export.spec.ts
+```
+
+---
 ## [v0.4.8] - 2026-08-10
 
 ### 追加｜svg-figureに任意SVG（```svg フェンス）表示機能を追加
