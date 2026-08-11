@@ -18,7 +18,13 @@ test.describe('表示モード切替（左サイドメニュー）', () => {
     await expect(page.locator('[data-layout-opt="split"]')).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('「編集のみ」でプレビューが消え、書き出しとビュー切替が無効になる', async ({ page }) => {
+  test('2分割レイアウトで ControlCluster が preview-pane の子要素になっている', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.workspace')).toHaveAttribute('data-layout', 'split');
+    await expect(page.locator('.preview-pane > .control-cluster')).toHaveCount(1);
+  });
+
+  test('「編集のみ」でプレビューが消え、ControlClusterもDOMごと消える', async ({ page }) => {
     await page.goto('/');
     await page.locator('[data-layout-opt="editor"]').click();
 
@@ -26,11 +32,9 @@ test.describe('表示モード切替（左サイドメニュー）', () => {
     await expect(page.locator('.editor-pane')).toBeVisible();
     await expect(page.locator('.preview-pane')).toHaveCount(0);
 
-    // ControlCluster は .preview-pane の外に出したので存在し続ける
-    await expect(page.locator('#theme-toggle')).toBeEnabled();
-    await expect(page.locator('#palette-toggle')).toBeEnabled();
-    await expect(page.locator('#view-toggle')).toBeDisabled();
-    await expect(page.locator('#export-toggle')).toBeDisabled();
+    // v0.4.10: ControlClusterは.preview-pane内部へ移設したため、
+    // .preview-pane自体が無い「編集のみ」ではDOMごと消える。
+    await expect(page.locator('.control-cluster')).toHaveCount(0);
 
     await page.locator('[data-layout-opt="split"]').click();
   });
@@ -44,6 +48,13 @@ test.describe('表示モード切替（左サイドメニュー）', () => {
     await expect(page.locator('.preview-pane')).toBeVisible();
     await expect(page.locator('#export-toggle')).toBeEnabled();
 
+    await page.locator('[data-layout-opt="split"]').click();
+  });
+
+  test('「プレビューのみ」でも ControlCluster が preview-pane 内に表示される', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('[data-layout-opt="preview"]').click();
+    await expect(page.locator('.preview-pane .control-cluster')).toBeVisible();
     await page.locator('[data-layout-opt="split"]').click();
   });
 

@@ -9,8 +9,10 @@
  */
 
 /* ─── 右上コントロールクラスタ ─── */
+/* v0.4.10: .preview-pane 内部へ移設したため fixed → absolute
+   （.preview-pane は position: relative 済み・app.css）。 */
 .control-cluster {
-  position: fixed;
+  position: absolute;
   top: 12px;
   right: 16px;
   display: flex;
@@ -281,13 +283,6 @@
   color: var(--accent);
   font-weight: 600;
 }
-/* ─── 編集モード時のControlCluster位置補正─── */
-/* プレゼンモードでは viewport 最上部（top: 12px）のまま。
-   編集モードではヘッダー（約48px）の下に配置して重なりを回避する。 */
-html[data-mode='edit'] .control-cluster {
-  top: 56px; /* app-header高さ(~48px) + 余白(8px) */
-}
-
 /* スワッチ（各パレットの accent 見本）。
    UI 備品のため直接色指定を許容（スライド内 SVG の色直書き禁止ルールとは別扱い）。 */
 .palette-swatch {

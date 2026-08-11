@@ -328,6 +328,19 @@ export default function App() {
 
         {!showAiPromptPanel && effectiveLayout !== 'editor' && (
           <div className="preview-pane">
+            <ControlCluster
+              theme={theme}
+              view={view}
+              palette={palette}
+              onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              onToggleView={toggleView}
+              onSetPalette={setPalette}
+              onExportHtml={doHtml}
+              onExportPdf={doPdf}
+              onExportPng={doPng}
+              onExportZip={doZip}
+              onExportMd={doMd}
+            />
             {deck.slides.length > 0 ? (
               <SlideDeckView
                 ref={deckRef}
@@ -350,21 +363,6 @@ export default function App() {
             )}
           </div>
         )}
-
-        <ControlCluster
-          theme={theme}
-          view={view}
-          palette={palette}
-          disabled={effectiveLayout === 'editor' || showAiPromptPanel}
-          onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-          onToggleView={toggleView}
-          onSetPalette={setPalette}
-          onExportHtml={doHtml}
-          onExportPdf={doPdf}
-          onExportPng={doPng}
-          onExportZip={doZip}
-          onExportMd={doMd}
-        />
       </div>
 
       {promptOpen && <PromptModal onClose={() => setPromptOpen(false)} />}

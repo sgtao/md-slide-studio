@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test';
  *
  * 確認すること:
  *   - サイドメニューから開くと editor-pane/preview-pane の代わりにパネルが出る
- *   - パネル表示中は view切替・エクスポートが無効、テーマ・パレットは有効
+ *   - パネル表示中は ControlCluster（.preview-pane内部のため）もDOMごと消える
  *   - 複数行のテーマ入力がプロンプト内容に反映される
  *   - 「閉じる」／表示モード切替でパネルが閉じる
  *   - パネルの開閉状態はリロードで保持されない（非永続の一時ビュー）
@@ -29,14 +29,13 @@ test.describe('AIプロンプト（左サイドメニュー・メインパネル
     await page.locator('[data-layout-opt="split"]').click();
   });
 
-  test('パネル表示中はビュー切替・エクスポートが無効、テーマ・パレットは有効', async ({ page }) => {
+  test('パネル表示中は ControlCluster がDOMごと消える', async ({ page }) => {
     await page.goto('/');
     await page.locator('.side-menu__item', { hasText: 'AIプロンプト' }).click();
 
-    await expect(page.locator('#view-toggle')).toBeDisabled();
-    await expect(page.locator('#export-toggle')).toBeDisabled();
-    await expect(page.locator('#theme-toggle')).toBeEnabled();
-    await expect(page.locator('#palette-toggle')).toBeEnabled();
+    // v0.4.10: ControlClusterは.preview-pane内部へ移設したため、
+    // .preview-pane自体が無いAIプロンプトパネル表示中はDOMごと消える。
+    await expect(page.locator('.control-cluster')).toHaveCount(0);
 
     await page.locator('[data-layout-opt="split"]').click();
   });

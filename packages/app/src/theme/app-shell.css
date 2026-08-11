@@ -93,13 +93,6 @@
   flex: 1 1 auto;
   border-right: none;
 }
-/* 'editor' では .control-cluster（position:fixed）がテキスト先頭行に重なるため
-   上余白を広げる。スクロール時に文字がボタンの下へ潜る点は残るが、
-   ヘッダーとコントロールの整理を行う。 */
-.workspace[data-layout='editor'] .editor-pane textarea {
-  padding-top: 36px;
-}
-
 /* ─── AIプロンプトパネル（左サイドメニュー版）─── */
 /* ヘッダーの🤖ポップアップ（.modal-head / .modal-body / .modal-foot・app.css）と
    同じ内側スタイルを流用しつつ、.workspace の中に直接置くため
