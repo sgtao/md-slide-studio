@@ -233,6 +233,25 @@ describe('parseSvgFigureSlide（parseSlideMarkdown経由）', () => {
     expect(s.notes).toEqual(['初回接触からログインまでの主要導線', '離脱ポイントは会員登録直後']);
   });
 
+  it('notes: リストは * マーカーでも読む', () => {
+    const md = fm(
+      [
+        '<!-- slide: svg-figure -->',
+        '## Signup ジャーニー',
+        '```mermaid',
+        'journey',
+        '  section Access',
+        '    LPを見る: 5: User',
+        '```',
+        'notes:',
+        '  * asteriskマーカーのノート',
+        '  * もう1件',
+      ].join('\n'),
+    );
+    const s = parseSlideMarkdown(md).slides[0] as SvgFigureSlide;
+    expect(s.notes).toEqual(['asteriskマーカーのノート', 'もう1件']);
+  });
+
   it('notes 省略時は undefined', () => {
     const md = fm(
       [

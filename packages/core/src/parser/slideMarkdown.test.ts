@@ -84,6 +84,11 @@ describe('points / summary', () => {
     expect(s.items[1].children).toHaveLength(1);
     expect(s.note).toBe('補足');
   });
+  it('* と + も箇条書きマーカーとして読む', () => {
+    const md = fm('<!-- slide: points -->\n## 見出し\n* asterisk項目\n+ plus項目\n- dash項目');
+    const s = parseSlideMarkdown(md).slides[0] as PointsSlide;
+    expect(s.items.map((i) => i.text)).toEqual(['asterisk項目', 'plus項目', 'dash項目']);
+  });
 });
 
 describe('table', () => {
@@ -137,6 +142,21 @@ source: { name: SO Survey, url: https://example.com }
     const s = parseSlideMarkdown(md).slides[0] as ChartSlide;
     expect(s.chart?.data).toHaveLength(5);
     expect(s.warnings.some((w) => w.includes('系列'))).toBe(true);
+  });
+  it('side-list サイドパネルは * / + マーカーでも読む（layout: side-list）', () => {
+    const md = fm(`<!-- slide: chart-bar, layout: side-list -->
+\`\`\`chart
+type: bar
+title: t
+data:
+  - { label: a, value: 1 }
+source: { name: s }
+\`\`\`
+### 前提
+* 条件A
++ 条件B`);
+    const s = parseSlideMarkdown(md).slides[0] as ChartSlide;
+    expect(s.sidePanel?.items.map((i) => i.text)).toEqual(['条件A', '条件B']);
   });
 });
 
@@ -232,6 +252,13 @@ describe('figure / sources / feature-showcase', () => {
     expect(s.links).toHaveLength(2);
     expect(s.links[0].note).toBe('補足あり');
     expect(s.links[1].note).toBeUndefined();
+  });
+  it('sources のリンクは * / + マーカーでも読む', () => {
+    const md = fm(
+      '<!-- slide: sources -->\n## 出典\n* [記事A](https://a.example)\n+ [記事B](https://b.example)',
+    );
+    const s = parseSlideMarkdown(md).slides[0] as SourcesSlide;
+    expect(s.links).toHaveLength(2);
   });
   it('feature-showcase の left/right を読む', () => {
     const md = fm(`<!-- slide: feature-showcase -->

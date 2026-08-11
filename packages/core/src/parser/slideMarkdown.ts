@@ -99,6 +99,9 @@ const LAYOUTS: LayoutVariant[] = [
   'grid',
 ];
 
+/** 箇条書き行（CommonMark/GFM準拠: -, *, + の3種をマーカーとして許可） */
+const BULLET_LINE_RE = /^(\s*)[-*+]\s+(.+)$/;
+
 // ---------------------------------------------------------------------------
 // エントリポイント
 // ---------------------------------------------------------------------------
@@ -366,7 +369,7 @@ function parseListBody(body: string, kind: 'bullet' | 'ordered') {
   let heading: string | undefined;
   const items: PointItem[] = [];
   const noteLines: string[] = [];
-  const re = kind === 'bullet' ? /^(\s*)-\s+(.+)$/ : /^(\s*)(?:\d+[.)]|-)\s+(.+)$/;
+  const re = kind === 'bullet' ? BULLET_LINE_RE : /^(\s*)(?:\d+[.)]|[-*+])\s+(.+)$/;
 
   for (const line of lines) {
     const h = line.match(/^##\s+(.+)$/);
@@ -530,7 +533,7 @@ function parseSidePanel(rest: string): ChartSidePanel | undefined {
   const afterH = rest.slice(rest.indexOf(hMatch[0]) + hMatch[0].length);
   const items: PointItem[] = [];
   for (const line of afterH.split('\n')) {
-    const m = line.match(/^(\s*)-\s+(.+)$/);
+    const m = line.match(BULLET_LINE_RE);
     if (m) {
       const depth = Math.floor(m[1].replace(/\t/g, '  ').length / 2);
       const item = parseSidePanelItem(m[2]);
@@ -817,11 +820,11 @@ export function parseMermaidSubset(src: string, warnings: string[]): DiagramBloc
 
 /** `notes:\n  - a\n  - b` 形式の箇条書きを string[] としてパースする。 */
 function parseNotesList(body: string): string[] | undefined {
-  const m = body.match(/^notes:\s*\n((?:\s*-\s+.+\n?)+)/m);
+  const m = body.match(/^notes:\s*\n((?:\s*[-*+]\s+.+\n?)+)/m);
   if (!m) return undefined;
   const items = m[1]
     .split('\n')
-    .map((l) => l.match(/^\s*-\s+(.+)$/))
+    .map((l) => l.match(/^\s*[-*+]\s+(.+)$/))
     .filter((mm): mm is RegExpMatchArray => mm !== null)
     .map((mm) => mm[1].trim());
   return items.length ? items : undefined;
@@ -1111,7 +1114,7 @@ function parseSources(body: string) {
   const { heading } = pickHeadingAndNote(body);
   const links: SourceLink[] = [];
   for (const line of body.split('\n')) {
-    const m = line.match(/^-\s+\[([^\]]+)\]\(([^)\s]+)\)\s*(?:[—-]\s*(.+))?$/);
+    const m = line.match(/^[-*+]\s+\[([^\]]+)\]\(([^)\s]+)\)\s*(?:[—-]\s*(.+))?$/);
     if (m) links.push({ label: m[1], url: m[2], note: m[3]?.trim() });
   }
   return { heading: heading ?? '出典・参考リンク', links };
