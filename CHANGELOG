@@ -3,7 +3,7 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
-## [v0.4.11] - YYYY-MM-DD
+## [v0.4.11] - 2026-08-12
 
 スライドMDパーサーの規約緩和（一般的なMarkdown記法との差異を縮小）
 
@@ -19,6 +19,10 @@ points/summary本文・chart側パネル・svg-figureのnotes・sourcesリンク
 
 `A -->|ラベル| B` 形式の標準Mermaid記法を解析エラーにせず通すようにした。ラベル文字列自体は現状のSVG描画には反映されない（破棄）。分岐・合流は引き続き非対応。
 
+### 変更｜GitHub workflow のデプロイタイミングをTag push 時に変更
+
+`main` ブランチ & `v*`タグのときにdeploy workflowを実行する。
+
 ### ファイル構成の変更
 ```
 変更:
@@ -28,6 +32,7 @@ points/summary本文・chart側パネル・svg-figureのnotes・sourcesリンク
   packages/core/src/parser/slideMarkdown.test.ts
   packages/core/src/parser/svgFigure.test.ts
   packages/core/src/spec/markdownSpec.ts
+  .github/workflows/deploy.yml
 ```
 
 ---
