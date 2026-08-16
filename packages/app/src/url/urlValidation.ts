@@ -29,3 +29,27 @@ export function validateUrlFormat(input: string): UrlErrorKind | null {
   if (!hasAllowedExt) return 'not-markdown';
   return null;
 }
+
+const GITHUB_BLOB_PATH = /^\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/;
+
+/**
+ * github.com のblob URL（ブラウザで開くページのリンク）を、直接取得可能な
+ * raw.githubusercontent.com のURLへ書き換える（fetch実行前に呼ぶ）。
+ * blobページはtext/html・CORSヘッダー無しのため直接fetchできないため
+ * （02_migration-plan 0816-02 Q1）。マッチしないURL（既にraw形式・他ホスト・
+ * 不正URL等）はそのまま返す。
+ */
+export function normalizeGitHubBlobUrl(input: string): string {
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch {
+    return input;
+  }
+  if (url.hostname !== 'github.com') return input;
+  const match = GITHUB_BLOB_PATH.exec(url.pathname);
+  if (!match) return input;
+  const [, owner, repo, ref, path] = match;
+  const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}`;
+  return `${raw}${url.search}${url.hash}`;
+}

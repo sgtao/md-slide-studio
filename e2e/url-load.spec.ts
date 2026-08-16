@@ -9,6 +9,7 @@ import { expect, test, type Page } from '@playwright/test';
 const OK_URL = 'https://raw.githubusercontent.com/example/repo/main/ok.md';
 const MISSING_URL = 'https://raw.githubusercontent.com/example/repo/main/missing.md';
 const BROKEN_URL = 'https://raw.githubusercontent.com/example/repo/main/broken.md';
+const BLOB_URL = 'https://github.com/example/repo/blob/main/ok.md';
 
 const VALID_MD = '---\ntitle: Loaded\npalette: ocean\n---\n<!-- slide: title -->\n# Loaded';
 const LINT_BLOCKED_MD =
@@ -74,6 +75,26 @@ test.describe('URL指定によるMD取得', () => {
     await confirmModal.getByRole('button', { name: '置き換える' }).click();
 
     await expect(confirmModal).toHaveCount(0);
+    await expect(textarea).toHaveValue(/title: Loaded/);
+  });
+
+  test('blob URL: github.comのblob URLを自動でraw形式へ変換して取得する', async ({ page }) => {
+    // raw.githubusercontent.com側のルートのみ登録する。blob URLのまま
+    // fetchされていた場合はこのルートに一致せず実ネットワークへ出てしまい
+    // 反映まで到達しないため、正規化が効いていることの検証になる。
+    await page.route(OK_URL, (route) =>
+      route.fulfill({ status: 200, contentType: 'text/plain; charset=utf-8', body: VALID_MD }),
+    );
+    await page.goto('/');
+    const textarea = page.locator('.editor-pane textarea');
+    const modal = await openModal(page);
+
+    await modal.locator('input[aria-label="MDファイルのURL"]').fill(BLOB_URL);
+    await modal.getByRole('button', { name: '取得' }).click();
+
+    const confirmModal = page.locator('.confirm-modal[data-modal-kind="confirm"]');
+    await expect(confirmModal).toBeVisible();
+    await confirmModal.getByRole('button', { name: '置き換える' }).click();
     await expect(textarea).toHaveValue(/title: Loaded/);
   });
 

@@ -10,7 +10,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { parseSlideMarkdown, lintDeck, sortLintResults, type LintResult } from '@mdss/core';
 import { ConfirmModal } from './ConfirmModal';
-import { validateUrlFormat, URL_LOAD_ERROR_MESSAGES } from '../url/urlValidation';
+import {
+  normalizeGitHubBlobUrl,
+  validateUrlFormat,
+  URL_LOAD_ERROR_MESSAGES,
+} from '../url/urlValidation';
 import { fetchMarkdownFromUrl, FETCH_ERROR_MESSAGES, type FetchedDoc } from '../url/fetchMarkdown';
 
 type Stage = 'input' | 'loading' | 'lint-blocked' | 'confirm';
@@ -45,13 +49,17 @@ export function UrlLoadModal({ onReplace, onClose }: Props) {
   const formatError = url.trim() ? validateUrlFormat(url.trim()) : null;
 
   const handleFetch = useCallback(async () => {
-    const trimmed = url.trim();
-    if (validateUrlFormat(trimmed)) return;
+    // github.comのblob URLはraw.githubusercontent.comへ変換してからfetchする
+    // （blobページはtext/html・CORSヘッダー無しのため直接fetchできないため）。
+    // 変換が起きた場合は入力欄の表示も書き換え、実際に取得するURLを利用者に示す。
+    const normalized = normalizeGitHubBlobUrl(url.trim());
+    if (normalized !== url) setUrl(normalized);
+    if (validateUrlFormat(normalized)) return;
     setStage('loading');
     setFetchErrorMessage(null);
     const controller = new AbortController();
     abortRef.current = controller;
-    const result = await fetchMarkdownFromUrl(trimmed, controller.signal);
+    const result = await fetchMarkdownFromUrl(normalized, controller.signal);
     abortRef.current = null;
     if (!mountedRef.current) return;
     if (!result.ok) {
@@ -167,7 +175,8 @@ export function UrlLoadModal({ onReplace, onClose }: Props) {
           )}
           {stage !== 'loading' && !formatError && !fetchErrorMessage && (
             <p className="url-load-modal__hint">
-              GitHubの場合は raw.githubusercontent.com 形式のURLを指定してください。
+              GitHubの場合、raw.githubusercontent.com 形式に加え、通常のファイルページURL
+              （blob/...）も自動変換して取得できます。
             </p>
           )}
         </div>
