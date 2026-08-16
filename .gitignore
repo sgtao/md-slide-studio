@@ -153,3 +153,5 @@ playwright-report
 coverage
 .vite
 result.json
+test-results
+
