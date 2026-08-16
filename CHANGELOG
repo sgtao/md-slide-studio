@@ -3,6 +3,55 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.5.1] - 2026-08-16
+
+サイドメニューに「🔗 URLで取得」を追加し、URLを指定して外部のMDファイルを取得・反映できるようにした
+
+### 追加｜URL指定によるMD取得（サイドメニュー「🔗 URLで取得」）
+
+サイドメニュー「🔗 URLで取得」からモーダルを開き、URL入力→取得→LINT検証→確認、の流れで外部のMDファイルを現在の原稿へ反映できるようにした。ドキュメント一覧・複数ファイル管理はスコープ外（v0.5.0のアップロード機能と同様、単一ドキュメントへの読み込みのみ）。
+
+- URL検証: httpsのみ許可
+- 取得: fetch＋AbortControllerで10秒タイムアウト、取得中は「中断」ボタンで中止できる
+- レスポンス検証: 404／403／5xx・Content-Type・サイズ上限（2MB、v0.5.0のアップロード機能と定数を共有）を判定し、原因別のエラーメッセージを表示する。エラー後もモーダルを閉じずにURLを直して再取得できる
+- LINT: `lintDeck`の結果に`error`が1件でもあれば反映をブロックし、読み取り専用の一覧のみ表示する（反映しない）。`warn`/`info`のみなら反映可、確認ダイアログに件数を表示する
+- 確認ダイアログはv0.5.0の`ConfirmModal`を再利用した
+
+### 変更｜GitHubのblob URLをraw形式へ自動変換
+
+`github.com/<owner>/<repo>/blob/<ref>/<path>`形式のURL（GitHub上でファイルを開いたときのページURL）を、取得直前に`raw.githubusercontent.com/<owner>/<repo>/<ref>/<path>`へ自動的に書き換えるようにした。blobページはHTMLでCORSヘッダーも無いため直接は取得できないための対応。変換が発生した場合は入力欄の表示もraw URLへ更新する。
+
+### 変更｜URL検証から拡張子チェックを撤廃
+
+`.md`/`.markdown`で終わることを必須としていたURL検証を緩和し、httpsかつURLとして構文的に正しければ受け付けるようにした。Google Driveの直接ダウンロードURL等、パスに拡張子が含まれない取得元にも対応するため。実際にスライドMDとして妥当かは引き続きLINT段階で判定する。
+
+### 変更｜サイドメニューの区切り線を調整
+
+「URLで取得」ボタンの追加位置に合わせ、「開く／URLで取得」のグループと「表示モード／プレゼン」のグループの間に区切り線が入るよう調整した。
+
+### 保守｜Git管理下の不要ファイルを整理
+
+誤って追跡されていたビルド成果物（`packages/app/dist/`）・テスト実行結果ファイル（`test-results/.last-run.json`）をGit管理から除外し、`.gitignore`の該当ルールを整理した。アプリの挙動に影響はない。
+
+### ファイル構成の変更
+```
+新規:
+  e2e/url-load.spec.ts
+  packages/app/src/components/UrlLoadModal.tsx
+  packages/app/src/url/fetchMarkdown.ts
+  packages/app/src/url/fetchMarkdown.test.ts
+  packages/app/src/url/urlValidation.ts
+  packages/app/src/url/urlValidation.test.ts
+変更:
+  package.json
+  packages/cli/package.json
+  packages/app/src/App.tsx
+  packages/app/src/components/SideMenu.tsx
+  packages/app/src/theme/app-shell.css
+  .gitignore
+```
+
+---
 ## [v0.5.0] - 2026-08-16
 
 MDファイルアップロード機能追加（サイドメニュー「開く」ボタン／ドラッグ&ドロップ）＋サイドメニュー項目の並び替え
