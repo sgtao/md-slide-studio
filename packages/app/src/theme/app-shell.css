@@ -158,3 +158,30 @@ html[data-mode='present'] .side-menu {
     display: none !important;
   }
 }
+
+/* ─── 設定ページ /settings（v0.5.2、プレースホルダー） ─── */
+/* SideMenuの外の独立ページ（0817-01 §4）のため .workspace は使わず、
+   ページ全体を中央寄せで構成する。 */
+.settings-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  text-align: center;
+}
+.settings-page h1 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+.settings-page__back {
+  color: var(--accent);
+  text-decoration: none;
+}
+.settings-page__back:hover {
+  text-decoration: underline;
+}

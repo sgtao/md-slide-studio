@@ -16,6 +16,7 @@
  * ヘッダーの 🤖 / サンプル / ❓ ボタンは併存させる
  * （既存E2Eのセレクタを維持するため。整理はヘッダー改修とセットで行う）。
  */
+import { Link } from 'wouter';
 import { LAYOUT_MODE_META, type LayoutMode } from '../layout/layoutMode';
 
 /**
@@ -158,6 +159,12 @@ export function SideMenu(props: Props) {
           </span>
           <span className="side-menu__label">ヘルプ</span>
         </button>
+        <Link href="/settings" className="side-menu__item" title="設定（準備中）">
+          <span className="side-menu__ico" aria-hidden="true">
+            ⚙️
+          </span>
+          <span className="side-menu__label">設定</span>
+        </Link>
       </div>
     </nav>
   );

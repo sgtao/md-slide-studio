@@ -4,6 +4,7 @@
  * テーマ / パレット / ビューは localStorage に永続化（元スキルの挙動を踏襲）。
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { useLocation } from 'wouter';
 import { parseSlideMarkdown, getSlideStartLines } from '@mdss/core';
 import { lintDeck } from '@mdss/core';
 import { LintPanel } from './components/LintPanel';
@@ -50,7 +51,13 @@ function computeTextareaScrollTop(
   return align === 'center' ? Math.max(0, y - el.clientHeight / 2) : Math.max(0, y);
 }
 
-export default function App() {
+export default function App({ mode }: { mode: 'edit' | 'present' }) {
+  // wouterの navigate は、後述のスライド送り用 navigate(dir: 1|-1) と名前が衝突するため
+  // goToRoute という別名で保持する。
+  const [, goToRoute] = useLocation();
+  const goEdit = useCallback(() => goToRoute('/'), [goToRoute]);
+  const goPresent = useCallback(() => goToRoute('/present'), [goToRoute]);
+
   // --- 原稿（localStorage 復元、初回はサンプル） ---
   const [md, setMd] = useState<string>(() => {
     try {
@@ -120,7 +127,8 @@ export default function App() {
   }, []);
 
   // --- 表示状態 ---
-  const [mode, setMode] = usePersistentState<'edit' | 'present'>('mdss-mode', 'edit');
+  // v0.5.2: mode はルーター（AppRouter）から prop で受け取る。URLが唯一の正となるため
+  // 内部stateは廃止（旧 usePersistentState('mdss-mode', ...) は非推奨化・移行処理なし）。
   // 表示モード（2分割／編集のみ／プレビューのみ）。present 中は 'preview' へ
   // 一時上書きするが保存値は変えない（プレゼンから戻ったとき作業レイアウトへ復帰させる）。
   const [layoutStored, setLayout] = usePersistentState<LayoutMode>('mdss-layout', 'split');
@@ -321,7 +329,7 @@ export default function App() {
           {title} ・ {deck.slides.length}枚
         </span>
         {mode === 'present' && (
-          <button className="primary" onClick={() => setMode('edit')}>
+          <button className="primary" onClick={goEdit}>
             ✎ 編集に戻る
           </button>
         )}
@@ -333,7 +341,7 @@ export default function App() {
           expanded={menuOpen === '1'}
           onSetLayout={applyLayout}
           onToggleExpanded={() => setMenuOpen(menuOpen === '1' ? '0' : '1')}
-          onStartPresent={() => setMode('present')}
+          onStartPresent={goPresent}
           aiPromptOpen={showAiPromptPanel}
           onOpenPromptPanel={() => setAiPromptPanelOpen(true)}
           onOpenFile={openFilePicker}

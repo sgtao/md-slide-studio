@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import { AppRouter } from './router/AppRouter';
 
 // CSS統合順は元スキルのSSoT（SKILL.md 参照ファイルガイド）を踏襲:
 // theme-vars → slide-core → nav-controls → figure → chart → diagram →
@@ -27,6 +27,6 @@ import './theme/app-shell.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <AppRouter />
   </React.StrictMode>,
 );
