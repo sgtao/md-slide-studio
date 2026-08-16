@@ -3,7 +3,7 @@
  * 編集モード（エディタ＋プレビュー2ペイン）⇄ プレゼンモード（全画面デッキ）。
  * テーマ / パレット / ビューは localStorage に永続化（元スキルの挙動を踏襲）。
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { parseSlideMarkdown, getSlideStartLines } from '@mdss/core';
 import { lintDeck } from '@mdss/core';
 import { LintPanel } from './components/LintPanel';
@@ -13,7 +13,9 @@ import { ControlCluster } from './components/ControlCluster';
 import { SideMenu } from './components/SideMenu';
 import { TemplateMenu } from './components/TemplateMenu';
 import { HelpModal } from './components/HelpModal';
+import { ConfirmModal } from './components/ConfirmModal';
 import { useKeyboardNav, usePersistentState } from './hooks/hooks';
+import { useFileUpload, UPLOAD_ERROR_MESSAGES } from './hooks/useFileUpload';
 import { canExportFromDom, resolveLayout, type LayoutMode } from './layout/layoutMode';
 import {
   exportAllToZip,
@@ -79,6 +81,32 @@ export default function App() {
   // 一度もフォーカスされたことが無い場合は既定値の0を返すため、
   // 「一度でもフォーカスされたか」を別途追跡し、未フォーカス時は末尾追記にフォールバックする。
   const hasFocusedTextareaRef = useRef(false);
+
+  // --- MDファイルアップロード（v0.5.0: ボタン／ドラッグ&ドロップ共通） ---
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const {
+    pendingFileName,
+    error: uploadError,
+    handleFile,
+    confirmReplace,
+    cancel: cancelUpload,
+  } = useFileUpload((text) => setMd(text), textareaRef);
+  const openFilePicker = useCallback(() => fileInputRef.current?.click(), []);
+  const onEditorDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragOver(true);
+  }, []);
+  const onEditorDragLeave = useCallback(() => setDragOver(false), []);
+  const onEditorDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setDragOver(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    },
+    [handleFile],
+  );
 
   // --- 表示状態 ---
   const [mode, setMode] = usePersistentState<'edit' | 'present'>('mdss-mode', 'edit');
@@ -297,6 +325,7 @@ export default function App() {
           onStartPresent={() => setMode('present')}
           aiPromptOpen={showAiPromptPanel}
           onOpenPromptPanel={() => setAiPromptPanelOpen(true)}
+          onOpenFile={openFilePicker}
           onLoadSample={() => setMd(sampleMd)}
           onOpenHelp={() => {
             setHelpOpen(true);
@@ -304,10 +333,28 @@ export default function App() {
           }}
         />
 
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".md,.markdown"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+            e.target.value = '';
+          }}
+        />
+
         {showAiPromptPanel && <AiPromptPanel onClose={() => setAiPromptPanelOpen(false)} />}
 
         {!showAiPromptPanel && effectiveLayout !== 'preview' && (
-          <div className="editor-pane">
+          <div
+            className="editor-pane"
+            data-drag-over={dragOver ? 'true' : undefined}
+            onDragOver={onEditorDragOver}
+            onDragLeave={onEditorDragLeave}
+            onDrop={onEditorDrop}
+          >
             <div className="editor-toolbar">
               <TemplateMenu onInsert={insertSnippet} />
             </div>
@@ -391,6 +438,26 @@ export default function App() {
         >
           ❓ 使い方・記法はヘルプで確認できます
         </div>
+      )}
+
+      {pendingFileName && (
+        <ConfirmModal
+          kind="confirm"
+          title="📂 原稿を置き換えますか？"
+          message={`「${pendingFileName}」の内容で現在の原稿を置き換えます。この操作は元に戻せません。`}
+          confirmLabel="置き換える"
+          cancelLabel="キャンセル"
+          onConfirm={confirmReplace}
+          onCancel={cancelUpload}
+        />
+      )}
+      {uploadError && (
+        <ConfirmModal
+          kind="error"
+          title="⚠ 読み込みエラー"
+          message={UPLOAD_ERROR_MESSAGES[uploadError]}
+          onCancel={cancelUpload}
+        />
       )}
     </>
   );

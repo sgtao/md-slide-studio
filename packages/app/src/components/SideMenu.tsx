@@ -25,6 +25,7 @@ interface Props {
   /** メインパネル版AIプロンプトが表示中か（ボタンの選択状態表示に使う） */
   aiPromptOpen: boolean;
   onOpenPromptPanel: () => void;
+  onOpenFile: () => void;
   onLoadSample: () => void;
   onOpenHelp: () => void;
 }
@@ -95,6 +96,17 @@ export function SideMenu(props: Props) {
             🤖
           </span>
           <span className="side-menu__label">AIプロンプト</span>
+        </button>
+        <button
+          type="button"
+          className="side-menu__item"
+          onClick={props.onOpenFile}
+          title="MDファイルを開く（.md / .markdown、現在の原稿を置き換えます）"
+        >
+          <span className="side-menu__ico" aria-hidden="true">
+            📂
+          </span>
+          <span className="side-menu__label">開く</span>
         </button>
         <button
           type="button"

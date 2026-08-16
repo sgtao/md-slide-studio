@@ -93,6 +93,14 @@
   flex: 1 1 auto;
   border-right: none;
 }
+/* ─── ファイルアップロード: ドラッグ&ドロップ（v0.5.0） ─── */
+/* .editor-pane のみが受付対象（02_migration-plan 0815-01 Q3）。
+   --accent 系はパレット切替に自動追従する（theme-vars.css）。 */
+.editor-pane[data-drag-over='true'] {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+  background: var(--accent-light);
+}
 /* ─── AIプロンプトパネル（左サイドメニュー版）─── */
 /* ヘッダーの🤖ポップアップ（.modal-head / .modal-body / .modal-foot・app.css）と
    同じ内側スタイルを流用しつつ、.workspace の中に直接置くため
