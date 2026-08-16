@@ -3,17 +3,17 @@
  *
  * fetch前に同期で検証する（存在しないURLへの無駄なリクエストや、http:指定による
  * mixed content即時ブロックをUI側で先に弾くため）。
+ *
+ * 拡張子（.md/.markdown）は検証しない。Google Driveの直接ダウンロードURL等、
+ * パスに拡張子が含まれない取得元にも対応するため、テキストとして取得できれば
+ * よい方針にした（実際にスライドMDとして妥当かはLINT段階で判定する）。
  */
-export type UrlErrorKind = 'invalid-url' | 'not-https' | 'not-markdown';
+export type UrlErrorKind = 'invalid-url' | 'not-https';
 
 export const URL_LOAD_ERROR_MESSAGES: Record<UrlErrorKind, string> = {
   'invalid-url': 'URLの形式が正しくありません。',
   'not-https': 'https から始まるURLのみ指定できます。',
-  'not-markdown':
-    '.md または .markdown で終わるURLを指定してください（GitHubの場合は raw.githubusercontent.com 形式か確認してください）。',
 };
-
-const ALLOWED_URL_EXTENSIONS = ['.md', '.markdown'];
 
 /** URL形式を検証する（DOM非依存の純粋関数。fetch実行前に呼ぶ）。 */
 export function validateUrlFormat(input: string): UrlErrorKind | null {
@@ -24,9 +24,6 @@ export function validateUrlFormat(input: string): UrlErrorKind | null {
     return 'invalid-url';
   }
   if (url.protocol !== 'https:') return 'not-https';
-  const pathname = url.pathname.toLowerCase();
-  const hasAllowedExt = ALLOWED_URL_EXTENSIONS.some((ext) => pathname.endsWith(ext));
-  if (!hasAllowedExt) return 'not-markdown';
   return null;
 }
 

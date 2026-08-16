@@ -176,7 +176,8 @@ export function UrlLoadModal({ onReplace, onClose }: Props) {
           {stage !== 'loading' && !formatError && !fetchErrorMessage && (
             <p className="url-load-modal__hint">
               GitHubの場合、raw.githubusercontent.com 形式に加え、通常のファイルページURL
-              （blob/...）も自動変換して取得できます。
+              （blob/...）も自動変換して取得できます。拡張子が.md/.markdownでないURL （Google
+              Driveの直接ダウンロードURL等）もテキストとして取得できます。
             </p>
           )}
         </div>
