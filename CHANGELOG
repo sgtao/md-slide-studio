@@ -3,6 +3,46 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.5.2] - 2026-08-17
+
+サイドメニュー・プレゼンモードの状態管理をURL駆動に変更し、hashベースルーター（wouter）を導入。あわせて今後の機能追加（BYOK APIキー設定等）向けの器として`/settings`ページのプレースホルダーを追加した
+
+### 追加｜ルーター導入（`/`・`/present`・`/settings`）
+
+hashベースルーター`wouter`（`useHashLocation`）を導入し、edit⇄プレゼン切替とURLを連動させた。
+
+- `/` … editモード（既定）
+- `/present` … プレゼンモード
+- `/settings` … 設定ページ（プレースホルダー、「準備中」表示＋「← エディタに戻る」リンクのみ）
+- ブラウザの戻る/進むボタンでedit⇄プレゼン間を行き来できる
+- GitHub Pages配信でのリライト設定は不要（hashフラグメントはサーバーへ送られないため、リロード・直接アクセスでも404にならない）
+
+### 追加｜サイドメニューに⚙️「設定」リンク
+
+サイドメニュー最終グループ（🤖AIプロンプト／📄サンプル／❓ヘルプ）の末尾に⚙️「設定」を追加し、`/settings`へ遷移できるようにした。設定ページはSideMenuの外の独立ページとして表示され、`/`・`/present`のみにSideMenuが表示される。
+
+### 破壊的変更｜プレゼンモードの状態をURL駆動へ変更（旧`mdss-mode`永続化キーは非推奨化）
+
+これまで`mode`（edit/present）は`usePersistentState`によりlocalStorage（`mdss-mode`キー）へ永続化されていたが、ルーター導入に伴いURLが唯一の正となった。旧キーからの自動移行処理は行わないため、以前presentモードのまま画面を閉じたユーザーも、次回`/`へのアクセス時は常にeditモードから起動する。
+
+### ファイル構成の変更
+```
+新規:
+  e2e/router.spec.ts
+  packages/app/src/pages/SettingsPage.tsx
+  packages/app/src/router/AppRouter.tsx
+変更:
+  package.json
+  packages/cli/package.json
+  packages/app/package.json（wouter追加）
+  packages/app/src/App.tsx
+  packages/app/src/components/SideMenu.tsx
+  packages/app/src/main.tsx
+  packages/app/src/theme/app-shell.css
+  packages/app/vite.config.ts（コメント訂正のみ）
+```
+
+---
 ## [v0.5.1] - 2026-08-16
 
 サイドメニューに「🔗 URLで取得」を追加し、URLを指定して外部のMDファイルを取得・反映できるようにした
