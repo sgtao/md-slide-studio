@@ -3,6 +3,41 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.5.0] - 2026-08-16
+
+MDファイルアップロード機能追加（サイドメニュー「開く」ボタン／ドラッグ&ドロップ）＋サイドメニュー項目の並び替え
+
+### 追加｜MDファイルアップロード（ボタン経由／ドラッグ&ドロップ）
+
+サイドメニュー「📂 開く」ボタン（`input[type=file]`、`accept=".md,.markdown"`）と、エディタペイン（`.editor-pane`）へのドラッグ&ドロップの両方から、現在の単一ドキュメント（原稿）をアップロードしたMDファイルの内容で置き換えられるようにした。ドキュメント一覧・複数ファイル管理はスコープ外（今回は単一ドキュメントへの読み込みのみ）。
+
+- 検証: 拡張子は`.md`/`.markdown`（大小文字無視）のみ許可、サイズ上限は2MB。検証はFileReader実行前に同期で行い、巨大ファイル読み込みによるUIフリーズを避けた
+- 反映フロー: 検証OK→ファイル読み込み→常に確認ダイアログを表示（dirty判定は行わない）→OKで置換、キャンセルで現状維持
+- エラー表示: `alert()`は使わず、確認ダイアログと同じ`.modal`スタイルで表示（拡張子NG／サイズ超過／読み込み失敗の3パターン）
+- ボタン経由・ドロップ経由どちらも`useFileUpload`フックの`handleFile()`に集約し、ロジックの二重管理を避けた
+- 確認/エラーダイアログは`AiPromptPanel`/`HelpModal`と同じ`.modal-backdrop`/`.modal`CSSを流用する汎用`ConfirmModal`を新設し、他機能からも再利用可能にした
+- ドラッグ中は`.editor-pane[data-drag-over='true']`でCSSハイライト（パレット切替に自動追従する`--accent`系変数を使用）
+
+### 変更｜サイドメニューの項目順を整理
+
+「開く」「表示モード（編集のみ／プレビューのみ／2分割）」「プレゼン」を1グループにまとめ、区切り線をメニュー直下とAIプロンプト直前の2箇所に整理した。表示モードのradiogroupはメニュー専用の並び順（`SIDE_MENU_LAYOUT_ORDER`）を持たせつつ、キーボードショートカット・ヘルプ表示に使う`layoutMode.ts`側の正順（`LAYOUT_MODES`）はそのまま維持した。
+
+### ファイル構成の変更
+```
+新規:
+  e2e/file-upload.spec.ts
+  packages/app/src/components/ConfirmModal.tsx
+  packages/app/src/hooks/useFileUpload.ts
+  packages/app/src/hooks/useFileUpload.test.ts
+変更:
+  package.json
+  packages/cli/package.json
+  packages/app/src/App.tsx
+  packages/app/src/components/SideMenu.tsx
+  packages/app/src/theme/app-shell.css
+```
+
+---
 ## [v0.4.11] - 2026-08-12
 
 スライドMDパーサーの規約緩和（一般的なMarkdown記法との差異を縮小）
