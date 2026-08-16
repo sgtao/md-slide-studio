@@ -35,6 +35,7 @@ interface Props {
   aiPromptOpen: boolean;
   onOpenPromptPanel: () => void;
   onOpenFile: () => void;
+  onOpenUrlLoad: () => void;
   onLoadSample: () => void;
   onOpenHelp: () => void;
 }
@@ -70,6 +71,18 @@ export function SideMenu(props: Props) {
             📂
           </span>
           <span className="side-menu__label">開く</span>
+        </button>
+
+        <button
+          type="button"
+          className="side-menu__item"
+          onClick={props.onOpenUrlLoad}
+          title="URLを指定してMDファイルを取得（.md / .markdown、現在の原稿を置き換えます）"
+        >
+          <span className="side-menu__ico" aria-hidden="true">
+            🔗
+          </span>
+          <span className="side-menu__label">URLで取得</span>
         </button>
 
         <div className="side-menu__subgroup" role="radiogroup" aria-label="表示モード">

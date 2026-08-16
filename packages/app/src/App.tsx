@@ -14,6 +14,7 @@ import { SideMenu } from './components/SideMenu';
 import { TemplateMenu } from './components/TemplateMenu';
 import { HelpModal } from './components/HelpModal';
 import { ConfirmModal } from './components/ConfirmModal';
+import { UrlLoadModal } from './components/UrlLoadModal';
 import { useKeyboardNav, usePersistentState } from './hooks/hooks';
 import { useFileUpload, UPLOAD_ERROR_MESSAGES } from './hooks/useFileUpload';
 import { canExportFromDom, resolveLayout, type LayoutMode } from './layout/layoutMode';
@@ -107,6 +108,16 @@ export default function App() {
     },
     [handleFile],
   );
+
+  // --- URL指定によるMD取得（v0.5.1） ---
+  const [urlLoadOpen, setUrlLoadOpen] = useState(false);
+  const handleUrlLoadReplace = useCallback((text: string) => {
+    setMd(text);
+    // アップロード機能と同じくscrollTopを明示的に先頭へ戻す（v0.4.10由来の対策）。
+    requestAnimationFrame(() => {
+      if (textareaRef.current) textareaRef.current.scrollTop = 0;
+    });
+  }, []);
 
   // --- 表示状態 ---
   const [mode, setMode] = usePersistentState<'edit' | 'present'>('mdss-mode', 'edit');
@@ -326,6 +337,7 @@ export default function App() {
           aiPromptOpen={showAiPromptPanel}
           onOpenPromptPanel={() => setAiPromptPanelOpen(true)}
           onOpenFile={openFilePicker}
+          onOpenUrlLoad={() => setUrlLoadOpen(true)}
           onLoadSample={() => setMd(sampleMd)}
           onOpenHelp={() => {
             setHelpOpen(true);
@@ -458,6 +470,9 @@ export default function App() {
           message={UPLOAD_ERROR_MESSAGES[uploadError]}
           onCancel={cancelUpload}
         />
+      )}
+      {urlLoadOpen && (
+        <UrlLoadModal onReplace={handleUrlLoadReplace} onClose={() => setUrlLoadOpen(false)} />
       )}
     </>
   );

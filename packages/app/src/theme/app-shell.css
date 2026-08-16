@@ -109,6 +109,15 @@
   outline-offset: -2px;
   background: var(--accent-light);
 }
+/* ─── URL指定によるMD取得: UrlLoadModal（v0.5.1） ─── */
+.url-load-modal__error {
+  font-weight: 600;
+}
+.url-load-modal__hint,
+.url-load-modal__loading {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
 /* ─── AIプロンプトパネル（左サイドメニュー版）─── */
 /* ヘッダーの🤖ポップアップ（.modal-head / .modal-body / .modal-foot・app.css）と
    同じ内側スタイルを流用しつつ、.workspace の中に直接置くため
