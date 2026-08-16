@@ -33,6 +33,14 @@
   margin-top: 8px;
   border-top: 1px solid var(--border);
 }
+/* .side-menu__group内にネストするradiogroup（表示モード）用の内側ラッパー。
+   flex方向の継承のみ必要で、区切り線は外側の.side-menu__groupが既に持つため
+   付与しない（開く/表示モード/プレゼンを1グループにまとめる並び順のため）。 */
+.side-menu__subgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 .side-menu__toggle,
 .side-menu__item {
