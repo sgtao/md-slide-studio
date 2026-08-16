@@ -84,7 +84,9 @@ export function SideMenu(props: Props) {
           </span>
           <span className="side-menu__label">URLで取得</span>
         </button>
+      </div>
 
+      <div className="side-menu__group">
         <div className="side-menu__subgroup" role="radiogroup" aria-label="表示モード">
           {SIDE_MENU_LAYOUT_ORDER.map((m) => {
             const meta = LAYOUT_MODE_META[m];
