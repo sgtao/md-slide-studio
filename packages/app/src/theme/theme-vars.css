@@ -44,6 +44,12 @@
   --bg-surface-dark: #161b22;
   --text-on-dark: #e6edf3;
   --text-on-dark-2: #8b949e;
+
+  /* 常時ダークな面（point帯・feature-showcase右面）上の強調色。
+   * 値は各パレットのダーク accent と同一（tone: dark の ==強調== と同じ色合い）。
+   * テーマがライトでも、暗い面では --accent（ライト値）ではなくこちらを使う。
+   * パレット別の値は下の各 [data-palette] で上書きする。 */
+  --accent-on-dark: #58a6ff;
 }
 
 [data-theme='dark'] {
@@ -92,6 +98,7 @@
   --accent: #2563eb;
   --accent-light: #eff6ff;
   --accent-dim: #dbeafe;
+  --accent-on-dark: #58a6ff;
 }
 [data-palette='ocean'][data-theme='dark'] {
   --accent: #58a6ff;
@@ -104,6 +111,7 @@
   --accent: #059669;
   --accent-light: #ecfdf5;
   --accent-dim: #d1fae5;
+  --accent-on-dark: #34d399;
 }
 [data-palette='forest'][data-theme='dark'] {
   --accent: #34d399;
@@ -116,6 +124,7 @@
   --accent: #ea580c;
   --accent-light: #fff7ed;
   --accent-dim: #ffedd5;
+  --accent-on-dark: #fb923c;
 }
 [data-palette='sunset'][data-theme='dark'] {
   --accent: #fb923c;
@@ -128,6 +137,7 @@
   --accent: #7c3aed;
   --accent-light: #f5f3ff;
   --accent-dim: #ede9fe;
+  --accent-on-dark: #a78bfa;
 }
 [data-palette='plum'][data-theme='dark'] {
   --accent: #a78bfa;
@@ -140,6 +150,7 @@
   --accent: #334155;
   --accent-light: #f1f5f9;
   --accent-dim: #e2e8f0;
+  --accent-on-dark: #94a3b8;
 }
 [data-palette='graphite'][data-theme='dark'] {
   --accent: #94a3b8;
@@ -152,6 +163,7 @@
   --accent: #dc2626;
   --accent-light: #fef2f2;
   --accent-dim: #fee2e2;
+  --accent-on-dark: #f87171;
 }
 [data-palette='ruby'][data-theme='dark'] {
   --accent: #f87171;
@@ -164,6 +176,7 @@
   --accent: #d97706;
   --accent-light: #fffbeb;
   --accent-dim: #fef3c7;
+  --accent-on-dark: #fbbf24;
 }
 [data-palette='gold'][data-theme='dark'] {
   --accent: #fbbf24;

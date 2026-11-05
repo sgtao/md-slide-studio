@@ -110,8 +110,11 @@
 .slide-point::before {
   content: '💡 ';
 }
-.slide-point .hl {
-  color: var(--accent);
+/* point帯は常にダーク面（--bg-surface-dark）。ライト側の --accent（濃い青など）は
+ * 暗い面で読みにくいため、暗い面用の強調色を使う（tone: dark の ==強調== と同じ色合い）。
+ * tone: dark のスライドでは帯が面＋枠のパネルに変わり、スライドの --accent がそのまま読めるため対象外。 */
+.slide:not(.slide--dark) .slide-point .hl {
+  color: var(--accent-on-dark);
 }
 /* ダークスライド上では地色と同化するため、面＋枠のパネルに切り替える */
 .slide--dark .slide-point {

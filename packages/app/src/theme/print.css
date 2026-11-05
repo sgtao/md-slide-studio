@@ -248,7 +248,7 @@ body.exporting-pdf .slide {
   }
   .feature-right .feature-num,
   .feature-right .feat-label {
-    color: var(--accent) !important;
+    color: var(--accent-on-dark) !important;
   }
 
   /* ─── 2-10. 色の印刷を強制（重要） ─── */
