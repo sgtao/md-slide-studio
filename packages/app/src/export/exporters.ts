@@ -30,16 +30,51 @@ export function exportToPdf() {
   requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
 }
 
+const CAPTURE_ATTR = 'data-capture';
+
+/**
+ * html2canvas が複製した DOM（clonedDoc）側で、キャプチャ対象を画面の拡大縮小から切り離す。
+ * - hero ビューでは親 .slide-scaler に scale(ratio) がかかる。残すと PNG が拡大・縮小・
+ *   切れ・文字重なりを起こすため外す。
+ * - list ビューの縮小幅（min(90vw, 960px)）や .slide-inner の scale、非アクティブスライドの
+ *   opacity:0 にも左右されないよう、対象を 960×540・transform なし・不透明に固定する。
+ */
+function prepareCaptureClone(clonedDoc: Document): void {
+  const scaler = clonedDoc.querySelector<HTMLElement>('.slide-scaler');
+  scaler?.style.setProperty('transform', 'none', 'important');
+  const target = clonedDoc.querySelector<HTMLElement>(`[${CAPTURE_ATTR}]`);
+  if (!target) return;
+  for (const [prop, value] of [
+    ['width', '960px'],
+    ['height', '540px'],
+    ['aspect-ratio', 'auto'],
+    ['transform', 'none'],
+    ['opacity', '1'],
+  ] as const) {
+    target.style.setProperty(prop, value, 'important');
+  }
+  target
+    .querySelector<HTMLElement>('.slide-inner')
+    ?.style.setProperty('transform', 'none', 'important');
+}
+
 async function captureSlide(slideEl: HTMLElement): Promise<HTMLCanvasElement> {
   const { default: html2canvas } = await import('html2canvas');
-  return html2canvas(slideEl, {
-    scale: 2, // 960×540 → 1920×1080
-    width: 960,
-    height: 540,
-    backgroundColor: null,
-    useCORS: true,
-    logging: false,
-  });
+  // 複製DOM側で対象を特定するための印（onclone は元要素の参照を持たない）
+  slideEl.setAttribute(CAPTURE_ATTR, '1');
+  try {
+    return await html2canvas(slideEl, {
+      scale: 2, // 960×540 → 1920×1080
+      width: 960,
+      height: 540,
+      backgroundColor: null,
+      useCORS: true,
+      logging: false,
+      onclone: prepareCaptureClone,
+    });
+  } finally {
+    slideEl.removeAttribute(CAPTURE_ATTR);
+  }
 }
 
 function downloadBlob(blob: Blob, filename: string) {
@@ -424,10 +459,30 @@ function buildCanvasOptions() {
     backgroundColor: getComputedStyle(document.body).backgroundColor,
     logging: false,
     onclone: function (clonedDoc) {
-      var el = clonedDoc.querySelectorAll('.slide-inner');
-      el.forEach(function (n) { n.style.transform = 'none'; });
+      // hero ビューでは親 .slide-scaler に scale(ratio) がかかっている。
+      // 残すと PNG が拡大・切れ・文字間隔崩れを起こすため外す。
+      var sc = clonedDoc.querySelector('.slide-scaler');
+      if (sc) sc.style.setProperty('transform', 'none', 'important');
+      // キャプチャ対象を 960×540・transform なし・不透明に固定する
+      // （list ビューの縮小幅 / 非アクティブスライドの opacity:0 に左右されない）
+      var t = clonedDoc.querySelector('[data-capture]');
+      if (t) {
+        [['width', '960px'], ['height', '540px'], ['aspect-ratio', 'auto'], ['transform', 'none'], ['opacity', '1']]
+          .forEach(function (kv) { t.style.setProperty(kv[0], kv[1], 'important'); });
+        var inner = t.querySelector('.slide-inner');
+        if (inner) inner.style.setProperty('transform', 'none', 'important');
+      }
     },
   };
+}
+/* 対象スライドに印を付けて html2canvas に渡す（onclone が印で対象を特定する） */
+async function captureSlide(slide) {
+  slide.setAttribute('data-capture', '1');
+  try {
+    return await html2canvas(slide, buildCanvasOptions());
+  } finally {
+    slide.removeAttribute('data-capture');
+  }
 }
 function showExportError(action, error) {
   var message = [
@@ -445,8 +500,7 @@ function showExportError(action, error) {
 async function exportSinglePNG() {
   try {
     await loadScript(HTML2CANVAS_CDN);
-    var target = currentView === 'list' ? slides[0] : slides[cur];
-    var canvas = await html2canvas(target, buildCanvasOptions());
+    var canvas = await captureSlide(slides[cur]);
     canvas.toBlob(function (blob) {
       if (!blob) return showExportError('PNGエクスポート', new Error('PNG生成に失敗しました'));
       downloadBlob(blob, sanitizeName(DECK_TITLE) + '-slide' + (cur + 1) + '.png');
@@ -460,7 +514,7 @@ async function exportAllPNG() {
     await Promise.all([loadScript(HTML2CANVAS_CDN), loadScript(JSZIP_CDN)]);
     var zip = new JSZip();
     for (var i = 0; i < slides.length; i++) {
-      var canvas = await html2canvas(slides[i], buildCanvasOptions());
+      var canvas = await captureSlide(slides[i]);
       var dataUrl = canvas.toDataURL('image/png');
       var base64 = dataUrl.split(',')[1];
       zip.file('slide-' + String(i + 1).padStart(2, '0') + '.png', base64, { base64: true });
