@@ -3,6 +3,67 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.5.3] - 2026-11-05
+
+PNGエクスポートが画面表示とずれる問題を修正し、あわせて常時ダークな面（point帯・feature-showcase右面）の強調色を明るくして読みやすくした
+
+### 修正｜html2canvasのPNG出力が画面とずれる問題（アプリ版・`mdss-convert`出力HTML版の両方）
+
+PNG出力（単体／全スライドZIP）が画面と一致しない原因は3つあり、いずれも同じ方針で修正した。
+
+- **heroビューで拡大・切れ・文字重なりが起きる**: 親`.slide-scaler`にかかる`scale(ratio)`が複製DOMに残っていた。複製側で`transform: none`にして外した
+- **listビューで常に1枚目が出力される**: 単体PNGが`currentView === 'list'`のとき`slides[0]`固定だった。現在表示中の`slides[cur]`を出力するようにした
+- **ZIPのPNGが空白になる**: 非アクティブスライドの`opacity: 0`がそのまま描画されていた。複製側でキャプチャ対象を`opacity: 1`にした
+
+キャプチャ対象には一時的に`data-capture`属性を付け（`onclone`は元要素の参照を持たないため）、複製DOM側で対象を特定して`960px × 540px`・`transform: none`・`opacity: 1`に固定する。listビューの縮小幅や`.slide-inner`の`scale`にも左右されない。属性は`try/finally`で必ず外す。
+
+- アプリ版: `captureSlide`に`onclone: prepareCaptureClone`を追加
+- 出力HTML版（`mdss-convert`）: スタンドアロンスクリプトに`captureSlide`を追加し、単体PNG・全スライドZIPの両方から利用
+- スタンドアロンスクリプトは`cli/src/standalone.ts`と`app/src/export/exporters.ts`（テンプレート文字列）の2箇所に重複して存在するため、両方に同一の修正を入れた
+
+### 変更｜常時ダークな面の強調色を明るく（`--accent-on-dark`）
+
+point帯（`point:`）とfeature-showcase右面は、テーマがライトでも常に暗い背景（`--bg-surface-dark`）。ところが強調色にはライト用の`--accent`（ocean: `#2563eb`）が使われ、コントラスト比が約3.35:1と読みづらかった（graphiteは約1.67:1でほぼ判読不能）。
+
+暗い面専用の変数`--accent-on-dark`を新設し、値は各パレットのダーク用`--accent`と同一（`tone: dark`の`==強調==`と同じ色合い）にした。
+
+| パレット | `--accent-on-dark` |
+|---|---|
+| ocean | `#58a6ff` |
+| forest | `#34d399` |
+| sunset | `#fb923c` |
+| plum | `#a78bfa` |
+| graphite | `#94a3b8` |
+| ruby | `#f87171` |
+| gold | `#fbbf24` |
+
+- 適用先: point帯の`==強調==`、feature-showcase右面の`.feature-num`・`.feat-eyebrow`・`.feat-ico`、印刷時の`.feature-right .feature-num`・`.feat-label`
+- ocean ではコントラスト比が約3.35:1 → 約6.85:1になった。全パレットで6:1以上
+- `tone: dark`のスライドでは、point帯が面＋枠のパネルに変わりスライドの`--accent`がそのまま読めるため対象外（`.slide:not(.slide--dark)`で限定）
+- 背景色そのものは変更していない
+
+### 既知の課題（未対応）
+
+- listビューのナンバーバッジ（`.slide::after`）が、幅の狭いPNGで位置ずれする
+- `tone: dark`とruby／goldパレットの組み合わせでは、`steps.css`に`.slide--dark`のパレット別上書きがなく、スライド本体の強調がoceanの青になる
+- listビューで、下部の注釈文がpoint帯と重なる
+- `steps-item--dark`（暗いカード）内の色は未調整
+- `slide-fit`スライドのPNG出力は未検証
+- 既存e2eはPNGのダウンロード発生のみを確認しており、画像の内容は検証していない
+
+### ファイル構成の変更
+```
+変更:
+  packages/app/src/export/exporters.ts
+  packages/cli/src/standalone.ts
+  packages/app/src/theme/theme-vars.css
+  packages/app/src/theme/steps.css
+  packages/app/src/theme/content.css
+  packages/app/src/theme/print.css
+  packages/cli/src/generated/themeCss.ts（生成物・build.mjsで再生成）
+```
+
+---
 ## [v0.5.2] - 2026-08-17
 
 サイドメニュー・プレゼンモードの状態管理をURL駆動に変更し、hashベースルーター（wouter）を導入。あわせて今後の機能追加（BYOK APIキー設定等）向けの器として`/settings`ページのプレースホルダーを追加した
