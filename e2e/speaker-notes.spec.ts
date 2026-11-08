@@ -43,8 +43,10 @@ test.describe('スピーカーノート（note:）', () => {
   }) => {
     await page.goto('/');
     await page.locator('textarea').fill(deck);
-    await page.emulateMedia({ media: 'print' });
     const notes = page.locator('.slide .slide-notes');
+    // プレビュー反映（300msデバウンス）を待ってから印刷メディアに切り替える
+    await expect(notes).toHaveCount(1);
+    await page.emulateMedia({ media: 'print' });
     await expect(notes).toBeHidden();
 
     await page.evaluate(() => document.body.setAttribute('data-notes', 'on'));
