@@ -21,9 +21,9 @@ export function htmlHasSpeakerNotes(sectionsHtml: string): boolean {
   return /class="slide-notes"/.test(sectionsHtml);
 }
 
-/** `.control-cluster` の先頭に置く 🗒️ ボタン。hero ビュー以外では JS が隠す。 */
+/** `.control-cluster` の先頭に置く 🗒️ ボタン。hero ビュー以外では隠さず `disabled`（薄く表示）にする。 */
 export function buildNotesButtonHtml(): string {
-  return '  <button id="notes-toggle" type="button" onclick="toggleNotes()" title="ノート（N）" aria-label="スピーカーノート" aria-expanded="false" hidden>🗒️</button>';
+  return '  <button id="notes-toggle" type="button" onclick="toggleNotes()" title="ノート（N・1枚表示で使用）" aria-label="スピーカーノート" aria-expanded="false" disabled>🗒️</button>';
 }
 
 /**
@@ -68,7 +68,7 @@ function refreshNotes() {
   if (!btn || !pop) return;
   var hero = (currentView === 'hero');
   var html = currentNotesHtml();
-  btn.hidden = !hero;
+  btn.disabled = !hero;
   btn.classList.toggle('is-empty', !html);
   btn.setAttribute('aria-expanded', String(hero && notesOpen));
   pop.hidden = !(hero && notesOpen);

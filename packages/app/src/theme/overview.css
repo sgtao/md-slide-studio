@@ -10,10 +10,6 @@
  */
 
 /* ─── 右上ボタン（一覧・サムネ帯） ─── */
-.control-cluster #strip-toggle[hidden],
-.control-cluster #grid-toggle[hidden] {
-  display: none;
-}
 .control-cluster #strip-toggle[aria-expanded='true'],
 .control-cluster #grid-toggle[aria-expanded='true'] {
   background: var(--accent);

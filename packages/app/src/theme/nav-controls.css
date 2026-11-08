@@ -43,6 +43,18 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* 今のビューで使えないボタン（🗒️ ノート・🎞️ サムネ帯、編集のみレイアウトでの一部）は
+   隠さず薄く表示する。ビューを切り替えてもボタンの数と位置が変わらない（v0.6.1）。 */
+.control-cluster > button:disabled,
+.control-cluster .export-menu > button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.control-cluster > button:disabled:hover,
+.control-cluster .export-menu > button:disabled:hover {
+  background: var(--nav-bg);
+}
+
 /* ─── モバイル幅でのControlCluster調整（v0.4.10） ─── */
 @media (max-width: 600px) {
   .control-cluster {
@@ -335,10 +347,6 @@
  *   同じ DOM・クラス名を使い、このCSSを共有する。
  *   色は既存のCSS変数のみ（ライト/ダーク × 全パレットで読める）。
  * ========================================================================== */
-.control-cluster #notes-toggle[hidden] {
-  display: none;
-}
-
 /* 現在のスライドにノートが無いときは薄く見せる（押すと「（ノートなし）」） */
 .control-cluster #notes-toggle.is-empty {
   opacity: 0.45;

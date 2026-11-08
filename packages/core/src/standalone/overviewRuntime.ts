@@ -18,11 +18,14 @@
  *   複製なのでパレット・ライト/ダークには CSS だけで追従し、画像は埋め込まない。
  */
 
-/** `.control-cluster` の view-toggle の直後に置くボタン。strip は hero 以外で JS が隠す。 */
+/**
+ * `.control-cluster` の view-toggle の直後に置くボタン。
+ * strip は hero 以外では隠さず `disabled`（薄く表示）にする: ビューを切り替えてもボタンの数・位置を変えない。
+ */
 export function buildOverviewButtonsHtml(): string {
   return [
     '  <button id="grid-toggle" type="button" onclick="toggleGrid()" title="一覧グリッド（G）" aria-label="一覧グリッド" aria-expanded="false">▦</button>',
-    '  <button id="strip-toggle" type="button" onclick="toggleStrip()" title="サムネ帯（T）" aria-label="サムネ帯" aria-expanded="false" hidden>🎞️</button>',
+    '  <button id="strip-toggle" type="button" onclick="toggleStrip()" title="サムネ帯（T・1枚表示で使用）" aria-label="サムネ帯" aria-expanded="false" disabled>🎞️</button>',
   ].join('\n');
 }
 
@@ -179,7 +182,7 @@ function syncOverview() {
   strip.hidden = !showStrip;
   grid.hidden = !showGrid;
   var st = document.getElementById('strip-toggle');
-  if (st) { st.hidden = !hero; st.setAttribute('aria-expanded', String(showStrip)); }
+  if (st) { st.disabled = !hero; st.setAttribute('aria-expanded', String(showStrip)); }
   var gt = document.getElementById('grid-toggle');
   if (gt) gt.setAttribute('aria-expanded', String(showGrid));
   if (showStrip) { layoutThumbs(strip); markCurrentThumbs(); centerCurrentThumb(strip, true); }

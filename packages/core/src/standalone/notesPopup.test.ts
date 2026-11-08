@@ -20,11 +20,12 @@ describe('htmlHasSpeakerNotes', () => {
 });
 
 describe('ノートポップアップの部品', () => {
-  it('ボタンは既定で hidden（hero になるまで JS が出す）で、押すと toggleNotes を呼ぶ', () => {
+  it('ボタンは既定で disabled（hero になるまで薄く表示。隠さない）で、押すと toggleNotes を呼ぶ', () => {
     const html = buildNotesButtonHtml();
     expect(html).toContain('id="notes-toggle"');
     expect(html).toContain('onclick="toggleNotes()"');
-    expect(html).toMatch(/aria-expanded="false"[^>]*hidden/);
+    expect(html).toMatch(/aria-expanded="false"[^>]*disabled/);
+    expect(html).not.toMatch(/id="notes-toggle"[^>]*hidden/);
   });
 
   it('ポップアップは hidden で始まり、前へ／次へ／閉じるのIDを持つ', () => {

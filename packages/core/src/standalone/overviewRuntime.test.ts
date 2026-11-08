@@ -6,14 +6,15 @@ import {
 } from './overviewRuntime';
 
 describe('閲覧UIの部品（書き出しHTML）', () => {
-  it('ボタンは 一覧(G)・サムネ帯(T) の2つで、サムネ帯は既定で hidden（hero になるまで JS が出す）', () => {
+  it('ボタンは 一覧(G)・サムネ帯(T) の2つで、サムネ帯は既定で disabled（hero になるまで薄く表示。隠さない）', () => {
     const html = buildOverviewButtonsHtml();
     expect(html).toContain('id="grid-toggle"');
     expect(html).toContain('onclick="toggleGrid()"');
     expect(html).toContain('id="strip-toggle"');
     expect(html).toContain('onclick="toggleStrip()"');
-    expect(html).toMatch(/id="strip-toggle"[^>]*hidden/);
-    expect(html).not.toMatch(/id="grid-toggle"[^>]*hidden/);
+    expect(html).toMatch(/id="strip-toggle"[^>]*disabled/);
+    expect(html).not.toMatch(/id="strip-toggle"[^>]*hidden/);
+    expect(html).not.toMatch(/id="grid-toggle"[^>]*(hidden|disabled)/);
   });
 
   it('入れ物（サムネ帯・グリッド）は空で hidden から始まる（既定は閉・サムネは開くまで作らない）', () => {

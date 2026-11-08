@@ -88,15 +88,16 @@ async function exerciseHero(page: Page) {
   await page.locator('#notes-close').click();
   await expect(popup(page)).toBeHidden();
 
-  // list ビュー（V）では 🗒️ もポップアップも隠れ、hero に戻ると開いていたポップアップも戻る
+  // list ビュー（V）ではポップアップが隠れ、🗒️ は消えずに無効（薄く表示）になる。hero に戻ると開いていたポップアップも戻る
   await toggle(page).click();
   await expect(popup(page)).toBeVisible();
   await page.keyboard.press('v');
-  await expect(toggle(page)).toBeHidden();
+  await expect(toggle(page)).toBeVisible();
+  await expect(toggle(page)).toBeDisabled();
   await expect(popup(page)).toBeHidden();
   await page.keyboard.press('n'); // list では N は無効
   await page.keyboard.press('v');
-  await expect(toggle(page)).toBeVisible();
+  await expect(toggle(page)).toBeEnabled();
   await expect(popup(page)).toBeVisible();
 }
 
@@ -206,8 +207,9 @@ test.describe('ノートポップアップ（書き出しHTML）', () => {
     await download.saveAs(file);
 
     await page.goto(`file://${file}`);
-    // 書き出しHTMLは list ビューで開く。list では 🗒️ は出ない
-    await expect(toggle(page)).toBeHidden();
+    // 書き出しHTMLは list ビューで開く。list では 🗒️ は消えず、無効（薄く表示）
+    await expect(toggle(page)).toBeVisible();
+    await expect(toggle(page)).toBeDisabled();
     await page.keyboard.press('v');
     await exerciseHero(page);
   });
