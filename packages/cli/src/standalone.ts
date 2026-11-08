@@ -20,6 +20,8 @@ import {
   htmlHasSpeakerNotes,
   NOTES_POPUP_SCRIPT,
   OVERVIEW_SCRIPT,
+  buildHelpPopupHtml,
+  HELP_POPUP_SCRIPT,
 } from '@mdss/core';
 
 const PALETTE_META_STANDALONE: { id: string; icon: string; label: string }[] = [
@@ -397,7 +399,8 @@ export function assembleStandaloneHtml(args: {
   const script =
     buildInlineScript(JSON.stringify(title), JSON.stringify(md)) +
     (hasNotes ? NOTES_POPUP_SCRIPT : '') +
-    OVERVIEW_SCRIPT;
+    OVERVIEW_SCRIPT +
+    HELP_POPUP_SCRIPT;
 
   return `<!doctype html>
 <html lang="ja" data-view="list" data-theme="${theme}" data-palette="${palette}">
@@ -423,6 +426,7 @@ ${sectionsHtml}
 <div id="slide-counter">1 / ${total}</div>
 </div>
 ${buildOverviewContainersHtml()}
+${buildHelpPopupHtml(hasNotes)}
 <script>${script}</script>
 </body>
 </html>

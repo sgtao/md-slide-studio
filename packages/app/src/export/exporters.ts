@@ -13,6 +13,8 @@ import {
   htmlHasSpeakerNotes,
   NOTES_POPUP_SCRIPT,
   OVERVIEW_SCRIPT,
+  buildHelpPopupHtml,
+  HELP_POPUP_SCRIPT,
 } from '@mdss/core';
 
 // html2canvas / JSZip はエクスポート実行時のみ動的ロード（初期バンドル削減。
@@ -607,7 +609,8 @@ function buildStandaloneHtml(scalerEl: HTMLElement, deckTitle: string, md: strin
   const script =
     buildInlineScript(deckTitleJson, deckMdJson) +
     (hasNotes ? NOTES_POPUP_SCRIPT : '') +
-    OVERVIEW_SCRIPT;
+    OVERVIEW_SCRIPT +
+    HELP_POPUP_SCRIPT;
 
   return `<!doctype html>
 <html lang="ja" data-view="list" data-theme="${theme}" data-palette="${palette}">
@@ -615,7 +618,12 @@ function buildStandaloneHtml(scalerEl: HTMLElement, deckTitle: string, md: strin
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
-<style>${css}</style>
+<style>${css}
+/* 共有テーマCSS（nav-controls.css）の .control-cluster はアプリの .preview-pane 内を前提に
+   position: absolute。書き出しHTMLは document がそのままスクロールする（list ビュー）ため、
+   position: fixed に戻して右上に固定する（CLI の standalone.ts と同じ上書き）。 */
+.control-cluster{position:fixed}
+</style>
 </head>
 <body data-view="list">
 ${controlClusterWithTheme}
@@ -627,6 +635,7 @@ ${sectionsHtml}
 <div id="slide-counter">1 / ${total}</div>
 </div>
 ${buildOverviewContainersHtml()}
+${buildHelpPopupHtml(hasNotes)}
 <script>${script}</script>
 </body>
 </html>

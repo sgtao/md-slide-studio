@@ -33,6 +33,9 @@ export {
   OVERVIEW_SCRIPT,
 } from './standalone/overviewRuntime';
 
+// --- 書き出しHTML用のショートカットのヘルプ（? キー。文字列を返すだけ） ---
+export { exportShortcuts, buildHelpPopupHtml, HELP_POPUP_SCRIPT } from './standalone/helpPopup';
+
 // --- deckLint ---
 export {
   lintDeck,

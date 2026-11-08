@@ -548,6 +548,63 @@ test.describe('閲覧UI（アプリのプレビュー）', () => {
 });
 
 test.describe('閲覧UI（書き出しHTML）', () => {
+  test('? でショートカットのヘルプを開閉。開いている間はキーを裏に渡さず、Esc・✕・背景クリックで閉じる', async ({
+    page,
+  }, testInfo) => {
+    const file = await exportHtml(page, testInfo, deckWithNotes);
+    await page.goto(`file://${file}`);
+    const help = page.locator('#help-popup');
+    await toHero(page);
+    await expect(counter(page)).toHaveText(`1 / ${TOTAL}`);
+    await expect(help).toBeHidden();
+
+    await page.keyboard.press('?');
+    await expect(help).toBeVisible();
+    await expect(help.locator('.help-panel')).toBeInViewport();
+    await expect(help).toContainText('キーボードショートカット');
+    await expect(help.locator('kbd', { hasText: /^N$/ })).toHaveCount(1); // ノートのあるデッキ
+    // 開いている間はページ送り・G などが裏の画面に効かない
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('g');
+    await expect(counter(page)).toHaveText(`1 / ${TOTAL}`);
+    await expect(grid(page)).toBeHidden();
+    // ? で閉じる
+    await page.keyboard.press('?');
+    await expect(help).toBeHidden();
+    await page.keyboard.press('ArrowRight');
+    await expect(counter(page)).toHaveText(`2 / ${TOTAL}`);
+
+    // Esc で閉じる（グリッドを開いていても、まずヘルプだけ閉じる）
+    await page.keyboard.press('g');
+    await expect(grid(page)).toBeVisible();
+    await page.keyboard.press('?');
+    await expect(help).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(help).toBeHidden();
+    await expect(grid(page)).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(grid(page)).toBeHidden();
+
+    // ✕ ボタン・背景クリックで閉じる
+    await page.keyboard.press('?');
+    await page.locator('#help-close').click();
+    await expect(help).toBeHidden();
+    await page.keyboard.press('?');
+    await help.click({ position: { x: 5, y: 5 } });
+    await expect(help).toBeHidden();
+    // 閉じたあとも → が効く
+    await page.keyboard.press('ArrowRight');
+    await expect(counter(page)).toHaveText(`3 / ${TOTAL}`);
+  });
+
+  test('ノートの無いデッキのヘルプには N の行が無い', async ({ page }, testInfo) => {
+    const file = await exportHtml(page, testInfo);
+    await page.goto(`file://${file}`);
+    await page.keyboard.press('?');
+    await expect(page.locator('#help-popup')).toBeVisible();
+    await expect(page.locator('#help-popup kbd', { hasText: /^N$/ })).toHaveCount(0);
+  });
+
   test('list: ← → Space Shift+Space で1枚ずつ送り、Enter で1枚表示。帯は list 既定表示・hero 既定閉', async ({
     page,
   }, testInfo) => {

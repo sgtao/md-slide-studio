@@ -72,8 +72,21 @@
 - 実装: 書き出しHTML（`overviewRuntime.ts`。`Shift+Space` は既存のキー処理が Shift を見ずに「次へ」にするため、キャプチャ段階で受けて止める）、アプリ（`App.tsx` の `stripOpenByView`・`navigate`・`openCurrentInHero`、`hooks.ts` の `onEnter`・`Shift+Space`）
 - 書き出しHTMLを list で開くと、サムネ帯が最初から出る（サムネは見える分だけ作る遅延生成のまま）
 
-### 変更｜その他
+### 追加｜書き出しHTMLのショートカットヘルプ（`?`）
 
+- 書き出したHTMLで `?` を押すと、キーボードショートカットの一覧をポップアップで出す（もう一度 `?`・`Esc`・✕・背景クリックで閉じる）。アプリの ？ アイコン（ヘルプ画面）とは別。右上のボタンは増やさない
+- 載せるのは書き出しHTMLで効くキーだけ（`1` / `2` / `3` の画面レイアウト切替は載せない）。`N` の行はノートのあるデッキだけ
+- 開いている間はキーを裏の画面に渡さない（ページ送り・`G` などが効かない。Tab は通す）。`Esc` はヘルプを閉じるだけで、グリッドやノートは閉じない
+- 新規 `core/src/standalone/helpPopup.ts`（`exportShortcuts`・`buildHelpPopupHtml`・`HELP_POPUP_SCRIPT`）。`exporters.ts`・`cli/standalone.ts` の両方から取り込む。スタイルは `overview.css`、印刷では非表示
+
+### 修正｜アプリから書き出したHTMLで、list をスクロールすると右上ボタンが消える
+
+- **症状**: アプリの「HTMLとして保存」で書き出したHTMLを list 表示でスクロールすると、右上のボタンがページと一緒に流れて見えなくなった（CLI の書き出しは問題なし）
+- **原因**: 共有CSS（`nav-controls.css`）の `.control-cluster` はアプリの `.preview-pane` 内を前提に `position: absolute`。CLI の `standalone.ts` は v0.4.10（`712334f`）で `position: fixed` に上書きしていたが、アプリの `exporters.ts` には同じ上書きが無かった
+- **直し方**: `exporters.ts` にも `.control-cluster{position:fixed}` を入れ、右上に固定した
+- e2e: `cluster-fixed.spec.ts`（アプリから書き出したHTMLで、list の末尾までスクロールしても右上ボタンが同じ位置に見えて押せる）
+
+### 変更｜その他
 
 - `Esc`: 一覧グリッドを開いていればそれを閉じる、無ければノートポップアップを閉じる（メニューが開いていれば、先にメニューだけ閉じる）。`useKeyboardNav` の `onCloseNotes` を `onEscape` に置き換えた
 - `V`（hero ⇄ list）は従来どおり。グリッド中に `V` を押すと hero に移る

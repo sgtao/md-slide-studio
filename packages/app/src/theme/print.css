@@ -125,6 +125,7 @@ body.exporting-pdf .slide {
   .nav-arrow,
   .thumb-strip,
   .overview-grid,
+  .help-popup,
   #progress-bar,
   #slide-counter {
     display: none !important;

@@ -188,6 +188,21 @@ test('どのデッキにも 一覧・サムネ帯のボタンと入れ物・ス�
   }
 });
 
+test('? キーのショートカットヘルプ（閉じた状態）とスクリプトが入り、N の行はノートのあるデッキだけ', () => {
+  const plain = run(['-', '--quiet'], PLAIN_MD);
+  const notes = run(['-', '--quiet'], NOTES_MD);
+  for (const html of [plain, notes]) {
+    assert.match(html, /<div id="help-popup" class="help-popup" hidden>/);
+    assert.ok(html.includes('function toggleHelp()'));
+    assert.ok(html.includes('.help-popup'), 'CSS も同梱');
+    // 右上のボタンは増やさない
+    const cluster = html.match(/<div class="control-cluster">([\s\S]*?)<\/div>\s*<div id="progress-bar">/);
+    assert.ok(cluster && !cluster[1].includes('help'));
+  }
+  assert.ok(!plain.includes('<kbd>N</kbd>'));
+  assert.ok(notes.includes('<kbd>N</kbd>'));
+});
+
 test('overview.css（サムネ帯・グリッド・サムネ）が埋め込まれ、印刷では非表示にする', () => {
   const html = run(['-', '--quiet'], PLAIN_MD);
   const css = html.match(/<style>([\s\S]*?)<\/style>/)[1];
@@ -195,7 +210,7 @@ test('overview.css（サムネ帯・グリッド・サムネ）が埋め込ま�
     assert.ok(css.includes(sel), sel);
   }
   const printBlock = css.slice(css.indexOf('@media print'));
-  assert.match(printBlock, /\.thumb-strip,\s*\.overview-grid/, '印刷では帯・グリッドを非表示にする');
+  assert.match(printBlock, /\.thumb-strip,\s*\.overview-grid,\s*\.help-popup/, '印刷では帯・グリッド・ヘルプを非表示にする');
 });
 
 test('list の縮小は 960×540 の箱ごと（--list-scale）。.slide-inner の個別 scale は使わない', () => {
