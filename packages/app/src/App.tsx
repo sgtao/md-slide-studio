@@ -3,7 +3,7 @@
  * 編集モード（エディタ＋プレビュー2ペイン）⇄ プレゼンモード（全画面デッキ）。
  * テーマ / パレット / ビューは localStorage に永続化（元スキルの挙動を踏襲）。
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import { parseSlideMarkdown, getSlideStartLines } from '@mdss/core';
 import { lintDeck } from '@mdss/core';
@@ -101,20 +101,36 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
     cancel: cancelUpload,
   } = useFileUpload((text) => setMd(text), textareaRef);
   const openFilePicker = useCallback(() => fileInputRef.current?.click(), []);
-  const onEditorDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragOver(true);
-  }, []);
-  const onEditorDragLeave = useCallback(() => setDragOver(false), []);
-  const onEditorDrop = useCallback(
-    (e: DragEvent<HTMLDivElement>) => {
+  // v0.5.4: ドロップ受付をエディタ領域だけでなく画面全体（window）に拡張。
+  // 受付対象は「ファイルを含むドラッグ」のみ（テキスト選択のドラッグ等は無視）。
+  // ブラウザ既定動作（ドロップしたファイルをタブで開く）は常に抑止する。
+  useEffect(() => {
+    const hasFiles = (e: globalThis.DragEvent) => e.dataTransfer?.types?.includes('Files') ?? false;
+    const onDragOver = (e: globalThis.DragEvent) => {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      setDragOver(true);
+    };
+    const onDragLeave = (e: globalThis.DragEvent) => {
+      // 子要素間の移動では relatedTarget が入る。ウィンドウ外へ出た時だけ解除する。
+      if (e.relatedTarget === null) setDragOver(false);
+    };
+    const onDrop = (e: globalThis.DragEvent) => {
+      if (!hasFiles(e)) return;
       e.preventDefault();
       setDragOver(false);
-      const file = e.dataTransfer.files[0];
+      const file = e.dataTransfer?.files[0];
       if (file) handleFile(file);
-    },
-    [handleFile],
-  );
+    };
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('dragleave', onDragLeave);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('dragleave', onDragLeave);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, [handleFile]);
 
   // --- URL指定によるMD取得（v0.5.1） ---
   const [urlLoadOpen, setUrlLoadOpen] = useState(false);
@@ -368,13 +384,7 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
         {showAiPromptPanel && <AiPromptPanel onClose={() => setAiPromptPanelOpen(false)} />}
 
         {!showAiPromptPanel && effectiveLayout !== 'preview' && (
-          <div
-            className="editor-pane"
-            data-drag-over={dragOver ? 'true' : undefined}
-            onDragOver={onEditorDragOver}
-            onDragLeave={onEditorDragLeave}
-            onDrop={onEditorDrop}
-          >
+          <div className="editor-pane" data-drag-over={dragOver ? 'true' : undefined}>
             <div className="editor-toolbar">
               <TemplateMenu onInsert={insertSnippet} />
             </div>
@@ -457,6 +467,12 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
           }}
         >
           ❓ 使い方・記法はヘルプで確認できます
+        </div>
+      )}
+
+      {dragOver && (
+        <div className="drop-overlay" role="presentation" data-testid="drop-overlay">
+          <div className="drop-overlay__label">📂 ここにMDファイルをドロップして読み込み</div>
         </div>
       )}
 

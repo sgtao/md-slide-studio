@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 /**
- * MDファイルアップロード（v0.5.0）。
+ * MDファイルアップロード（v0.5.0）。v0.5.4で画面全体へのドロップに拡張。
  * ボタン経由（input[type=file]、page.waitForEvent('filechooser')で捕捉）・
  * ドロップ経由（.editor-pane）の両ルートと、拡張子NG／サイズ超過／読み込み失敗の
  * 3エラーパターンを検証する。確認ダイアログは常に表示される仕様
@@ -84,20 +84,61 @@ test.describe('MDファイルアップロード', () => {
     const editorPane = page.locator('.editor-pane');
 
     await editorPane.evaluate((el) => {
+      const dragTransfer = () => {
+        const dt = new DataTransfer();
+        dt.items.add(new File(['x'], 'x.md', { type: 'text/markdown' }));
+        return dt;
+      };
       el.dispatchEvent(
         new DragEvent('dragover', {
           bubbles: true,
           cancelable: true,
-          dataTransfer: new DataTransfer(),
+          dataTransfer: dragTransfer(),
         }),
       );
     });
     await expect(editorPane).toHaveAttribute('data-drag-over', 'true');
+    await expect(page.getByTestId('drop-overlay')).toBeVisible();
 
     await editorPane.evaluate((el) => {
       el.dispatchEvent(new DragEvent('dragleave', { bubbles: true, cancelable: true }));
     });
     await expect(editorPane).not.toHaveAttribute('data-drag-over', 'true');
+    await expect(page.getByTestId('drop-overlay')).toHaveCount(0);
+  });
+
+  test('画面全体: プレビュー領域（エディタ外）へドロップしても読み込める', async ({ page }) => {
+    await page.goto('/');
+    const textarea = page.locator('.editor-pane textarea');
+    await expect(textarea).toBeVisible();
+
+    const dispatchDrop = (selector: string) =>
+      page.locator(selector).first().evaluate((el) => {
+        const dt = new DataTransfer();
+        dt.items.add(new File(['# Dropped on preview'], 'preview-drop.md', { type: 'text/markdown' }));
+        const ev = new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt });
+        el.dispatchEvent(ev);
+        return ev.defaultPrevented;
+      });
+
+    const prevented = await dispatchDrop('.preview-pane, .slide-stage, .workspace');
+    expect(prevented).toBe(true);
+
+    const modal = page.locator('.confirm-modal[data-modal-kind="confirm"]');
+    await expect(modal).toBeVisible();
+    await expect(modal).toContainText('preview-drop.md');
+    await modal.getByRole('button', { name: '置き換える' }).click();
+    await expect(textarea).toHaveValue(/Dropped on preview/);
+  });
+
+  test('ファイルを含まないドラッグ（テキスト等）は無視される', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.editor-pane').evaluate((el) => {
+      const dt = new DataTransfer();
+      dt.setData('text/plain', 'hello');
+      el.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
+    });
+    await expect(page.locator('.editor-pane')).not.toHaveAttribute('data-drag-over', 'true');
   });
 
   test('エラー: 許可拡張子以外（.txt）はエラーモーダルが表示される', async ({ page }) => {

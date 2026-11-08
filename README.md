@@ -25,6 +25,7 @@ Markdown原稿（スライドMD）から **HTMLスライド／PDF／PNG** を生
   色はすべてCSS変数経由（ハードコード禁止ルールを踏襲）
 - **エクスポート**: PDF（`P`・印刷経由）/ 現在スライドPNG（`Shift+S`）/
   全スライドZIP（`Shift+P`）/ スライドMD保存
+- **MDファイルの読み込み**: 「開く」ボタン、または **画面のどこにでもMDファイル（.md / .markdown）をドロップ** して読み込み（確認ダイアログあり）
 - **AI原稿支援**: 🤖ボタンでLLM用の原稿作成プロンプトを生成・コピー
 - **テンプレート挿入**: エディタの「➕ テンプレート挿入」から、全17type・20テンプレートの
   正しい記法をワンクリックで挿入
@@ -41,7 +42,6 @@ npm run build    # 本番ビルド（dist/）
 ```
 
 ## デプロイ（GitHub Pages）
-
 1. このリポジトリを GitHub に push
 2. リポジトリの **Settings → Pages → Source** を **GitHub Actions** に設定
 3. `main` ブランチへの push で `.github/workflows/deploy.yml` が
