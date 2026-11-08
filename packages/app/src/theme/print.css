@@ -123,6 +123,8 @@ body.exporting-pdf .slide {
   .export-menu,
   .export-dropdown,
   .nav-arrow,
+  .thumb-strip,
+  .overview-grid,
   #progress-bar,
   #slide-counter {
     display: none !important;

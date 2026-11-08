@@ -11,22 +11,35 @@ import { layoutModeFromKey, type LayoutMode } from '../layout/layoutMode';
  * 元実装は window 基準だったが、エディタ2ペイン埋め込みに対応するため
  * ResizeObserver でコンテナ基準に一般化（present モードではコンテナ＝全画面）。
  */
-export function useFitSlide(containerRef: RefObject<HTMLElement | null>, enabled: boolean) {
-  const [scale, setScale] = useState(1);
+export function useFitSlide(
+  containerRef: RefObject<HTMLElement | null>,
+  enabled: boolean,
+  /** 下部に重ねる UI（サムネ帯）の高さ。その分だけスライド表示領域を縮める */
+  bottomInset = 0,
+) {
+  const [fit, setFit] = useState<{ scale: number; top: number | undefined }>({
+    scale: 1,
+    top: undefined,
+  });
   useEffect(() => {
     if (!enabled) return;
     const el = containerRef.current;
     if (!el) return;
-    const fit = () => {
-      const { clientWidth: vw, clientHeight: vh } = el;
-      setScale(Math.min(vw / 960, vh / 540) * 0.92);
+    const apply = () => {
+      const vw = el.clientWidth;
+      const vh = el.clientHeight - bottomInset;
+      setFit({
+        scale: Math.min(vw / 960, vh / 540) * 0.92,
+        // 帯が開いているときは、残った領域の中央へスライドを置く
+        top: bottomInset ? vh / 2 : undefined,
+      });
     };
-    fit();
-    const ro = new ResizeObserver(fit);
+    apply();
+    const ro = new ResizeObserver(apply);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [containerRef, enabled]);
-  return scale;
+  }, [containerRef, enabled, bottomInset]);
+  return fit;
 }
 
 export interface KeyboardNavHandlers {
@@ -34,8 +47,17 @@ export interface KeyboardNavHandlers {
   onToggleView: () => void;
   /** ノートポップアップの開閉（N）。未指定ならキーを無視する。 */
   onToggleNotes?: () => void;
-  /** Esc でノートポップアップを閉じる。未指定なら無視する。 */
-  onCloseNotes?: () => void;
+  /** Esc（一覧グリッド・ノートポップアップを閉じる）。未指定なら無視する。 */
+  onEscape?: () => void;
+  /** 先頭・末尾へ（Home / End）。未指定ならキーを無視する。 */
+  onHome?: () => void;
+  onEnd?: () => void;
+  /** ページ番号の入力（J）。 */
+  onJump?: () => void;
+  /** 一覧グリッドの開閉（G）。 */
+  onToggleGrid?: () => void;
+  /** サムネ帯の開閉（T）。 */
+  onToggleStrip?: () => void;
   /** 表示モード切替（1/2/3）。未指定ならキーを無視する。 */
   onSetLayout?: (m: LayoutMode) => void;
   onExportPdf?: () => void;
@@ -45,7 +67,8 @@ export interface KeyboardNavHandlers {
 
 /**
  * useKeyboardNav — navigation.js のショートカット移植。
- * ← / → / Space / F（フルスクリーン） / V（ビュー切替） / N（ノートポップアップ） / Esc（ポップアップを閉じる） /
+ * ← / → / Space / Home / End / J（ページ番号入力） / F（フルスクリーン） / V（ビュー切替） /
+ * G（一覧グリッド） / T（サムネ帯） / N（ノートポップアップ） / Esc（グリッド・ポップアップを閉じる） /
  * 1 / 2 / 3（表示モード切替） /
  * P（PDF） / Shift+S（PNG） / Shift+P（ZIP）
  * 入力フィールド内・Ctrl/Cmd 押下時は無効（ブラウザ標準を尊重）。
@@ -80,9 +103,35 @@ export function useKeyboardNav(handlers: KeyboardNavHandlers, enabled: boolean) 
         handlers.onToggleNotes();
         return;
       }
-      if (e.key === 'Escape' && handlers.onCloseNotes) {
-        handlers.onCloseNotes();
+      if (e.key === 'Escape' && handlers.onEscape) {
+        handlers.onEscape();
         return;
+      }
+      if (!e.shiftKey && !e.altKey) {
+        const k = e.key;
+        if (k === 'Home' && handlers.onHome) {
+          e.preventDefault();
+          handlers.onHome();
+          return;
+        }
+        if (k === 'End' && handlers.onEnd) {
+          e.preventDefault();
+          handlers.onEnd();
+          return;
+        }
+        if ((k === 'j' || k === 'J') && handlers.onJump) {
+          e.preventDefault();
+          handlers.onJump();
+          return;
+        }
+        if ((k === 'g' || k === 'G') && handlers.onToggleGrid) {
+          handlers.onToggleGrid();
+          return;
+        }
+        if ((k === 't' || k === 'T') && handlers.onToggleStrip) {
+          handlers.onToggleStrip();
+          return;
+        }
       }
       // 1/2/3 で表示モード切替。Shift併用時は e.key が記号になるため衝突しない。
       if (!e.shiftKey && handlers.onSetLayout) {

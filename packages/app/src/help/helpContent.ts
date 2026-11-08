@@ -30,6 +30,11 @@ const LAYOUT_LABELS = LAYOUT_MODES.map((m) => LAYOUT_MODE_META[m].label).join('�
 export const SHORTCUTS: ShortcutItem[] = [
   { keys: '→ / Space', desc: '次のスライドへ' },
   { keys: '←', desc: '前のスライドへ' },
+  // ページ指定移動（1枚表示のみ）。数字キーの直打ちは 1/2/3（表示モード切替）と衝突するため使わない
+  { keys: 'Home / End', desc: '先頭・末尾のスライドへ' },
+  { keys: 'J', desc: 'ページ番号を入力して移動（右下の「3 / 22」をクリックでも可）' },
+  { keys: 'G', desc: '一覧グリッドを開閉（クリック／Enter でそのページへ・矢印でフォーカス移動）' },
+  { keys: 'T', desc: 'サムネ帯の開閉（1枚表示の下部。クリックでそのページへ）' },
   { keys: 'F', desc: 'フルスクリーン切替' },
   // 実装は hero⇔list（プレビューの見せ方）の切替。旧説明
   // 「エディタ⇔プレビュー表示切替」は新設の表示モード（1/2/3）と紛らわしいため修正した。
@@ -37,7 +42,7 @@ export const SHORTCUTS: ShortcutItem[] = [
   { keys: LAYOUT_KEYS, desc: `表示モード切替（${LAYOUT_LABELS}）` },
   // 🗒️ はスピーカーノート（note:）のあるデッキの hero ビューだけに出る
   { keys: 'N', desc: 'スピーカーノートのポップアップを開閉（1枚表示・note: のあるデッキ）' },
-  { keys: 'Esc', desc: 'ノートのポップアップを閉じる' },
+  { keys: 'Esc', desc: '一覧グリッド・ノートのポップアップを閉じる' },
   { keys: 'P', desc: 'PDF出力（印刷ダイアログ）' },
   { keys: 'Shift+S', desc: '現在スライドをPNG出力' },
   { keys: 'Shift+P', desc: '全スライドをZIP出力' },

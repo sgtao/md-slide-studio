@@ -236,12 +236,64 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
   };
 
   // --- ナビゲーション ---
+  // 一覧グリッド（G）・サムネ帯（T）・ページ番号入力（J）。いずれも既定は閉・保存しない。
+  // 'editor' レイアウト・AIプロンプトパネル表示中は .preview-pane が無いので、状態は残っても無効扱い。
+  const [gridOpen, setGridOpen] = useState(false);
+  const [stripOpen, setStripOpen] = useState(false);
+  const [jumping, setJumping] = useState(false);
+  const previewVisible = effectiveLayout !== 'editor' && !showAiPromptPanel;
+  const gridActive = gridOpen && previewVisible;
+  const stripActive = stripOpen && view === 'hero' && previewVisible;
+  const jumpActive = jumping && view === 'hero' && !gridActive && previewVisible;
+
+  const lastIndex = Math.max(0, deck.slides.length - 1);
   const navigate = useCallback(
     (dir: 1 | -1) => {
-      if (view === 'list') return; // 一覧モード中は無効（元 navigation.js）
+      // 一覧モード・グリッド中は無効（元 navigation.js。グリッドでは矢印をフォーカス移動に使う）
+      if (view === 'list' || gridActive) return;
       setCurrent((c) => Math.max(0, Math.min(deck.slides.length - 1, c + dir)));
     },
-    [view, deck.slides.length],
+    [view, gridActive, deck.slides.length],
+  );
+  // 指定ページ（0始まり）へ。範囲外は先頭・末尾に丸める。hero のときだけ
+  const goTo = useCallback(
+    (index: number) => {
+      if (view !== 'hero' || gridActive) return;
+      setCurrent(Math.max(0, Math.min(lastIndex, index)));
+    },
+    [view, gridActive, lastIndex],
+  );
+  const goHome = useCallback(() => goTo(0), [goTo]);
+  const goEnd = useCallback(() => goTo(lastIndex), [goTo, lastIndex]);
+  const startJump = useCallback(() => {
+    if (view === 'hero' && !gridActive && previewVisible && deck.slides.length > 0)
+      setJumping(true);
+  }, [view, gridActive, previewVisible, deck.slides.length]);
+  const doJump = useCallback(
+    (page: number) => {
+      setJumping(false);
+      goTo(page - 1);
+    },
+    [goTo],
+  );
+  const cancelJump = useCallback(() => setJumping(false), []);
+  const toggleGrid = useCallback(() => {
+    if (!previewVisible || deck.slides.length === 0) return;
+    setJumping(false);
+    setGridOpen((o) => !o);
+  }, [previewVisible, deck.slides.length]);
+  const toggleStrip = useCallback(() => {
+    if (view !== 'hero' || gridActive || !previewVisible) return;
+    setStripOpen((o) => !o);
+  }, [view, gridActive, previewVisible]);
+  // サムネ・グリッドのクリック／Enter: hero のそのページを開く
+  const pickSlide = useCallback(
+    (index: number) => {
+      setCurrent(index);
+      setView('hero');
+      setGridOpen(false);
+    },
+    [setView],
   );
 
   const toggleView = useCallback(() => setView(view === 'hero' ? 'list' : 'hero'), [view, setView]);
@@ -254,12 +306,16 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
     [deck.slides],
   );
   // 'editor' レイアウト・AIプロンプトパネル表示中は .preview-pane が無く、🗒️ も出ない
-  const previewVisible = effectiveLayout !== 'editor' && !showAiPromptPanel;
   const toggleNotes = useCallback(() => {
-    if (view !== 'hero' || !hasAnyNotes || !previewVisible) return;
+    if (view !== 'hero' || !hasAnyNotes || !previewVisible || gridActive) return;
     setNotesOpen((o) => !o);
-  }, [view, hasAnyNotes, previewVisible]);
+  }, [view, hasAnyNotes, previewVisible, gridActive]);
   const closeNotes = useCallback(() => setNotesOpen(false), []);
+  // Esc: 一覧グリッドを開いていればそれを閉じる（直前のビューへ戻る）。無ければノートポップアップを閉じる
+  const onEscape = useCallback(() => {
+    if (gridActive) setGridOpen(false);
+    else closeNotes();
+  }, [gridActive, closeNotes]);
 
   // --- エクスポート ---
   const title = deck.frontmatter.title;
@@ -329,7 +385,12 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
         onNavigate: navigate,
         onToggleView: toggleView,
         onToggleNotes: toggleNotes,
-        onCloseNotes: closeNotes,
+        onEscape,
+        onHome: goHome,
+        onEnd: goEnd,
+        onJump: startJump,
+        onToggleGrid: toggleGrid,
+        onToggleStrip: toggleStrip,
         onSetLayout: onSetLayoutByKey,
         onExportPdf: canExport ? doPdf : undefined,
         onExportPng: canExport ? doPng : undefined,
@@ -339,7 +400,12 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
         navigate,
         toggleView,
         toggleNotes,
-        closeNotes,
+        onEscape,
+        goHome,
+        goEnd,
+        startJump,
+        toggleGrid,
+        toggleStrip,
         onSetLayoutByKey,
         canExport,
         doPdf,
@@ -453,6 +519,10 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
               palette={palette}
               onToggleTheme={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               onToggleView={toggleView}
+              grid={gridActive}
+              onToggleGrid={toggleGrid}
+              strip={stripActive}
+              onToggleStrip={toggleStrip}
               onSetPalette={setPalette}
               onExportHtml={doHtml}
               onExportPdf={doPdf}
@@ -481,11 +551,18 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
                 deck={deck}
                 current={clampedCurrent}
                 view={view}
+                grid={gridActive}
+                strip={stripActive}
+                jumping={jumpActive}
                 onSelect={(i) => {
                   setCurrent(i);
                   setView('hero');
                 }}
                 onNavigate={navigate}
+                onPick={pickSlide}
+                onStartJump={startJump}
+                onJump={doJump}
+                onCancelJump={cancelJump}
               />
             ) : (
               <div className="empty-deck">

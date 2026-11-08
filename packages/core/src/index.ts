@@ -26,6 +26,13 @@ export {
   NOTES_POPUP_SCRIPT,
 } from './standalone/notesPopup';
 
+// --- 書き出しHTML用の閲覧UI部品（サムネ帯・一覧グリッド・ページ指定移動。文字列を返すだけ） ---
+export {
+  buildOverviewButtonsHtml,
+  buildOverviewContainersHtml,
+  OVERVIEW_SCRIPT,
+} from './standalone/overviewRuntime';
+
 // --- deckLint ---
 export {
   lintDeck,

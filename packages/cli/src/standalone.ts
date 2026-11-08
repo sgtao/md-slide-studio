@@ -15,8 +15,11 @@
 import {
   buildNotesButtonHtml,
   buildNotesPopupHtml,
+  buildOverviewButtonsHtml,
+  buildOverviewContainersHtml,
   htmlHasSpeakerNotes,
   NOTES_POPUP_SCRIPT,
+  OVERVIEW_SCRIPT,
 } from '@mdss/core';
 
 const PALETTE_META_STANDALONE: { id: string; icon: string; label: string }[] = [
@@ -65,6 +68,7 @@ function buildControlClusterHtml(palette: string, hasNotes = false): string {
     ...(hasNotes ? [buildNotesPopupHtml(), buildNotesButtonHtml()] : []),
     '  <button id="theme-toggle" onclick="toggleTheme()" title="テーマ切替"><span id="theme-icon">🌙</span></button>',
     '  <button id="view-toggle" onclick="toggleView()" title="表示切替（V）">▭</button>',
+    buildOverviewButtonsHtml(),
     '  <div class="palette-menu">',
     '    <button id="palette-toggle" onclick="togglePaletteMenu()" title="カラーパレット">🎨</button>',
     '    <div id="palette-dropdown" class="palette-dropdown" hidden role="menu">',
@@ -153,14 +157,14 @@ function applyView() {
     scaleListSlides();
   }
 }
+/* list ビュー: 各スライドを 960×540 の箱ごと scale する（CSS が --list-scale を使う）。
+   .slide-inner を持たない型や point 吹き出しも hero と同じ比率で縮む。 */
 function scaleListSlides() {
   requestAnimationFrame(function () {
-    slides.forEach(function (slide) {
-      var inner = slide.querySelector('.slide-inner');
-      if (!inner) return;
-      var ratio = slide.clientWidth / 960;
-      inner.style.transform = 'scale(' + ratio + ')';
-    });
+    var scaler = document.querySelector('.slide-scaler');
+    if (!scaler) return;
+    var w = Math.min(document.documentElement.clientWidth * 0.9, 960);
+    scaler.style.setProperty('--list-scale', String(w / 960));
   });
 }
 slides.forEach(function (slide, i) {
@@ -298,7 +302,7 @@ function buildCanvasOptions() {
       // （list ビューの縮小幅 / 非アクティブスライドの opacity:0 に左右されない）
       var t = clonedDoc.querySelector('[data-capture]');
       if (t) {
-        [['width', '960px'], ['height', '540px'], ['aspect-ratio', 'auto'], ['transform', 'none'], ['opacity', '1']]
+        [['width', '960px'], ['height', '540px'], ['aspect-ratio', 'auto'], ['transform', 'none'], ['margin', '0'], ['opacity', '1']]
           .forEach(function (kv) { t.style.setProperty(kv[0], kv[1], 'important'); });
         var inner = t.querySelector('.slide-inner');
         if (inner) inner.style.setProperty('transform', 'none', 'important');
@@ -391,7 +395,8 @@ export function assembleStandaloneHtml(args: {
   );
   const script =
     buildInlineScript(JSON.stringify(title), JSON.stringify(md)) +
-    (hasNotes ? NOTES_POPUP_SCRIPT : '');
+    (hasNotes ? NOTES_POPUP_SCRIPT : '') +
+    OVERVIEW_SCRIPT;
 
   return `<!doctype html>
 <html lang="ja" data-view="list" data-theme="${theme}" data-palette="${palette}">
@@ -416,6 +421,7 @@ ${controlClusterWithTheme}
 ${sectionsHtml}
 <div id="slide-counter">1 / ${total}</div>
 </div>
+${buildOverviewContainersHtml()}
 <script>${script}</script>
 </body>
 </html>

@@ -188,45 +188,53 @@ html[data-mode='edit'] body {
   gap: 32px;
   padding: 56px 4vw 64px;
 }
+/* 960×540 の箱ごと scale する（v0.6.1）。--list-scale（= 表示幅 / 960）は SlideDeck.tsx が
+   .slide-scaler に設定する。縮んだ分の余白は負のマージンで詰める（詳細は list-view.css） */
 .deck-container[data-view='list'] .slide {
+  --s: var(--list-scale, 1);
   position: relative;
   inset: auto;
-  width: min(90%, 960px);
-  height: auto;
-  aspect-ratio: 16 / 9;
+  width: 960px;
+  height: 540px;
+  margin: 0 calc(480px * (var(--s) - 1)) calc(540px * (var(--s) - 1));
+  transform: scale(var(--s));
+  transform-origin: top center;
   overflow: hidden;
   opacity: 1;
   pointer-events: auto;
   cursor: pointer;
+  flex-shrink: 0;
 }
-.deck-container[data-view='list'] .slide .slide-inner {
-  transform-origin: top left;
-  width: 960px;
-  height: 540px;
-}
-/* slide-fit: list時は高さ可変（元 list-view.css の思想を踏襲） */
+/* slide-fit: list時は高さ可変・箱ごと scale しない（元 list-view.css の思想を踏襲） */
 .deck-container[data-view='list'] .slide.slide-fit {
-  aspect-ratio: auto;
+  width: min(90%, 960px);
   height: auto;
+  margin: 0;
+  transform: none;
 }
 .deck-container[data-view='list'] .slide.slide-fit .slide-inner {
   position: relative;
   height: auto;
   min-height: 540px;
 }
-/* スライド番号バッジ（listビュー） */
+/* スライド番号バッジ（listビュー）。スライドごと縮むため縮小の逆数で大きさを保つ */
 .deck-container[data-view='list'] .slide::after {
   content: attr(data-num);
   position: absolute;
-  right: 10px;
-  bottom: 8px;
-  font-size: 0.7rem;
+  right: calc(10px / var(--s));
+  bottom: calc(8px / var(--s));
+  font-size: calc(11px / var(--s));
   color: var(--text-secondary);
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 0.1em 0.7em;
   z-index: 5;
+}
+.deck-container[data-view='list'] .slide.slide-fit::after {
+  right: 10px;
+  bottom: 8px;
+  font-size: 0.7rem;
 }
 
 /* 空デッキプレースホルダ */

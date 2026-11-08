@@ -160,3 +160,81 @@ test('ノート付き出力のインラインscriptは文法的に正しい（�
   // 検出力の確認: 壊れたコードは落ちる
   assert.throws(() => new Script(inline + '\nfunction ('));
 });
+
+// ─── 閲覧UI（サムネ帯・一覧グリッド・ページ指定移動 / v0.6.1） ───
+
+const PLAIN_MD = [
+  '---', 'title: T', 'palette: ocean', '---',
+  '<!-- slide: title -->', '# 表紙', '---',
+  '<!-- slide: points -->', '## 2枚目', '- **a**：b', '',
+].join('\n');
+
+test('どのデッキにも 一覧・サムネ帯のボタンと入れ物・スクリプトが入る（ノートの有無に依らない）', () => {
+  for (const md of [PLAIN_MD, NOTES_MD]) {
+    const html = run(['-', '--quiet'], md);
+    assert.ok(html.includes('id="grid-toggle"'));
+    assert.ok(html.includes('id="strip-toggle"'));
+    assert.ok(html.includes('id="thumb-strip"'));
+    assert.ok(html.includes('id="overview-grid"'));
+    assert.ok(html.includes('function toggleGrid()'));
+    assert.ok(html.includes('function startJump()'));
+    // ボタンは .control-cluster の中（view-toggle の直後）
+    const cluster = html.match(/<div class="control-cluster">([\s\S]*?)<\/div>\s*<div id="progress-bar">/);
+    assert.ok(cluster && cluster[1].includes('id="grid-toggle"') && cluster[1].includes('id="strip-toggle"'));
+    // 既定は閉（hidden）。サムネは開いたときに JS が作るので静的HTMLには無い
+    assert.match(html, /<div id="thumb-strip"[^>]*hidden><\/div>/);
+    assert.match(html, /<div id="overview-grid"[^>]*hidden><\/div>/);
+    assert.ok(!html.includes('class="thumb"'), '静的HTMLにサムネは含まれない（遅延生成）');
+  }
+});
+
+test('overview.css（サムネ帯・グリッド・サムネ）が埋め込まれ、印刷では非表示にする', () => {
+  const html = run(['-', '--quiet'], PLAIN_MD);
+  const css = html.match(/<style>([\s\S]*?)<\/style>/)[1];
+  for (const sel of ['.thumb-strip', '.overview-grid', '.thumb-stage', '.counter-input']) {
+    assert.ok(css.includes(sel), sel);
+  }
+  const printBlock = css.slice(css.indexOf('@media print'));
+  assert.match(printBlock, /\.thumb-strip,\s*\.overview-grid/, '印刷では帯・グリッドを非表示にする');
+});
+
+test('list の縮小は 960×540 の箱ごと（--list-scale）。.slide-inner の個別 scale は使わない', () => {
+  const html = run(['-', '--quiet'], PLAIN_MD);
+  assert.ok(html.includes("setProperty('--list-scale'"));
+  assert.ok(!html.includes("inner.style.transform = 'scale("), '旧方式（.slide-inner だけ縮小）は残っていない');
+  assert.ok(html.includes('transform: scale(var(--s))'));
+});
+
+test('閲覧UIは外部URLを増やさない（S4: 外部URLは従来どおりPNG用のCDN 2つだけ）', () => {
+  const html = run(['-', '--quiet'], PLAIN_MD);
+  const urls = new Set(
+    [...html.matchAll(/https?:\/\/[^"'\s)<>]+/g)]
+      .map((m) => m[0])
+      // SVG の名前空間宣言は読み込みではない
+      .filter((u) => !u.startsWith('http://www.w3.org/')),
+  );
+  assert.deepEqual([...urls].sort(), [
+    'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+    'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+  ]);
+});
+
+test('閲覧UI付き出力のインラインscriptは文法的に正しい（ノートの有無どちらも）', () => {
+  for (const md of [PLAIN_MD, NOTES_MD]) {
+    const html = run(['-', '--quiet'], md);
+    const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+    const inline = scripts[scripts.length - 1];
+    assert.ok(inline.includes('function syncOverview()'));
+    assert.doesNotThrow(() => new Script(inline));
+    assert.throws(() => new Script(inline + '\nfunction ('));
+  }
+});
+
+test('スライド本体のHTMLは閲覧UIの追加で変わらない（S5: スライド部分に新しい属性・要素が入らない）', () => {
+  const html = run(['-', '--quiet'], PLAIN_MD);
+  const sections = [...html.matchAll(/<section id="s\d+"[\s\S]*?<\/section>/g)].map((m) => m[0]);
+  assert.equal(sections.length, 2);
+  for (const s of sections) {
+    assert.ok(!/thumb|overview|list-scale/.test(s), 'スライドHTMLにサムネ関連の記述が無い');
+  }
+});

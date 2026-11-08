@@ -5,7 +5,7 @@ import { AppRouter } from './router/AppRouter';
 // CSS統合順は元スキルのSSoT（SKILL.md 参照ファイルガイド）を踏襲:
 // theme-vars → slide-core → nav-controls → figure → chart → diagram →
 // list-view → print（必ず最後）→ content（旧デッキ側CSS）→ app（シェル）
-// → steps → timeline-sidelist → contrast → svg-figure
+// → steps → timeline-sidelist → contrast → svg-figure → overview
 // → app-shell（アプリ専用。CLIの CSS_ORDER には追加しない）
 import './theme/theme-vars.css';
 import './theme/slide-core.css';
@@ -21,6 +21,7 @@ import './theme/steps.css';
 import './theme/timeline-sidelist.css';
 import './theme/contrast.css';
 import './theme/svg-figure.css';
+import './theme/overview.css';
 // アプリシェル専用（サイドメニュー・表示モード）。
 // app.css より後に読み込むこと（.editor-pane の flex 指定を上書きするため）。
 import './theme/app-shell.css';

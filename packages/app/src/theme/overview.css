@@ -1,0 +1,178 @@
+/* overview.css
+ * 閲覧UI（v0.6.1）: サムネ帯（T）・一覧グリッド（G）・ページ番号入力（J）のスタイル。
+ * 書き出しHTML（core/standalone/overviewRuntime.ts）とアプリ（Overview*.tsx）で
+ * 同じ DOM・クラス名を使い、このCSSを共有する。設計: 02_viewer-ui-plan.md §4-1〜§4-5。
+ *
+ * サムネは「960×540 の箱（.thumb-stage）を scale() で縮小」して作る。縮小率は JS が
+ * .thumb-stage に設定する。中身はスライドの複製なので、パレット・ライト/ダークには
+ * CSS 変数だけで追従する（色は既存の変数のみ）。
+ * CSS 統合順: 一番最後（svg-figure の後）。印刷では print.css が非表示にする。
+ */
+
+/* ─── 右上ボタン（一覧・サムネ帯） ─── */
+.control-cluster #strip-toggle[hidden],
+.control-cluster #grid-toggle[hidden] {
+  display: none;
+}
+.control-cluster #strip-toggle[aria-expanded='true'],
+.control-cluster #grid-toggle[aria-expanded='true'] {
+  background: var(--accent);
+  color: var(--nav-text);
+}
+
+/* ─── サムネ（帯・グリッド共通） ─── */
+.thumb {
+  position: relative;
+  flex: 0 0 auto;
+  width: 144px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+.thumb:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.thumb-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--bg-slide);
+  box-shadow: 0 0 0 1px var(--border);
+}
+.thumb:hover .thumb-frame {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.thumb.is-current .thumb-frame {
+  box-shadow: 0 0 0 3px var(--accent);
+}
+.thumb-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 960px;
+  height: 540px;
+  transform-origin: top left;
+  pointer-events: none;
+}
+/* 複製したスライドは hero の「非アクティブ（opacity 0）」ではなく常に見せる。
+   list ビューの縮小（--list-scale・負のマージン）も受けないよう固定する。 */
+.thumb-stage .slide {
+  position: absolute;
+  inset: 0;
+  width: 960px;
+  height: 540px;
+  margin: 0;
+  opacity: 1;
+  transform: none;
+  border-radius: 0;
+  box-shadow: none;
+  transition: none;
+  pointer-events: none;
+}
+.thumb-stage .slide::after {
+  display: none;
+}
+.thumb-num {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  z-index: 2;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.thumb.is-current .thumb-num {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--nav-text);
+}
+
+/* ─── サムネ帯（hero の下部。既定は閉） ─── */
+.thumb-strip {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  box-sizing: border-box;
+  height: 112px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 12px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+.thumb-strip[hidden] {
+  display: none;
+}
+
+/* ─── 一覧グリッド（G。画面全体に重ねる） ─── */
+.overview-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  align-content: start;
+  padding: 64px 5vw 48px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-body);
+}
+.overview-grid[hidden] {
+  display: none;
+}
+.overview-grid .thumb {
+  width: auto;
+}
+.overview-grid .thumb-num {
+  left: 8px;
+  bottom: 8px;
+  font-size: 12px;
+}
+
+/* アプリ: .deck-container（position: absolute）の内側に収める */
+.deck-container .thumb-strip,
+.deck-container .overview-grid {
+  position: absolute;
+}
+
+/* ─── ページ番号の入力（#slide-counter をクリック／J） ─── */
+#slide-counter {
+  cursor: pointer;
+}
+#slide-counter .counter-input {
+  width: 4.5em;
+  padding: 1px 4px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--bg-slide);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: right;
+}
+#slide-counter .counter-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}

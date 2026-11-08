@@ -56,4 +56,24 @@ test.describe('PDF（印刷）の全ページ出力', () => {
     expect(slides).toBeGreaterThan(10);
     expect(pageCount(await page.pdf(pdfOptions))).toBe(slides);
   });
+  // 閲覧UI（v0.6.1）: サムネ帯・一覧グリッドを開いたままでも、サムネ（複製）は印刷に出ない
+  test('サムネ帯を開いたままでも、サンプルは「スライド枚数＝ページ数」になる', async ({ page }) => {
+    await page.goto('/');
+    const slides = await page.locator('.slide-scaler .slide').count();
+    await page.locator('.preview-pane').click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press('t');
+    await expect(page.locator('#thumb-strip .thumb-stage .slide').first()).toBeVisible();
+    expect(pageCount(await page.pdf(pdfOptions))).toBe(slides);
+  });
+
+  test('一覧グリッドを開いたままでも、サンプルは「スライド枚数＝ページ数」になる', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const slides = await page.locator('.slide-scaler .slide').count();
+    await page.locator('.preview-pane').click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press('g');
+    await expect(page.locator('#overview-grid .thumb-stage .slide').first()).toBeVisible();
+    expect(pageCount(await page.pdf(pdfOptions))).toBe(slides);
+  });
 });

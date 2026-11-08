@@ -1,6 +1,6 @@
 /**
  * ControlCluster.tsx — 右上コントロール（base-template.html の .control-cluster 移植）。
- * テーマ切替 / ビュー切替 / パレット5色ドロップダウン / エクスポートメニュー。
+ * テーマ切替 / ビュー切替 / 一覧グリッド・サムネ帯 / パレット5色ドロップダウン / エクスポートメニュー。
  *
  * 配置を .preview-pane の内側から .workspace 直下へ移した。
  *   'editor' レイアウトでは .preview-pane 自体がアンマウントされるため、
@@ -36,6 +36,12 @@ interface Props {
   disabled?: boolean;
   onToggleTheme: () => void;
   onToggleView: () => void;
+  /** 一覧グリッド（G）を開いているか。開いている間は 🗒️ とサムネ帯ボタンを隠す */
+  grid?: boolean;
+  onToggleGrid?: () => void;
+  /** サムネ帯（T）を開いているか。ボタンは hero ビュー（グリッド以外）のときだけ出す */
+  strip?: boolean;
+  onToggleStrip?: () => void;
   onSetPalette: (p: Palette) => void;
   onExportHtml: () => void;
   onExportPdf: () => void;
@@ -73,7 +79,9 @@ export function ControlCluster(props: Props) {
   const visibleMenu = props.disabled ? null : openMenu;
 
   // 🗒️ とポップアップは hero ビュー（1枚表示）のときだけ。list では隠す。
-  const showNotes = props.view === 'hero' && !!props.notes;
+  // 一覧グリッドを開いている間も隠す。
+  const showNotes = props.view === 'hero' && !props.grid && !!props.notes;
+  const showStripButton = props.view === 'hero' && !props.grid && !!props.onToggleStrip;
 
   const toggle = (m: 'palette' | 'export') => {
     if (props.disabled) return;
@@ -107,6 +115,32 @@ export function ControlCluster(props: Props) {
       >
         {props.view === 'hero' ? '☰' : '▭'}
       </button>
+      {props.onToggleGrid && (
+        <button
+          id="grid-toggle"
+          type="button"
+          onClick={props.onToggleGrid}
+          disabled={props.disabled}
+          aria-expanded={!!props.grid}
+          aria-label="一覧グリッド"
+          title={props.disabled ? DISABLED_TITLE : '一覧グリッド（G）'}
+        >
+          ▦
+        </button>
+      )}
+      {showStripButton && (
+        <button
+          id="strip-toggle"
+          type="button"
+          onClick={props.onToggleStrip}
+          disabled={props.disabled}
+          aria-expanded={!!props.strip}
+          aria-label="サムネ帯"
+          title={props.disabled ? DISABLED_TITLE : 'サムネ帯（T）'}
+        >
+          🎞️
+        </button>
+      )}
       <div className="palette-menu">
         <button id="palette-toggle" onClick={() => toggle('palette')} title="カラーパレット">
           🎨

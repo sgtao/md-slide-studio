@@ -3,6 +3,102 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.6.1] - 2026-11-08
+
+閲覧UIを追加し、狭い画面の list 表示で `point:` の吹き出しが箇条書きに重なる不具合を直した。サムネ帯・一覧グリッド・ページ指定移動（`J` / `Home` / `End` / URL `#番号`）を、アプリのプレビューと書き出したHTMLの両方に入れた（設計: `22_design-mdss-migrate/03_migration-plan/02_viewer-ui-plan.md` §4-1〜§4-5・§5）
+
+### 追加｜サムネ帯（`T`）
+
+- hero 表示の下部に出す、全スライドの縮小版の帯。**既定は閉**（発表の邪魔をしない）。🎞️ ボタンでも開閉（hero のときだけ表示）
+- 開くとスライドの表示領域が帯の高さ（112px）の分だけ上に縮む（書き出しHTMLは `fitSlide()`、アプリは `useFitSlide` の `bottomInset`）
+- 現在のページを枠で強調し、移動に合わせて中央へ自動スクロール。クリックでそのページへ移動（押してもフォーカスは奪わないので、そのまま `Space` で送れる）
+
+### 追加｜一覧グリッド（`G`）
+
+- 全スライドの縮小版を格子状に並べて画面全体に重ねる（`repeat(auto-fill, minmax(220px, 1fr))`）。▦ ボタンでも開閉
+- 開くと現在のページまでスクロールして強調・フォーカス。クリック／`Enter`／`Space` でそのページを hero で開く。矢印キー・`Home`／`End` でフォーカス移動。`Esc`／`G` で直前のビュー（hero／list）へ戻る
+- アプリは「ビューの設定（`slide-view`）」には保存せず、開閉は画面の一時状態。`data-view="grid"` を `.deck-container`（書き出しHTMLは `<html>`・`<body>`）に付ける
+- グリッド中は `←` `→` `Space` をページ送りに使わず（フォーカス移動のため）、ノートポップアップ・🗒️・サムネ帯ボタンは隠れる
+
+### 追加｜ページ指定移動
+
+- `Home` / `End`: 先頭・末尾へ
+- `J` または右下の「3 / 22」をクリック: 数字入力欄に変わる。`Enter` で移動、`Esc`／フォーカス外れで取消。範囲外は先頭・末尾に丸める。入力中は他のキーを奪わない
+- URL `#番号`（**書き出しHTMLのみ**）: `…html#12` で開くと12枚目を hero で表示（範囲外は丸める）。hero で移動するたびに `history.replaceState` で `#番号` を更新（履歴は増えない）。アドレス欄でハッシュを書き換えても追従。`#` が無ければ従来どおり list で開く。アプリは hash ルーティング（`#/present` など）なので使わない
+- 数字キーの直打ちは採用しない（アプリでは `1` / `2` / `3` が画面レイアウト切替のため）
+
+### 追加｜サムネの作り方
+
+- **書き出しHTML**: `section.slide` を `cloneNode(true)` して `active`・`id`・`.slide-notes` を外し、960×540 の箱ごと `transform: scale()` で縮小。見える位置に来たサムネだけ `IntersectionObserver`（`rootMargin: 160px`）で複製する遅延生成。複製した SVG 内の `id`（マーカー・グラデーション）は `s3-…` のように付け替え、`url(#…)` の参照も書き換えて重複を防ぐ。サムネは初めて開いたときに作るので、閉じたままの書き出しHTMLのスライド部分は変わらない（画像も埋め込まない）
+- **アプリ**: `SlideRenderer` の描画結果を同じ方式で縮小（`Overview.tsx`。見えたサムネだけ描画し、描画後は保持）
+- 色は既存の CSS 変数のみ。複製なので 7パレット × ライト/ダークに CSS だけで追従する。外部URLは増やしていない（S4）
+
+### 修正｜list 表示で `point:` の吹き出しが箇条書きに重なる
+
+- **症状**: 狭い画面（リスト表示）で、2枚目などの `point:`（💡の帯）が箇条書きの上に大きく重なった
+- **原因**: `.slide-point` は `.slide` 直下に `position: absolute` で置かれるが、list の縮小（`scaleListSlides`）を受けるのは `.slide-inner` を持つ型（steps・svg-figure）だけで、他の型の本文と `.slide-point` は縮まなかった
+- **直し方（案A）**: list も hero・サムネと同じく **960×540 の箱ごと `scale()`** する方式にそろえた。縮小率 `--list-scale`（= 表示幅 / 960）を JS が `.slide-scaler` に設定し、CSS が `.slide` を `transform: scale(var(--s))` ＋ 負のマージンで縮める（`.slide-inner` の個別 scale は廃止）。広い画面（960px 以上）では等倍で、見た目は変わらない
+- スライド番号バッジ（右上）は縮小の逆数で大きさを保つ。`fit` 指定（`slide-fit`）のスライドは従来どおり高さ可変で、箱ごとの縮小の対象外
+- 縮小（`transform`）にはアニメーションを付けない。ホバーで浮かせる動きは個別の `translate` プロパティに分けた（`transform` に transition を掛けたままだと、初回表示で縮小率が入る瞬間に 960px から縮むアニメーションが見えるため）
+- **副産物の修正**: PNG／ZIP の書き出し中は、list の番号バッジを画像に写さない（以前から小さく写っていた。`.slide[data-capture]::after { display: none }`）。list からの PNG は hero と同じ絵になる
+
+### 変更｜その他
+
+- `Esc`: 一覧グリッドを開いていればそれを閉じる、無ければノートポップアップを閉じる（メニューが開いていれば、先にメニューだけ閉じる）。`useKeyboardNav` の `onCloseNotes` を `onEscape` に置き換えた
+- `V`（hero ⇄ list）は従来どおり。グリッド中に `V` を押すと hero に移る
+- 新規 `overview.css`（サムネ帯・グリッド・サムネ・数字入力欄。CSS 統合順は最後）。`print.css` でサムネ帯・グリッドを印刷しない（PDF は list の箱ごと縮小の影響を受けず、1ページ＝1スライドのまま）
+- ヘルプのショートカット一覧・`README.md`・`docs/references/markdown-format-ext.md`（§7）を更新
+
+### ランタイムの扱い
+
+書き出しHTMLのランタイム統合（`core/standalone/runtimeScript.ts` 等への一本化）は今回も行わない。v0.6.0 の `notesPopup.ts` と同じく、閲覧UIは新設の `core/src/standalone/overviewRuntime.ts`（ボタン・入れ物のHTMLと、既存の `fitSlide` / `update` / `applyView` / `navigate` を包む追加スクリプトを返すだけ）に1か所で置き、`app/export/exporters.ts` と `cli/src/standalone.ts` の両方から取り込む。`scaleListSlides` だけは既存関数そのものを書き換えた（両ファイル）。アプリは React の別実装で、DOM の id・クラス・キーは共通
+
+### テスト
+
+- core: `overviewRuntime.test.ts`（部品のHTML・既定は閉・外部URLなし・既存関数を包むこと）
+- CLI: `smoke.test.mjs` に、どのデッキにも閲覧UIのボタン・入れ物・スクリプトが入ること、サムネは静的HTMLに含まれないこと、`overview.css` と印刷での非表示、list の箱ごと縮小、外部URLが従来のCDN 2つのままであること（S4）、スライド本体のHTMLが変わらないこと（S5）、インラインscriptの文法を追加
+- e2e: `overview.spec.ts`（アプリと書き出しHTMLで、J・Home/End・T・G の操作、遅延生成、`#番号` の読み込み・更新・丸め・履歴を増やさないこと）、`list-point.spec.ts`（狭い幅で point が本文と重ならない・広い画面は等倍・list からの PNG が hero と同じ絵）、`theme.spec.ts`（7パレット × ライト/ダークでサムネ帯・グリッドが読める・複製が元スライドと同じ地色）
+
+### 既知の制約
+
+- `Space` が押下中のフォーカス要素を再クリックする挙動（Chrome 以外）への保険として、サムネ帯のクリックは `mousedown` の既定動作を止めてフォーカスを奪わない。Chrome では元々二重に動かないため、E2E では判別できない
+- 100枚を超えるデッキのグリッド表示は実測していない（遅延生成で抑える想定。重ければ上限や簡易表示を検討）
+- アプリでは、閲覧UI のうち `#番号` は対象外（hash ルーティングと衝突するため）
+
+### ファイル構成の変更
+```
+新規:
+  e2e/overview.spec.ts
+  e2e/list-point.spec.ts
+  packages/app/src/components/Overview.tsx
+  packages/app/src/theme/overview.css
+  packages/core/src/standalone/overviewRuntime.ts
+  packages/core/src/standalone/overviewRuntime.test.ts
+変更:
+  package.json
+  package-lock.json
+  packages/cli/package.json
+  README.md
+  docs/references/markdown-format-ext.md
+  e2e/theme.spec.ts
+  packages/core/src/index.ts
+  packages/app/src/App.tsx
+  packages/app/src/main.tsx
+  packages/app/src/components/ControlCluster.tsx
+  packages/app/src/components/SlideDeck.tsx
+  packages/app/src/export/exporters.ts
+  packages/app/src/help/helpContent.ts
+  packages/app/src/hooks/hooks.ts
+  packages/app/src/theme/app.css
+  packages/app/src/theme/list-view.css
+  packages/app/src/theme/print.css
+  packages/cli/build.mjs
+  packages/cli/src/standalone.ts
+  packages/cli/test/smoke.test.mjs
+  packages/cli/src/generated/themeCss.ts（生成物・build.mjsで再生成）
+```
+
+---
 ## [v0.6.0] - 2026-11-08
 
 スライドごとのスピーカーノート（`note:`）を追加し、1枚表示の右上 🗒️ のポップアップで読めるようにした。あわせて、アプリのPDF出力が1ページ目しか出ない問題を修正した

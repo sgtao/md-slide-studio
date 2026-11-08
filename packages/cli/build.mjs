@@ -35,6 +35,7 @@ const CSS_ORDER = [
   'timeline-sidelist',
   'contrast',
   'svg-figure',
+  'overview',
 ];
 const themeDir = resolve(appSrc, 'theme');
 const cssParts = CSS_ORDER.map((name) => {

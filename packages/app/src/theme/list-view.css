@@ -29,60 +29,60 @@ body[data-view='list'] .slide-scaler {
   padding: 72px 5vw 64px;
 }
 
-/* ─── スライド枠: レスポンシブ幅 + 16:9比率維持 ─── */
+/* ─── スライド枠: hero と同じ 960×540 の箱を丸ごと scale する（v0.6.1） ─── */
+/* --list-scale（= 表示幅 / 960）は JS が .slide-scaler に設定する。
+   箱の中身（.slide-inner を持たない型・.slide-point など絶対配置の要素）も同じ比率で縮むので、
+   狭い画面でも hero と同じ見た目になり、point の吹き出しが本文に重ならない。
+   scale() は レイアウト上の大きさを変えないため、負のマージンで縮んだ分の余白を詰める。
+   横は左右同量にして transform-origin: top center と釣り合わせ、中央に置く。 */
 body[data-view='list'] .slide {
+  --s: var(--list-scale, 1);
   position: relative;
   inset: auto;
-  width: min(90vw, 960px);
-  height: auto;
-  aspect-ratio: 16 / 9;
-  padding: 0 !important;
+  width: 960px;
+  height: 540px;
+  margin: 0 calc(480px * (var(--s) - 1)) calc(540px * (var(--s) - 1));
+  transform: scale(var(--s));
+  transform-origin: top center;
   overflow: hidden;
   opacity: 1;
-  transform: none;
   pointer-events: auto;
   cursor: pointer;
   flex-shrink: 0;
+  /* ホバーで浮かせる動きは個別の translate プロパティで行う。transform（縮小）に transition を
+     掛けると、初回表示で --list-scale が入る瞬間に 960px → 縮小後 のアニメーションが見えてしまう */
   transition:
     box-shadow 0.2s,
-    transform 0.2s;
+    translate 0.2s;
 }
 
 body[data-view='list'] .slide:hover {
-  transform: translateY(-4px);
+  translate: 0 -4px;
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.4);
 }
 
-/* ─── 内部コンテンツラッパ: 960×540px 固定 + scale変換 ─── */
-/* JS側で slide.clientWidth / 960 を ratio として scale() を設定する */
-body[data-view='list'] .slide-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 960px;
-  height: 540px;
-  padding: 52px 72px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  transform-origin: top left;
-  box-sizing: border-box;
-}
-
 /* ─── スライド番号バッジ（右上） ─── */
+/* スライドごと縮むため、バッジだけ縮小の逆数で大きさを保つ（読める大きさのまま） */
 body[data-view='list'] .slide::after {
   content: attr(data-num);
   position: absolute;
-  top: 12px;
-  right: 16px;
-  font-size: 11px;
+  top: calc(12px / var(--s));
+  right: calc(16px / var(--s));
+  font-size: calc(11px / var(--s));
   font-family: 'JetBrains Mono', monospace;
   color: var(--text-secondary);
   background: var(--bg-surface);
-  padding: 3px 8px;
-  border-radius: 10px;
+  padding: calc(3px / var(--s)) calc(8px / var(--s));
+  border-radius: calc(10px / var(--s));
   border: 1px solid var(--border);
   z-index: 5;
+}
+
+/* PNG/ZIP の書き出し中（対象に data-capture が付く間）は番号バッジを画像に写さない。
+   html2canvas は擬似要素を元のドキュメントのスタイルから読むため、複製側ではなくここで消す。
+   バッジは --list-scale の逆数で大きさを保つので、そのまま写ると大きく写ってしまう */
+.slide[data-capture]::after {
+  display: none !important;
 }
 
 /* ─── ナビ矢印・カウンター・プログレスバーを非表示 ─── */
@@ -90,13 +90,6 @@ body[data-view='list'] .nav-arrow,
 body[data-view='list'] #slide-counter,
 body[data-view='list'] #progress-bar {
   display: none;
-}
-
-/* ─── チャート: list モードでもスライド枠からはみ出さないようにする ─── */
-/* .chart-svg は overflow:visible だが、親 .slide-chart で抑制する */
-body[data-view='list'] .slide-inner .slide-chart {
-  max-width: 100%;
-  overflow: hidden;
 }
 
 /* ==========================================================================
@@ -116,12 +109,23 @@ body[data-view='list'] .slide-inner .slide-chart {
  *     print.css 側にも .slide-fit 対応ルールを追加すること
  * ========================================================================== */
 
-/* ─── スライド枠: aspect-ratio を解除して高さ可変に ─── */
+/* ─── スライド枠: 高さ可変に（箱ごと scale しない。幅は従来どおり画面幅に追従） ─── */
 body[data-view='list'] .slide.slide-fit {
+  width: min(90vw, 960px);
   height: fit-content;
-  aspect-ratio: auto;
   min-height: 200px;
+  margin: 0;
+  transform: none;
   overflow: visible;
+}
+
+/* slide-fit は縮小しないので、バッジも元の大きさに戻す */
+body[data-view='list'] .slide.slide-fit::after {
+  top: 12px;
+  right: 16px;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 10px;
 }
 
 /* ─── 内部コンテンツラッパ: absolute → relative に変更 ─── */
