@@ -117,3 +117,34 @@ test('スタンドアロン出力のPNGキャプチャは .slide-notes を除外
   const html = run([SAMPLE, '--quiet']);
   assert.ok(html.includes("el.classList.contains('slide-notes')"));
 });
+
+const NOTES_MD = [
+  '---', 'title: notes', 'palette: ocean', '---',
+  '<!-- slide: points -->', '## 要点', '- **A**：説明', 'note: ノートです',
+  '---',
+  '<!-- slide: sources -->', '## 出典', '- [例](https://example.com)', '',
+].join('\n');
+
+test('ノートがあるデッキには 🗒️ ボタン・ポップアップ・スクリプトが入る', () => {
+  const html = run(['-', '--quiet'], NOTES_MD);
+  assert.ok(html.includes('id="notes-toggle"'));
+  assert.ok(html.includes('id="notes-popup"'));
+  assert.ok(html.includes('function toggleNotes()'));
+  assert.ok(html.includes('function refreshNotes()'));
+  // 🗒️ ボタン・ポップアップは .control-cluster の中（右上のボタン群の子）にある
+  const cluster = html.match(/<div class="control-cluster">([\s\S]*?)<\/div>\s*<div id="progress-bar">/);
+  assert.ok(cluster && cluster[1].includes('id="notes-toggle"') && cluster[1].includes('id="notes-popup"'));
+});
+
+test('ノートが無いデッキには 🗒️ もポップアップもスクリプトも入らない（後方互換）', () => {
+  const html = run(['-', '--quiet'], NOTES_MD.replace('note: ノートです\n', ''));
+  assert.ok(!html.includes('id="notes-toggle"'));
+  assert.ok(!html.includes('id="notes-popup"'));
+  assert.ok(!html.includes('function toggleNotes()'));
+});
+
+test('ノートポップアップは外部URLを読み込まない（S4）', () => {
+  const html = run(['-', '--quiet'], NOTES_MD);
+  const popup = html.slice(html.indexOf('id="notes-popup"'), html.indexOf('id="notes-popup"') + 900);
+  assert.ok(!/https?:\/\//.test(popup));
+});

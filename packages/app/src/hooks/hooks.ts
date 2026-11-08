@@ -32,6 +32,10 @@ export function useFitSlide(containerRef: RefObject<HTMLElement | null>, enabled
 export interface KeyboardNavHandlers {
   onNavigate: (dir: 1 | -1) => void;
   onToggleView: () => void;
+  /** ノートポップアップの開閉（N）。未指定ならキーを無視する。 */
+  onToggleNotes?: () => void;
+  /** Esc でノートポップアップを閉じる。未指定なら無視する。 */
+  onCloseNotes?: () => void;
   /** 表示モード切替（1/2/3）。未指定ならキーを無視する。 */
   onSetLayout?: (m: LayoutMode) => void;
   onExportPdf?: () => void;
@@ -41,7 +45,7 @@ export interface KeyboardNavHandlers {
 
 /**
  * useKeyboardNav — navigation.js のショートカット移植。
- * ← / → / Space / F（フルスクリーン） / V（ビュー切替） /
+ * ← / → / Space / F（フルスクリーン） / V（ビュー切替） / N（ノートポップアップ） / Esc（ポップアップを閉じる） /
  * 1 / 2 / 3（表示モード切替） /
  * P（PDF） / Shift+S（PNG） / Shift+P（ZIP）
  * 入力フィールド内・Ctrl/Cmd 押下時は無効（ブラウザ標準を尊重）。
@@ -70,6 +74,14 @@ export function useKeyboardNav(handlers: KeyboardNavHandlers, enabled: boolean) 
       }
       if (e.key === 'v' || e.key === 'V') {
         handlers.onToggleView();
+        return;
+      }
+      if (!e.shiftKey && !e.altKey && (e.key === 'n' || e.key === 'N') && handlers.onToggleNotes) {
+        handlers.onToggleNotes();
+        return;
+      }
+      if (e.key === 'Escape' && handlers.onCloseNotes) {
+        handlers.onCloseNotes();
         return;
       }
       // 1/2/3 で表示モード切替。Shift併用時は e.key が記号になるため衝突しない。

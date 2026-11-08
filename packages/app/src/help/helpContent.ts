@@ -35,6 +35,9 @@ export const SHORTCUTS: ShortcutItem[] = [
   // 「エディタ⇔プレビュー表示切替」は新設の表示モード（1/2/3）と紛らわしいため修正した。
   { keys: 'V', desc: 'プレビュー表示切替（1枚⇔一覧）' },
   { keys: LAYOUT_KEYS, desc: `表示モード切替（${LAYOUT_LABELS}）` },
+  // 🗒️ はスピーカーノート（note:）のあるデッキの hero ビューだけに出る
+  { keys: 'N', desc: 'スピーカーノートのポップアップを開閉（1枚表示・note: のあるデッキ）' },
+  { keys: 'Esc', desc: 'ノートのポップアップを閉じる' },
   { keys: 'P', desc: 'PDF出力（印刷ダイアログ）' },
   { keys: 'Shift+S', desc: '現在スライドをPNG出力' },
   { keys: 'Shift+P', desc: '全スライドをZIP出力' },

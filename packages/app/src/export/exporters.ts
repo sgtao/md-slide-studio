@@ -5,6 +5,13 @@
  * ZIP: 全スライドPNGを JSZip でまとめる
  * 元スキルはCDN動的ロードだったが、リポジトリ化に伴い npm 依存に置き換え。
  */
+import {
+  buildNotesButtonHtml,
+  buildNotesPopupHtml,
+  htmlHasSpeakerNotes,
+  NOTES_POPUP_SCRIPT,
+} from '@mdss/core';
+
 // html2canvas / JSZip はエクスポート実行時のみ動的ロード（初期バンドル削減。
 // 元スキルの「閲覧は自己完結・エクスポート時のみ追加ロード」の思想を踏襲）
 
@@ -208,7 +215,7 @@ function escapeHtml(s: string): string {
 }
 
 /** コントロールクラスタのHTML断片を組み立てる（HTML保存ボタンは含めない） */
-function buildControlClusterHtml(palette: string): string {
+function buildControlClusterHtml(palette: string, hasNotes = false): string {
   const paletteButtons = PALETTE_META_STANDALONE.map((p) => {
     const active = p.id === palette ? ' is-active' : '';
     return (
@@ -229,6 +236,8 @@ function buildControlClusterHtml(palette: string): string {
 
   return [
     '<div class="control-cluster">',
+    // ノートがあるデッキだけ 🗒️ ボタンとポップアップを出す（既存MDの出力を変えない）
+    ...(hasNotes ? [buildNotesPopupHtml(), buildNotesButtonHtml()] : []),
     '  <button id="theme-toggle" onclick="toggleTheme()" title="テーマ切替"><span id="theme-icon">🌙</span></button>',
     '  <button id="view-toggle" onclick="toggleView()" title="表示切替（V）">▭</button>',
     '  <div class="palette-menu">',
@@ -580,7 +589,8 @@ function buildStandaloneHtml(scalerEl: HTMLElement, deckTitle: string, md: strin
     .join('\n');
 
   const title = deckTitle || 'MD Slide Studio Export';
-  const controlCluster = buildControlClusterHtml(palette);
+  const hasNotes = htmlHasSpeakerNotes(sectionsHtml);
+  const controlCluster = buildControlClusterHtml(palette, hasNotes);
   const themeIcon = theme === 'dark' ? '☀️' : '🌙';
   const controlClusterWithTheme = controlCluster.replace(
     '<span id="theme-icon">🌙</span>',
@@ -588,7 +598,8 @@ function buildStandaloneHtml(scalerEl: HTMLElement, deckTitle: string, md: strin
   );
   const deckTitleJson = JSON.stringify(title);
   const deckMdJson = JSON.stringify(md);
-  const script = buildInlineScript(deckTitleJson, deckMdJson);
+  const script =
+    buildInlineScript(deckTitleJson, deckMdJson) + (hasNotes ? NOTES_POPUP_SCRIPT : '');
 
   return `<!doctype html>
 <html lang="ja" data-view="list" data-theme="${theme}" data-palette="${palette}">

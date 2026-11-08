@@ -246,6 +246,21 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
 
   const toggleView = useCallback(() => setView(view === 'hero' ? 'list' : 'hero'), [view, setView]);
 
+  // --- スピーカーノートのポップアップ（hero ビューの右上 🗒️ / N キー） ---
+  // 既定は閉・保存しない。デッキにノートが1つも無いときは 🗒️ もキーも無効。
+  const [notesOpen, setNotesOpen] = useState(false);
+  const hasAnyNotes = useMemo(
+    () => deck.slides.some((s) => (s.speakerNotes?.length ?? 0) > 0),
+    [deck.slides],
+  );
+  // 'editor' レイアウト・AIプロンプトパネル表示中は .preview-pane が無く、🗒️ も出ない
+  const previewVisible = effectiveLayout !== 'editor' && !showAiPromptPanel;
+  const toggleNotes = useCallback(() => {
+    if (view !== 'hero' || !hasAnyNotes || !previewVisible) return;
+    setNotesOpen((o) => !o);
+  }, [view, hasAnyNotes, previewVisible]);
+  const closeNotes = useCallback(() => setNotesOpen(false), []);
+
   // --- エクスポート ---
   const title = deck.frontmatter.title;
   const doPdf = useCallback(() => exportToPdf(), []);
@@ -313,12 +328,24 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
       () => ({
         onNavigate: navigate,
         onToggleView: toggleView,
+        onToggleNotes: toggleNotes,
+        onCloseNotes: closeNotes,
         onSetLayout: onSetLayoutByKey,
         onExportPdf: canExport ? doPdf : undefined,
         onExportPng: canExport ? doPng : undefined,
         onExportZip: canExport ? doZip : undefined,
       }),
-      [navigate, toggleView, onSetLayoutByKey, canExport, doPdf, doPng, doZip],
+      [
+        navigate,
+        toggleView,
+        toggleNotes,
+        closeNotes,
+        onSetLayoutByKey,
+        canExport,
+        doPdf,
+        doPng,
+        doZip,
+      ],
     ),
     true,
   );
@@ -432,6 +459,21 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
               onExportPng={doPng}
               onExportZip={doZip}
               onExportMd={doMd}
+              notes={
+                hasAnyNotes
+                  ? {
+                      open: notesOpen,
+                      onToggle: toggleNotes,
+                      popup: {
+                        notes: deck.slides[clampedCurrent]?.speakerNotes ?? [],
+                        current: clampedCurrent,
+                        total: deck.slides.length,
+                        onNavigate: navigate,
+                        onClose: closeNotes,
+                      },
+                    }
+                  : undefined
+              }
             />
             {deck.slides.length > 0 ? (
               <SlideDeckView

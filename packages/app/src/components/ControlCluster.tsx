@@ -13,6 +13,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import type { Palette } from '@mdss/core';
+import { NotesPopup, type NotesPopupProps } from './NotesPopup';
 
 /** 'editor' レイアウトで無効化したボタンに出す説明。 */
 const DISABLED_TITLE = '「編集のみ」表示中は使用できません';
@@ -41,6 +42,15 @@ interface Props {
   onExportPng: () => void;
   onExportZip: () => void;
   onExportMd: () => void;
+  /**
+   * スピーカーノートのポップアップ。デッキにノートが1つも無いときは渡さない（🗒️ を出さない）。
+   * 🗒️ は hero ビューのときだけ出す。
+   */
+  notes?: {
+    open: boolean;
+    onToggle: () => void;
+    popup: NotesPopupProps;
+  };
 }
 
 export function ControlCluster(props: Props) {
@@ -62,6 +72,9 @@ export function ControlCluster(props: Props) {
   // 表示に使う値をレンダリング時に導出する（クリック操作の記録用stateとは分離する）。
   const visibleMenu = props.disabled ? null : openMenu;
 
+  // 🗒️ とポップアップは hero ビュー（1枚表示）のときだけ。list では隠す。
+  const showNotes = props.view === 'hero' && !!props.notes;
+
   const toggle = (m: 'palette' | 'export') => {
     if (props.disabled) return;
     setOpenMenu((cur) => (cur === m ? null : m));
@@ -69,6 +82,20 @@ export function ControlCluster(props: Props) {
 
   return (
     <div className="control-cluster" ref={rootRef}>
+      {showNotes && props.notes?.open && <NotesPopup {...props.notes.popup} />}
+      {showNotes && props.notes && (
+        <button
+          id="notes-toggle"
+          type="button"
+          onClick={props.notes.onToggle}
+          className={props.notes.popup.notes.length === 0 ? 'is-empty' : undefined}
+          aria-expanded={props.notes.open}
+          aria-label="スピーカーノート"
+          title="ノート（N）"
+        >
+          🗒️
+        </button>
+      )}
       <button id="theme-toggle" onClick={props.onToggleTheme} title="テーマ切替">
         <span id="theme-icon">{props.theme === 'dark' ? '☀️' : '🌙'}</span>
       </button>

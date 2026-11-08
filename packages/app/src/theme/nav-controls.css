@@ -327,3 +327,134 @@
 .swatch-gold {
   background: #d97706;
 }
+
+/* ==========================================================================
+ * スピーカーノートのポップアップ（v0.6.0）
+ *   hero ビューの右上 🗒️ ボタン（#notes-toggle）で開く浮かぶパネル（非モーダル）。
+ *   書き出しHTML（core/standalone/notesPopup.ts）とアプリ（NotesPopup.tsx）で
+ *   同じ DOM・クラス名を使い、このCSSを共有する。
+ *   色は既存のCSS変数のみ（ライト/ダーク × 全パレットで読める）。
+ * ========================================================================== */
+.control-cluster #notes-toggle[hidden] {
+  display: none;
+}
+
+/* 現在のスライドにノートが無いときは薄く見せる（押すと「（ノートなし）」） */
+.control-cluster #notes-toggle.is-empty {
+  opacity: 0.45;
+}
+
+.control-cluster #notes-toggle[aria-expanded='true'] {
+  background: var(--accent);
+  color: var(--nav-text);
+}
+
+/* ポップアップ本体: 右上ボタン群の真下。.export-dropdown と同じ置き方（top 44px）。 */
+.notes-popup {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(60vh, 480px);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-slide);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 150;
+}
+
+.notes-popup[hidden] {
+  display: none;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 8px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.notes-page {
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.notes-body {
+  flex: 1 1 auto;
+  min-height: 3em;
+  overflow-y: auto;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: left;
+}
+
+.notes-body p {
+  margin: 0 0 0.7em;
+}
+
+.notes-body p:last-child {
+  margin-bottom: 0;
+}
+
+.notes-body .notes-empty {
+  color: var(--text-secondary);
+}
+
+.notes-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* .control-cluster button（36×36・暗い丸角）より具体的なセレクタで、ポップアップ内のボタンだけ上書きする */
+.control-cluster .notes-popup button {
+  width: auto;
+  height: auto;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.control-cluster .notes-popup button:hover:not(:disabled) {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+[data-theme='dark'] .control-cluster .notes-popup button:hover:not(:disabled) {
+  background: var(--accent-dim);
+}
+
+.control-cluster .notes-popup button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.control-cluster .notes-popup .notes-header button {
+  padding: 2px 8px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .notes-popup {
+    top: 40px;
+  }
+}

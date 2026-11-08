@@ -18,6 +18,14 @@ export {
 } from './parser/slideMarkdown';
 export { parseSlideHeader } from './parser/slideHeader';
 
+// --- 書き出しHTML用のノートポップアップ部品（文字列を返すだけ・DOM非依存） ---
+export {
+  htmlHasSpeakerNotes,
+  buildNotesButtonHtml,
+  buildNotesPopupHtml,
+  NOTES_POPUP_SCRIPT,
+} from './standalone/notesPopup';
+
 // --- deckLint ---
 export {
   lintDeck,
