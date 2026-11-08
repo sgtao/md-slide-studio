@@ -101,6 +101,22 @@ body.exporting-pdf .slide {
     background: #ffffff !important;
   }
 
+  /* ─── 2-3b. エディタモード（アプリ本体）でも全ページを印刷する ─── */
+  /* app.css が html[data-mode='edit'] / その body に overflow:hidden・height:100%（!important）を
+       かけているため、上の 2-3 より詳細度が高く、印刷でも「画面1枚分の高さ」で切られて
+       1ページ目しか PDF にならなかった。印刷時だけ解除する。app.css は print.css より後に
+       読み込まれ、同じ !important・同じ詳細度だと負けるため、:root を足して詳細度を上げている。
+       #root も height:100% の flex 列なので、高さを内容に任せる。 */
+  html[data-mode='edit']:root,
+  html[data-mode='edit']:root body {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  #root {
+    height: auto !important;
+    display: block !important;
+  }
+
   /* ─── 2-4. 非表示要素 ─── */
   /* インタラクション系の UI は印刷物に含めない。 */
   .control-cluster,
@@ -165,8 +181,11 @@ body.exporting-pdf .slide {
     break-inside: avoid;
   }
 
-  /* 最終スライドの後ろに空白ページを作らない */
-  .slide:last-child {
+  /* 最終スライドの後ろに空白ページを作らない。
+       アプリ本体ではスライドの後ろに #slide-counter 等の兄弟要素があり :last-child に
+       当たらないため、:last-of-type（section）でも指定する。 */
+  .slide:last-child,
+  section.slide:last-of-type {
     page-break-after: auto;
     break-after: auto;
   }

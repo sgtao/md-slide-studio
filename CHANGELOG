@@ -25,6 +25,15 @@
 - テンプレート挿入の `points` に `note:` 行を追加
 - テスト: `sample.test.ts` にノート数の検証、CLI smoke の後方互換テストを「サンプルから `note:` 行を除いた同じMDにはノート要素が入らない」形に変更
 
+### 修正｜PDF出力が1ページ目しか出力されない問題（アプリ版）
+
+`P` キー／エクスポートメニューからのPDF出力で、全スライドではなく1ページ目だけのPDFになっていた（`main` でも再現する既存の不具合で、`note:` とは無関係）。原因は2つあった。
+
+- **画面1枚分の高さで切れる**: `app.css` の `html[data-mode='edit'] body { overflow: hidden !important; height: 100% !important }` が、`print.css` の「印刷時は高さを解除する」ルールより詳細度が高く、印刷でも効いていた。`print.css` に `html[data-mode='edit']:root` 系の解除ルールを追加（`app.css` は後から読み込まれ、同じ詳細度だと負けるため `:root` で詳細度を上げた）。`#root` の `height: 100%` も解除
+- **末尾に空白ページ**: 最終スライドの `break-after: page` を外す `.slide:last-child` が、アプリ本体ではスライドの後ろに `#slide-counter` などの兄弟要素があるため当たらなかった。`section.slide:last-of-type` でも指定
+- 書き出したHTML（`mdss-convert` 出力）は構造が違い、この問題は起きていない
+- e2e: `e2e/pdf-print.spec.ts` を新規追加（実PDFのページ数がスライド枚数と一致することを、3枚デッキ・list切替・サンプル全体で確認。修正前は3件とも失敗）
+
 ### 今回やらないこと
 
 - ノート表示の切替UI（`body[data-notes]` を切り替えるボタン・キー操作）とノートパネル、サムネ帯での `.slide-notes` 除去は閲覧UIプラン（02）の担当
