@@ -28,8 +28,9 @@ const LAYOUT_KEYS = LAYOUT_MODES.map((m) => LAYOUT_MODE_META[m].key).join(' / ')
 const LAYOUT_LABELS = LAYOUT_MODES.map((m) => LAYOUT_MODE_META[m].label).join('／');
 
 export const SHORTCUTS: ShortcutItem[] = [
-  { keys: '→ / Space', desc: '次のスライドへ' },
-  { keys: '←', desc: '前のスライドへ' },
+  { keys: '→ / Space', desc: '次のスライドへ（一覧表示ではスクロール）' },
+  { keys: '← / Shift+Space', desc: '前のスライドへ（一覧表示ではスクロール）' },
+  { keys: 'Enter', desc: '一覧表示で、現在のスライドを1枚表示で開く' },
   // ページ指定移動（1枚表示のみ）。数字キーの直打ちは 1/2/3（表示モード切替）と衝突するため使わない
   { keys: 'Home / End', desc: '先頭・末尾のスライドへ（一覧表示ではスクロール）' },
   {
@@ -37,7 +38,10 @@ export const SHORTCUTS: ShortcutItem[] = [
     desc: 'ページ番号を入力して移動（一覧・グリッドからは1枚表示に移って入力。右下の「3 / 22」をクリックでも可）',
   },
   { keys: 'G', desc: '一覧グリッドを開閉（クリック／Enter でそのページへ・矢印でフォーカス移動）' },
-  { keys: 'T', desc: 'サムネ帯の開閉（1枚表示・一覧表示の画面下部。クリックでそのページへ）' },
+  {
+    keys: 'T',
+    desc: 'サムネ帯の開閉（画面下部。一覧表示は既定で表示・1枚表示は既定で閉。クリックでそのページへ）',
+  },
   { keys: 'F', desc: 'フルスクリーン切替' },
   // 実装は hero⇔list（プレビューの見せ方）の切替。旧説明
   // 「エディタ⇔プレビュー表示切替」は新設の表示モード（1/2/3）と紛らわしいため修正した。

@@ -239,21 +239,33 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
   // 一覧グリッド（G）・サムネ帯（T）・ページ番号入力（J）。いずれも既定は閉・保存しない。
   // 'editor' レイアウト・AIプロンプトパネル表示中は .preview-pane が無いので、状態は残っても無効扱い。
   const [gridOpen, setGridOpen] = useState(false);
-  const [stripOpen, setStripOpen] = useState(false);
+  // サムネ帯の開閉は list と hero で別々に持つ。list は既定で表示（キーで送る足場）、hero は既定で閉
+  const [stripOpenByView, setStripOpenByView] = useState<Record<'hero' | 'list', boolean>>({
+    hero: false,
+    list: true,
+  });
   const [jumping, setJumping] = useState(false);
   const previewVisible = effectiveLayout !== 'editor' && !showAiPromptPanel;
   const gridActive = gridOpen && previewVisible;
-  const stripActive = stripOpen && previewVisible; // hero・list で表示（グリッド中は SlideDeck が出さない）
+  const stripActive = stripOpenByView[view] && previewVisible; // グリッド中は SlideDeck が出さない
   const jumpActive = jumping && view === 'hero' && !gridActive && previewVisible;
 
   const lastIndex = Math.max(0, deck.slides.length - 1);
   const navigate = useCallback(
     (dir: 1 | -1) => {
-      // 一覧モード・グリッド中は無効（元 navigation.js。グリッドでは矢印をフォーカス移動に使う）
-      if (view === 'list' || gridActive) return;
-      setCurrent((c) => Math.max(0, Math.min(deck.slides.length - 1, c + dir)));
+      // グリッド中は無効（矢印・Space はグリッドのフォーカス移動に使う）
+      if (gridActive) return;
+      const last = Math.max(0, deck.slides.length - 1);
+      if (view === 'list') {
+        // list: 前後のスライドへスクロールする（現在のスライドを1つ動かす）
+        const i = Math.max(0, Math.min(last, clampedCurrent + dir));
+        setCurrent(i);
+        deckRef.current?.scrollToSlide(i);
+        return;
+      }
+      setCurrent((c) => Math.max(0, Math.min(last, c + dir)));
     },
-    [view, gridActive, deck.slides.length],
+    [view, gridActive, deck.slides.length, clampedCurrent],
   );
   // 指定ページ（0始まり）へ。範囲外は先頭・末尾に丸める。hero は表示を切り替え、list はスクロールする
   const goTo = useCallback(
@@ -295,11 +307,15 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
     // グリッド中の T: グリッドを閉じて、直前のビュー（hero／list）でサムネ帯を開く
     if (gridActive) {
       setGridOpen(false);
-      setStripOpen(true);
+      setStripOpenByView((s) => ({ ...s, [view]: true }));
       return;
     }
-    setStripOpen((o) => !o);
-  }, [gridActive, previewVisible]);
+    setStripOpenByView((s) => ({ ...s, [view]: !s[view] }));
+  }, [gridActive, previewVisible, view]);
+  // list の Enter: 現在のスライドを1枚表示で開く
+  const openCurrentInHero = useCallback(() => {
+    if (view === 'list' && !gridActive && previewVisible) setView('hero');
+  }, [view, gridActive, previewVisible, setView]);
   // サムネ・グリッドのクリック／Enter: hero のそのページを開く
   const pickSlide = useCallback(
     (index: number) => {
@@ -404,6 +420,7 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
     useMemo(
       () => ({
         onNavigate: navigate,
+        onEnter: openCurrentInHero,
         onToggleView: toggleView,
         onToggleNotes: toggleNotes,
         onEscape,
@@ -419,6 +436,7 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
       }),
       [
         navigate,
+        openCurrentInHero,
         toggleView,
         toggleNotes,
         onEscape,

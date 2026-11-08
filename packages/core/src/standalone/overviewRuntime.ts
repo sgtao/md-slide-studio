@@ -48,7 +48,9 @@ export function buildOverviewContainersHtml(): string {
 export const OVERVIEW_SCRIPT = String.raw`
 
 /* ─── 閲覧UI: サムネ帯・一覧グリッド・ページ指定移動（v0.6.1） ─── */
-var stripOpen = false;
+/* サムネ帯の開閉は list と hero で別々に持つ。list は既定で表示（キーで送る足場）、hero は既定で閉（発表の邪魔をしない） */
+var stripOpenByView = { hero: false, list: true };
+function isStripOpen() { return currentView === 'hero' || currentView === 'list' ? stripOpenByView[currentView] : false; }
 var prevViewBeforeGrid = 'hero';
 var thumbBuilt = { strip: false, grid: false };
 var thumbObserver = null;
@@ -66,7 +68,7 @@ fitSlide = function () {
   var scaler = document.querySelector('.slide-scaler');
   if (!scaler) return;
   var strip = stripEl();
-  var inset = (stripOpen && currentView === 'hero' && strip) ? strip.offsetHeight : 0;
+  var inset = (currentView === 'hero' && stripOpenByView.hero && strip) ? strip.offsetHeight : 0;
   var vw = window.innerWidth;
   var vh = window.innerHeight - inset;
   var ratio = Math.min(vw / 960, vh / 540) * 0.92;
@@ -178,7 +180,7 @@ function syncOverview() {
   var grid = gridEl();
   if (!strip || !grid) return;
   var hero = (currentView === 'hero');
-  var showStrip = stripOpen && (currentView === 'hero' || currentView === 'list');
+  var showStrip = isStripOpen();
   var showGrid = (currentView === 'grid');
   if (showStrip && !thumbBuilt.strip) { buildThumbs(strip, 's'); thumbBuilt.strip = true; }
   if (showGrid && !thumbBuilt.grid) { buildThumbs(grid, 'g'); thumbBuilt.grid = true; }
@@ -227,18 +229,20 @@ applyView = function () {
 var overviewBaseNavigate = navigate;
 navigate = function (dir) {
   if (currentView === 'grid') return; /* グリッド中の矢印・Space はフォーカス移動に使う */
+  /* list: ← → Space で前後のスライドへスクロールする（現在のスライドを1つ動かす） */
+  if (currentView === 'list') { listGo(cur + dir); return; }
   overviewBaseNavigate(dir);
 };
 window.addEventListener('resize', function () {
   if (currentView === 'grid' && gridEl()) layoutThumbs(gridEl());
-  if ((currentView === 'hero' || currentView === 'list') && stripOpen && stripEl()) layoutThumbs(stripEl());
+  if (isStripOpen() && stripEl()) layoutThumbs(stripEl());
 });
 
 /* ── 開閉・移動 ── */
 function toggleStrip() {
   /* グリッド中に T: グリッドを閉じて、直前のビュー（hero／list）でサムネ帯を開く */
-  if (currentView === 'grid') { stripOpen = true; closeGrid(); return; }
-  stripOpen = !stripOpen;
+  if (currentView === 'grid') { stripOpenByView[prevViewBeforeGrid] = true; closeGrid(); return; }
+  stripOpenByView[currentView] = !stripOpenByView[currentView];
   syncOverview();
 }
 function toggleGrid() {
@@ -411,10 +415,29 @@ function gridColumns(grid) {
 }
 
 /* ── キー: G グリッド / T サムネ帯 / J 番号入力 / Home・End / Esc でグリッドを閉じる。どのビューからでも1回のキーで届く ── */
+/* Shift+Space: 前のスライドへ（hero はページ、list はスクロール）。既存のキー処理は Shift を見ずに
+   Space を「次へ」にするため、それより先（キャプチャ段階）で受けて止める。グリッド中は対象外 */
+document.addEventListener('keydown', function (e) {
+  var t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key !== ' ' || !e.shiftKey || currentView === 'grid') return;
+  e.preventDefault();
+  e.stopPropagation();
+  navigate(-1);
+}, true);
+
 document.addEventListener('keydown', function (e) {
   var t = e.target;
   if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
   if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+  /* list の Enter: 現在のスライドを1枚表示で開く（ボタン・リンクにフォーカスがあるときはそちらを優先） */
+  if (e.key === 'Enter' && currentView === 'list' && !(t && (t.tagName === 'BUTTON' || t.tagName === 'A'))) {
+    e.preventDefault();
+    currentView = 'hero';
+    applyView();
+    return;
+  }
   if (e.key === 'Escape') {
     if (currentView === 'grid') { closeGrid(); e.preventDefault(); }
     return;

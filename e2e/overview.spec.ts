@@ -150,9 +150,7 @@ async function exerciseOneStep(page: Page) {
   const slideAt = (i: number) => page.locator('.slide-scaler .slide').nth(i);
   await toList(page);
 
-  // list でサムネ帯を開く。クリックでそのスライドへスクロール（list のまま）
-  await expect(strip(page)).toBeHidden();
-  await page.keyboard.press('t');
+  // list ではサムネ帯が既定で出ている。クリックでそのスライドへスクロール（list のまま）
   await expect(strip(page)).toBeVisible();
   await expect(strip(page)).toBeInViewport();
   await strip(page).locator('.thumb[data-index="9"]').click();
@@ -210,7 +208,7 @@ async function exerciseOneStep(page: Page) {
   await page.keyboard.press('t');
   await expect(grid(page)).toBeHidden();
   await expect(strip(page)).toBeVisible();
-  await page.keyboard.press('t'); // 帯を閉じる
+  await page.keyboard.press('t'); // 帯を閉じる（hero の帯。list の帯とは別）
 
   // グリッド中の N: hero に移ってノートを開く（グリッドの現在ページ＝3枚目）
   await toHero(page);
@@ -232,6 +230,60 @@ async function exerciseOneStep(page: Page) {
   await page.keyboard.press('j');
   await expect(grid(page)).toBeHidden();
   await expect(page.locator('#slide-counter .counter-input')).toBeFocused();
+}
+
+/**
+ * list のキー操作: ← → Space Shift+Space で現在のスライドを1つずつ動かし（スクロール）、Enter で1枚表示を開く。
+ * サムネ帯の開閉は list と hero で別々（list は既定で表示、hero は既定で閉）。hero でも Shift+Space で前へ。
+ */
+async function exerciseListKeys(page: Page) {
+  const slideAt = (i: number) => page.locator('.slide-scaler .slide').nth(i);
+  await toList(page);
+  await expect(strip(page)).toBeVisible(); // list は既定で表示
+  await page.keyboard.press('Home');
+  await expect(currentThumbNum(page)).toHaveText('1');
+
+  await page.keyboard.press('ArrowRight');
+  await expect(currentThumbNum(page)).toHaveText('2');
+  await page.keyboard.press('Space');
+  await expect(currentThumbNum(page)).toHaveText('3');
+  await expect(slideAt(2)).toBeInViewport({ ratio: 0.5 });
+  await page.keyboard.press('Shift+Space');
+  await expect(currentThumbNum(page)).toHaveText('2');
+  await page.keyboard.press('ArrowLeft');
+  await expect(currentThumbNum(page)).toHaveText('1');
+  await page.keyboard.press('ArrowLeft'); // 先頭より前へは行かない
+  await expect(currentThumbNum(page)).toHaveText('1');
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight');
+  await expect(currentThumbNum(page)).toHaveText('5');
+  await expect(slideAt(4)).toBeInViewport({ ratio: 0.5 });
+
+  // Enter: 現在のスライドを1枚表示で開く。hero の帯は既定で閉（list とは別に持つ）
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#view-toggle')).toHaveText('☰');
+  await expect(counter(page)).toHaveText(`5 / ${TOTAL}`);
+  await expect(strip(page)).toBeHidden();
+
+  // hero でも Shift+Space で前へ
+  await page.keyboard.press('Shift+Space');
+  await expect(counter(page)).toHaveText(`4 / ${TOTAL}`);
+  await page.keyboard.press('Space');
+  await expect(counter(page)).toHaveText(`5 / ${TOTAL}`);
+
+  // list で帯を閉じても hero には影響せず、list に戻ると閉じたまま
+  await toList(page);
+  await page.keyboard.press('t');
+  await expect(strip(page)).toBeHidden();
+  await toHero(page);
+  await expect(strip(page)).toBeHidden();
+  await page.keyboard.press('t');
+  await expect(strip(page)).toBeVisible();
+  await toList(page);
+  await expect(strip(page)).toBeHidden();
+  // 帯を閉じていても list の ← → は効く
+  await page.keyboard.press('ArrowRight');
+  await toHero(page);
+  await expect(counter(page)).toHaveText(`6 / ${TOTAL}`);
 }
 
 /** ページ指定移動（J / Home / End / カウンタークリック）。hero で開始している前提 */
@@ -431,6 +483,13 @@ async function exerciseGrid(page: Page) {
 }
 
 test.describe('閲覧UI（アプリのプレビュー）', () => {
+  test('list: ← → Space Shift+Space で1枚ずつ送り、Enter で1枚表示。帯は list 既定表示・hero 既定閉', async ({
+    page,
+  }) => {
+    await openApp(page);
+    await exerciseListKeys(page);
+  });
+
   test('どのビューからも1回のキー／ボタンで届く（list のサムネ帯・N・J・T）', async ({ page }) => {
     await openApp(page, deckWithNotes);
     await exerciseOneStep(page);
@@ -489,6 +548,14 @@ test.describe('閲覧UI（アプリのプレビュー）', () => {
 });
 
 test.describe('閲覧UI（書き出しHTML）', () => {
+  test('list: ← → Space Shift+Space で1枚ずつ送り、Enter で1枚表示。帯は list 既定表示・hero 既定閉', async ({
+    page,
+  }, testInfo) => {
+    const file = await exportHtml(page, testInfo);
+    await page.goto(`file://${file}`);
+    await exerciseListKeys(page);
+  });
+
   test('どのビューからも1回のキー／ボタンで届く（list のサムネ帯・N・J・T）', async ({
     page,
   }, testInfo) => {
@@ -578,7 +645,7 @@ test.describe('閲覧UI（書き出しHTML）', () => {
     expect(new URL(page.url()).hash).toBe('');
   });
 
-  test('書き出しHTMLに一覧・サムネ帯のボタンと入れ物が入り、既定は閉', async ({
+  test('書き出しHTMLに一覧・サムネ帯のボタンと入れ物が入る。list で開くとサムネ帯は表示・グリッドは閉', async ({
     page,
   }, testInfo) => {
     const file = await exportHtml(page, testInfo);
@@ -586,9 +653,11 @@ test.describe('閲覧UI（書き出しHTML）', () => {
     await expect(page.locator('#grid-toggle')).toBeVisible();
     await expect(page.locator('#strip-toggle')).toBeVisible(); // list でも消えない
     await expect(page.locator('#strip-toggle')).toBeEnabled();
-    await expect(strip(page)).toBeHidden();
+    await expect(strip(page)).toBeVisible(); // list は既定で表示
     await expect(grid(page)).toBeHidden();
-    // 閉じている間はサムネを1つも作らない
-    await expect(page.locator('.thumb')).toHaveCount(0);
+    // サムネは見える分だけ作る（遅延生成）。グリッドは開くまで1つも作らない
+    await expect.poll(() => builtThumbs(page, 'strip').count()).toBeGreaterThan(0);
+    expect(await builtThumbs(page, 'strip').count()).toBeLessThan(TOTAL);
+    await expect(grid(page).locator('.thumb')).toHaveCount(0);
   });
 });

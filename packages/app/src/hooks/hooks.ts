@@ -44,6 +44,8 @@ export function useFitSlide(
 
 export interface KeyboardNavHandlers {
   onNavigate: (dir: 1 | -1) => void;
+  /** Enter（ボタン・リンク以外にフォーカスがあるとき）。list で現在のスライドを1枚表示で開く */
+  onEnter?: () => void;
   onToggleView: () => void;
   /** ノートポップアップの開閉（N）。未指定ならキーを無視する。 */
   onToggleNotes?: () => void;
@@ -67,7 +69,7 @@ export interface KeyboardNavHandlers {
 
 /**
  * useKeyboardNav — navigation.js のショートカット移植。
- * ← / → / Space / Home / End / J（ページ番号入力） / F（フルスクリーン） / V（ビュー切替） /
+ * ← / → / Space / Shift+Space / Enter（list で1枚表示を開く） / Home / End / J（ページ番号入力） / F（フルスクリーン） / V（ビュー切替） /
  * G（一覧グリッド） / T（サムネ帯） / N（ノートポップアップ） / Esc（グリッド・ポップアップを閉じる） /
  * 1 / 2 / 3（表示モード切替） /
  * P（PDF） / Shift+S（PNG） / Shift+P（ZIP）
@@ -81,6 +83,21 @@ export function useKeyboardNav(handlers: KeyboardNavHandlers, enabled: boolean) 
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
       if (e.ctrlKey || e.metaKey) return;
 
+      // Shift+Space は前へ（Space の逆）
+      if (e.key === ' ' && e.shiftKey) {
+        e.preventDefault();
+        handlers.onNavigate(-1);
+        return;
+      }
+      if (
+        e.key === 'Enter' &&
+        handlers.onEnter &&
+        !(t && (t.tagName === 'BUTTON' || t.tagName === 'A'))
+      ) {
+        e.preventDefault();
+        handlers.onEnter();
+        return;
+      }
       if (e.key === 'ArrowRight' || e.key === ' ') {
         e.preventDefault();
         handlers.onNavigate(1);
