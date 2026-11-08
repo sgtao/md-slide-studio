@@ -3,6 +3,34 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.6.0] - 2026-11-08
+
+スライドごとのスピーカーノート（`note:`）を追加した。既定は非表示で、既存のMDは修正なしで同じ見た目・同じHTMLになる
+
+### 追加｜`note:`（スピーカーノート）
+
+発表者が話す原稿や、配布時の読み手への補足を、スライドごとに書けるようにした（設計: `22_design-mdss-migrate/03_migration-plan/01_speaker-notes-plan.md`）。
+
+- **記法**: 全18型共通の行頭キー `note:`。何行でも書け、1行が1段落になる。`**太字**`・`==強調==`・リンクが使える。空の `note:` は無視し、コードフェンス内・インデント付きの `note:` は対象外
+- **データ構造**: `SlideBase.speakerNotes?: InlineText[]`（`notes` にしないのは `SvgFigureSlide.notes` との衝突回避）。`badge` / `lead` / `point` は後勝ちのままで、`note` だけ出現順に追記する
+- **HTML**: 各 `section.slide` に `<aside class="slide-notes" aria-label="スピーカーノート" hidden>` を出力（1段落＝1`<p>`）。ノートが無いスライドには要素を出力しない。`SlideRenderer` の1か所の変更で、アプリのプレビューと `mdss-convert` の両方に反映される
+- **書き出し**: HTML は常に含める（元MD `DECK_MD` に `note:` 行が残るので往復も維持）。PNG・全枚ZIP は `ignoreElements` で `.slide-notes` を除外（常にスライドのみ）。PDF は既定どおりスライドのみで、`body[data-notes="on"]` のときだけスライドの下にノートを付ける（ノートはページをまたいで流れる配布資料形式）
+- **AI向け仕様**: `markdownSpec.ts`・`draftAssistPrompt.ts`・`docs/references/markdown-format-ext.md`・`README.md` に `note:` を追加（「スライドに書ききれない根拠・数字の時点・話す順番を書く。本文の繰り返しは書かない」）
+- **名前の混同に注意**: `note:`（非表示）、本文末尾の `>` 引用（見える補足）、svg-figure の `notes:`（複数形・図の右側の補足）は別物。仕様書に対比表を載せた
+- deckLint にノート未記入の警告は追加しない（既存デッキで大量に警告が出るため）
+
+### 今回やらないこと
+
+- ノート表示の切替UI（`body[data-notes]` を切り替えるボタン・キー操作）とノートパネル、サムネ帯での `.slide-notes` 除去は閲覧UIプラン（02）の担当
+- ランタイム統合（`exporters.ts` と `cli/src/standalone.ts` の二重管理の解消）は未実施。PNG除外の修正は両方に同一で入れた
+
+### テスト
+
+- core（Vitest）: `slideHeader.test.ts` に複数行・フェンス内・インデント・空行・`notes:` の誤拾い防止・全18型・`>` 引用／svg-figure `notes:` との共存を追加
+- CLI（`node --test`）: ノート付きMDで `.slide-notes` が `hidden` で入ること、ノート無しMDには入らないこと、PNG除外の埋め込みを追加
+- E2E（Playwright）: `e2e/speaker-notes.spec.ts` を新規追加（既定非表示・PNG書き出し起動・印刷時の `data-notes` 連動）
+
+---
 ## [v0.5.4] - 2026-11-08
 
 MDファイルのドラッグ&ドロップを、エディタ領域だけでなく画面全体で受け付けるようにした

@@ -77,3 +77,36 @@ test('不正なMDでもクラッシュしない（非クラッシュ規約）', 
   const html = run(['-', '--quiet'], md);
   assert.match(html, /^<!doctype html>/i);
 });
+
+test('note: 付きMD → .slide-notes が hidden の aside として入る（段落ごとに <p>・インライン対応）', () => {
+  const md = [
+    '---', 'title: notes', 'palette: ocean', '---',
+    '<!-- slide: points -->',
+    '## 要点',
+    '- **A**：説明',
+    'note: 全体の結論を3点にまとめたスライドです。',
+    'note: 数字は==11月5日時点==です。',
+    '---',
+    '<!-- slide: sources -->',
+    '## 出典',
+    '- [例](https://example.com) — 補足',
+    '',
+  ].join('\n');
+  const html = run(['-', '--quiet'], md);
+  assert.match(html, /<aside class="slide-notes" aria-label="スピーカーノート" hidden="">/);
+  assert.ok(html.includes('<p>全体の結論を3点にまとめたスライドです。</p>'));
+  assert.match(html, /<p>数字は<span class="hl">11月5日時点<\/span>です。<\/p>/);
+  assert.equal((html.match(/<aside class="slide-notes"/g) ?? []).length, 1, 'ノートの無いスライドには出力しない');
+  assert.ok(!html.includes('<p>note:'), '`note:` 行が本文の段落に漏れない');
+  assert.ok(html.includes('note: 全体の結論'), '元MD（DECK_MD）には note: 行がそのまま残る（往復）');
+});
+
+test('note: 無しMDの出力にはスピーカーノート要素が一切入らない（後方互換）', () => {
+  const html = run([SAMPLE, '--quiet']);
+  assert.ok(!html.includes('<aside class="slide-notes"'));
+});
+
+test('スタンドアロン出力のPNGキャプチャは .slide-notes を除外する', () => {
+  const html = run([SAMPLE, '--quiet']);
+  assert.ok(html.includes("el.classList.contains('slide-notes')"));
+});

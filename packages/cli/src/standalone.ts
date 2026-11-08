@@ -276,6 +276,10 @@ function buildCanvasOptions() {
     allowTaint: false,
     backgroundColor: getComputedStyle(document.body).backgroundColor,
     logging: false,
+    // スピーカーノート（note:）はスライド画像に写さない（PNG/ZIPは常にスライドのみ）
+    ignoreElements: function (el) {
+      return !!(el.classList && el.classList.contains('slide-notes'));
+    },
     onclone: function (clonedDoc) {
       // hero ビューでは親 .slide-scaler に scale(ratio) がかかっている。
       // 残すと PNG が拡大・切れ・文字間隔崩れを起こすため外す。

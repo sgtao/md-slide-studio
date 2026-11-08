@@ -31,7 +31,7 @@ import {
   LayerDiagramSvg,
   TimelineDiagramSvg,
 } from '../diagrams/Diagrams';
-import { Note, PointBand, SlideHeading } from './common';
+import { Note, PointBand, SlideHeading, SpeakerNotes } from './common';
 import { StepsView } from './StepsView';
 import { SvgFigureView } from './SvgFigureView';
 
@@ -579,6 +579,7 @@ export function SlideRenderer({ slide, index }: { slide: Slide; index: number })
     <>
       {renderSlideBody(slide, index)}
       <PointBand text={slide.point} />
+      <SpeakerNotes notes={slide.speakerNotes} />
     </>
   );
 }

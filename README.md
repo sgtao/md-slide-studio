@@ -61,7 +61,7 @@ Vite の `base: './'`（相対パス）でビルドするため、リポジト�
 - 制約: 枚数の厳密な上限はなし（AIへ依頼する際の目安は8〜16枚）/ 1スライド1グラフ /
   最終スライドは sources・先頭は title を推奨 / 生の `<script>` `<style>` は無視される
 - 全typeで共通ヘッダキーが使える: `badge:`（見出し左のピル）/ `lead:`（補足1行）/
-  `point:`（下部の💡強調帯）
+  `point:`（下部の💡強調帯）/ `note:`（非表示のスピーカーノート。何行でも可・1行＝1段落）
 - `steps` type: 手順のカード型フロー。```steps ブロックに style（cards / circled）と
   items（icon / title / desc）、任意の ratio（比率帯）をYAMLで記述
 - ディレクティブの `tone: dark` でそのスライドだけ地色を反転

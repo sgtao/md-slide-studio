@@ -57,6 +57,8 @@ palette: ocean
 - `, fit`: 内容量が多いスライドに `slide-fit`（自動縮小）を付ける
 - `layout:` キーは 使用予定の予約語（例: `<!-- slide: points, layout: two-col -->`）。
   v0.7.0 では無視してよいが、エラーにしない
+- 全typeで使える共通ヘッダ（`badge:` / `lead:` / `point:` / `note:`）は [`markdown-format-ext.md`](./markdown-format-ext.md) §1 を参照。
+  `note:` はスピーカーノート（既定は非表示・何行でも可・1行＝1段落）。本文末尾の `>` 引用（見える補足）とは別物
 
 ### type 一覧
 

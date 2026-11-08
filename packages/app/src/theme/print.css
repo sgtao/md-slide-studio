@@ -196,6 +196,36 @@ body.exporting-pdf .slide {
     min-height: 720px;
   }
 
+  /* ─── 2-6c. スピーカーノート（note:） ─── */
+  /* 既定（data-notes が on 以外）はノートを出さず、従来どおりスライドのみ。
+       ノート表示オンのときは「スライド（1ページ）＋その直下にノート」の配布資料形式にする:
+       スライドを高さ可変にし、ノートはスライド本体の下（次ページ以降に流れてよい）へ置く。
+       data-notes の切替UIは閲覧UI側の担当。 */
+  .slide-notes {
+    display: none !important;
+  }
+  body[data-notes='on'] .slide,
+  body[data-notes='on'][data-view='list'] .slide {
+    height: auto !important;
+    overflow: visible !important;
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+  body[data-notes='on'] .slide .slide-notes {
+    display: block !important;
+    box-sizing: border-box;
+    width: 1280px;
+    padding: 28px 96px 40px;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    border-top: 2px solid var(--border);
+    font-size: 18px;
+    line-height: 1.7;
+  }
+  body[data-notes='on'] .slide .slide-notes p {
+    margin: 0 0 0.6em;
+  }
+
   /* ─── 2-7. 内部コンテンツ：1280×720 にスケールアップ ─── */
   /* 元の 960×540 から 1280×720 への拡大は transform でなく padding 調整で吸収。
        transform: scale() を使うと印刷時に位置ずれが起きやすいため避ける。 */

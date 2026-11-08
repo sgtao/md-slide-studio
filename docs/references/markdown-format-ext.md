@@ -12,9 +12,9 @@ MD Slide Studio 独自のスライドMD拡張仕様。
 
 ---
 
-## 1. 共通ヘッダ拡張（badge / lead / point）
+## 1. 共通ヘッダ拡張（badge / lead / point / note）
 
-全スライドtypeの本文で、**行頭（インデントなし）**に書ける3つのキー。
+全スライドtypeの本文で、**行頭（インデントなし）**に書けるキー。`badge` / `lead` / `point` は見える要素、`note` は既定で見えないスピーカーノート。
 
 ```markdown
 <!-- slide: points -->
@@ -23,6 +23,8 @@ badge: WHY
 lead: 見出しを補足するグレーの1行
 - **リード**：説明
 point: スライド下部の💡強調帯（==hl== 強調可）
+note: スピーカーノート（既定は非表示。1行が1段落）
+note: 何行でも書ける。==強調==や**太字**も使える
 ```
 
 | キー | 描画 | 備考 |
@@ -30,13 +32,28 @@ point: スライド下部の💡強調帯（==hl== 強調可）
 | `badge:` | 見出し左のピル（`.slide-badge`、accent地） | 工程番号（Step 1）や一言ラベル（WHY）に |
 | `lead:` | 見出し直下のグレー1行（`.slide-lead`） | title では `subtitle:` と併存可（subtitle→lead の順に描画） |
 | `point:` | スライド下部の帯（`.slide-point`、💡自動付与） | 既存の `>` ノート（控えめな補足）とは別物として併存 |
+| `note:` | 非表示の `<aside class="slide-notes" hidden>`（1行＝1`<p>`） | 発表者の原稿・配布時の補足。**繰り返し可**（出現順）。空の `note:` は無視。全18type有効 |
 
 規則:
 
 - 対象はコードフェンス外・行頭のキーのみ。feature-showcase 等の **YAML内（インデントあり）の同名キーは対象外**
 - badge / lead は見出し（`##` / `#`）を持つtypeで有効。feature-showcase / comparison-chart（独自2カラム構造）では badge / lead は描画されない。**point は全typeで有効**
-- 同一キーの重複は後勝ち（警告なし）
-- 実装: `src/parser/slideHeader.ts`（純関数）→ `SlideBase.badge / lead / point`
+- badge / lead / point の重複は後勝ち（警告なし）。**`note:` だけは上書きせず出現順に追記**
+- 実装: `src/parser/slideHeader.ts`（純関数）→ `SlideBase.badge / lead / point / speakerNotes`
+
+### `note:`（スピーカーノート）の詳細
+
+- AST のフィールド名は `speakerNotes`（`InlineText[]`）。`notes` にしないのは `SvgFigureSlide.notes`（図の右側に見える補足）と衝突するため
+- 紛らわしい既存の「note」との違い:
+
+| 記法 | 意味 | 見えるか |
+|---|---|---|
+| `note:`（単数・行頭キー） | スピーカーノート | 既定で非表示 |
+| `> 引用`（本文末尾） | スライド上の補足（`<p class="note">`） | 見える |
+| `notes:`（複数形・svg-figure の箇条書き） | 図の右側の補足 | 見える |
+
+- 書き出し: HTML は常に含める（非表示）／PDF は `body[data-notes="on"]` のときだけスライド下にノートを付ける／PNG・ZIP は常にスライドのみ
+- 書き方の指針: スライドに書ききれない根拠・数字の時点・話す順番を書き、スライド本文の繰り返しは避ける
 
 ---
 
@@ -125,6 +142,7 @@ interface SlideBase {
   lead?: InlineText;
   point?: InlineText;
   tone?: SlideTone;
+  speakerNotes?: InlineText[]; // `note:` 行（1要素＝1段落）
 }
 
 interface StepsSlide extends SlideBase {

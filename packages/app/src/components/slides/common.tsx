@@ -49,3 +49,19 @@ export function PointBand({ text }: { text?: string }) {
   if (!text) return null;
   return <div className="slide-point">{renderInline(text)}</div>;
 }
+
+/**
+ * スピーカーノート（`note:` 行）。既定は非表示（hidden 属性＋CSS）。
+ * 1要素＝1段落。ノートが無いスライドでは要素自体を出力しない（既存MDの出力HTMLを変えない）。
+ * クラス名は `.slide-notes`（`.note` は見える補足ノートで使用済みのため避ける）。
+ */
+export function SpeakerNotes({ notes }: { notes?: string[] }) {
+  if (!notes || notes.length === 0) return null;
+  return (
+    <aside className="slide-notes" aria-label="スピーカーノート" hidden>
+      {notes.map((n, i) => (
+        <p key={i}>{renderInline(n)}</p>
+      ))}
+    </aside>
+  );
+}

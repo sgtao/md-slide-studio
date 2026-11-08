@@ -218,6 +218,12 @@ interface SlideBase {
   lead?: InlineText;
   point?: InlineText;
   tone?: SlideTone;
+
+  /**
+   * スピーカーノート（`note:` 行・1要素＝1段落）。既定は非表示（HTML上は hidden の aside）。
+   * 注意: フィールド名を `notes` にしないこと（SvgFigureSlide.notes＝図の右側に見える補足と衝突する）。
+   */
+  speakerNotes?: InlineText[];
 }
 
 export interface TitleSlide extends SlideBase {
