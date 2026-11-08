@@ -5,60 +5,96 @@
 ---
 ## [v0.6.0] - 2026-11-08
 
-スライドごとのスピーカーノート（`note:`）を追加し、1枚表示の右上 🗒️ のポップアップで読めるようにした。既定は非表示で、ノートの無い既存のMDは修正なしで同じ見た目・同じスライドHTMLになる
+スライドごとのスピーカーノート（`note:`）を追加し、1枚表示の右上 🗒️ のポップアップで読めるようにした。あわせて、アプリのPDF出力が1ページ目しか出ない問題を修正した
 
 ### 追加｜`note:`（スピーカーノート）
 
-発表者が話す原稿や、配布時の読み手への補足を、スライドごとに書けるようにした（設計: `22_design-mdss-migrate/03_migration-plan/01_speaker-notes-plan.md`）。
+発表者が話す原稿や、配布時の読み手への補足を、スライドごとに書けるようにした。既定は非表示で、ノートの無い既存のMDは修正なしで同じ見た目・同じスライドHTMLになる。
 
 - **記法**: 全18型共通の行頭キー `note:`。何行でも書け、1行が1段落になる。`**太字**`・`==強調==`・リンクが使える。空の `note:` は無視し、コードフェンス内・インデント付きの `note:` は対象外
 - **データ構造**: `SlideBase.speakerNotes?: InlineText[]`（`notes` にしないのは `SvgFigureSlide.notes` との衝突回避）。`badge` / `lead` / `point` は後勝ちのままで、`note` だけ出現順に追記する
 - **HTML**: 各 `section.slide` に `<aside class="slide-notes" aria-label="スピーカーノート" hidden>` を出力（1段落＝1`<p>`）。ノートが無いスライドには要素を出力しない。`SlideRenderer` の1か所の変更で、アプリのプレビューと `mdss-convert` の両方に反映される
 - **書き出し**: HTML は常に含める（元MD `DECK_MD` に `note:` 行が残るので往復も維持）。PNG・全枚ZIP は `ignoreElements` で `.slide-notes` を除外（常にスライドのみ）。PDF は既定どおりスライドのみで、`body[data-notes="on"]` のときだけスライドの下にノートを付ける（ノートはページをまたいで流れる配布資料形式）
-- **AI向け仕様**: `markdownSpec.ts`・`draftAssistPrompt.ts`・`docs/references/markdown-format-ext.md`・`README.md` に `note:` を追加（「スライドに書ききれない根拠・数字の時点・話す順番を書く。本文の繰り返しは書かない」）
 - **名前の混同に注意**: `note:`（非表示）、本文末尾の `>` 引用（見える補足）、svg-figure の `notes:`（複数形・図の右側の補足）は別物。仕様書に対比表を載せた
-- deckLint にノート未記入の警告は追加しない（既存デッキで大量に警告が出るため）
+- **AI向け仕様**: `markdownSpec.ts`・`draftAssistPrompt.ts`・`docs/references/markdown-format-ext.md`・`README.md` に `note:` を追加（「スライドに書ききれない根拠・数字の時点・話す順番を書く。本文の繰り返しは書かない」）
+- core: `slideHeader.test.ts` に複数行・フェンス内・インデント・空行・`notes:` の誤拾い防止・全18型・`>` 引用／svg-figure `notes:` との共存を追加
+- CLI: `smoke.test.mjs` に、ノート付きMDで `.slide-notes` が `hidden` で入ること、ノート無しMDでは入らないことを追加
+- e2e: 既定非表示・PNG書き出しの起動・印刷時の `data-notes` 連動を追加（`e2e/speaker-notes.spec.ts`）
 
-### 追加｜サンプル・テンプレートへの `note:`
+### 追加｜ノートポップアップ（右上 🗒️）
 
-- `sample.md`: title・contrast・points・steps（HOW）・svg-figure（journey）・sources の6枚に `note:` を追加（計9行）。サンプルを開く／`mdss-convert` で変換すると6枚に `.slide-notes` が入る。svg-figure の `notes:`（複数形・図の右に見える補足）との違いも、そのスライドのノートで説明している
+`note:` を画面で読めるようにした。1枚表示（hero・`V` で切り替え）の右上に 🗒️ ボタンを出し、押すと現在のスライドのノートを浮かぶパネル（非モーダル）で表示する。アプリのプレビュー（編集画面・`/present`）と書き出したHTMLの両方で同じ操作ができる（設計: `22_design-mdss-migrate/03_migration-plan/02_viewer-ui-plan.md` §4-6）。
+
+- **開閉**: 🗒️ クリック／`N` キー。`Esc`・✕・🗒️ 再押下・`N` で閉じる。既定は閉で、状態は保存しない。背景は暗くせず、スライドを見ながら読める
+- **ページ移動**: ポップアップ上部（ヘッダー）の「◀ 前へ」「次へ ▶」で、開いたまま前後のスライドへ移動し、ノートと `現在 / 総数` が更新される。先頭・末尾では無効。`←` `→` `Space` も従来どおり効く
+- **表示条件**: デッキに `note:` が1つでもあるときだけ 🗒️ を出す。現在のスライドにノートが無いときは薄く表示し、開くと「（ノートなし）」。一覧（list）表示では 🗒️・ポップアップとも隠れ、hero に戻ると開いていたポップアップも戻る
+- **後方互換**: ノートの無いデッキの書き出しHTMLには 🗒️・ポップアップ・スクリプトのいずれも入らない
+- **実装**: アプリは `NotesPopup.tsx`（`ControlCluster` の子）と `hooks.ts` の `N`／`Esc`。書き出しHTMLのスクリプトは `cli/src/standalone.ts` と `app/src/export/exporters.ts`（テンプレート文字列）の2箇所に重複して存在するため、ポップアップ部分は新設の `core/src/standalone/notesPopup.ts`（HTML断片と追加スクリプトを返すだけ）に1か所で置き、両方から取り込む
+- DOM の id・クラスはアプリと書き出しHTMLで共通で、CSS は `nav-controls.css` を共有（既存のCSS変数のみ）
+- ヘルプのショートカット一覧・`README.md`・`markdown-format-ext.md`・AI向け仕様（`markdownSpec.ts`）に読み方を追記
+- ポップアップ内のボタンはマウスで押してもフォーカスを奪わない（`mousedown` の既定動作を止める）。Chrome では `Space` の keydown を止めているため元々二重には動かず、他ブラウザ向けの保険
+- core: `notesPopup.test.ts`（出力条件の判定・ボタンとポップアップのHTML・スクリプトの文法）
+- CLI: `smoke.test.mjs` に、ノートがあるデッキにだけ 🗒️・ポップアップ・スクリプトが `.control-cluster` の中に入ること、外部URLを含まないことを追加
+- e2e: アプリと、アプリから書き出したHTMLの両方で、開閉・前へ／次へ・`←` `→`・`N`／`Esc`・list 切替・ノート無しスライド・ノート無しデッキ・「前へ／次へ」が本文より上にあること、7パレット × ライト/ダークでの可読性と画面内への収まりを追加（`e2e/notes-popup.spec.ts`）
+
+### 変更｜`sample.md`・テンプレートに `note:` を追加
+
+- `sample.md`: title・contrast・points・steps（HOW）・svg-figure（journey）・sources の6枚に `note:` を追加（計9行）。サンプルを開く／`mdss-convert` で変換すると6枚に `.slide-notes` が入る
+- svg-figure の `notes:`（複数形・図の右に見える補足）との違いを、journey スライドのノートで説明した。AI向けプロンプト（`draftAssistPrompt.ts`）の svg-figure の説明にも、`note:` との違いを追記
 - テンプレート挿入の `points` に `note:` 行を追加
-- テスト: `sample.test.ts` にノート数の検証、CLI smoke の後方互換テストを「サンプルから `note:` 行を除いた同じMDにはノート要素が入らない」形に変更
+- app: `sample.test.ts` にノート数の検証を追加
+- CLI: smoke の後方互換テストを「サンプルから `note:` 行を除いた同じMDにはノート要素が入らない」形に変更
 
-### 修正｜PDF出力が1ページ目しか出力されない問題（アプリ版）
+### 修正｜アプリのPDF出力が1ページ目しか出力されない問題
 
-`P` キー／エクスポートメニューからのPDF出力で、全スライドではなく1ページ目だけのPDFになっていた（`main` でも再現する既存の不具合で、`note:` とは無関係）。原因は2つあった。
+`P` キー／エクスポートメニューからのPDF出力で、全スライドではなく1ページ目だけのPDFになっていた（`note:` とは無関係に起きていた既存の不具合）。原因は2つあった。
 
 - **画面1枚分の高さで切れる**: `app.css` の `html[data-mode='edit'] body { overflow: hidden !important; height: 100% !important }` が、`print.css` の「印刷時は高さを解除する」ルールより詳細度が高く、印刷でも効いていた。`print.css` に `html[data-mode='edit']:root` 系の解除ルールを追加（`app.css` は後から読み込まれ、同じ詳細度だと負けるため `:root` で詳細度を上げた）。`#root` の `height: 100%` も解除
 - **末尾に空白ページ**: 最終スライドの `break-after: page` を外す `.slide:last-child` が、アプリ本体ではスライドの後ろに `#slide-counter` などの兄弟要素があるため当たらなかった。`section.slide:last-of-type` でも指定
 - 書き出したHTML（`mdss-convert` 出力）は構造が違い、この問題は起きていない
-- e2e: `e2e/pdf-print.spec.ts` を新規追加（実PDFのページ数がスライド枚数と一致することを、3枚デッキ・list切替・サンプル全体で確認。修正前は3件とも失敗）
+- e2e: 実PDFのページ数がスライド枚数と一致することを、3枚デッキ・list切替・サンプル全体で確認（`e2e/pdf-print.spec.ts`。修正前は3件とも失敗）
 
-### 追加｜ノートポップアップ（右上 🗒️）
-
-`note:` を画面で読めるようにした。1枚表示（hero・`V` で切り替え）の右上に 🗒️ ボタンを出し、押すと現在のスライドのノートを浮かぶパネル（非モーダル）で表示する（設計: `22_design-mdss-migrate/03_migration-plan/02_viewer-ui-plan.md` §4-6）。アプリのプレビュー（編集画面・`/present`）と書き出したHTMLの両方で同じ操作ができる。
-
-- **開閉**: 🗒️ クリック／`N` キー。`Esc`・✕・🗒️ 再押下・`N` で閉じる。既定は閉で、状態は保存しない。背景は暗くせず、スライドを見ながら読める
-- **ページ移動**: ポップアップ上部（ヘッダー）の「◀ 前へ」「次へ ▶」で、開いたまま前後のスライドへ移動し、ノートと `現在 / 総数` が更新される。先頭・末尾では無効。`←` `→` `Space` も従来どおり効く（ページ指定ジャンプは後続）
-- **表示条件**: デッキに `note:` が1つでもあるときだけ 🗒️ を出す。現在のスライドにノートが無いときは薄く表示し、開くと「（ノートなし）」。一覧（list）表示では 🗒️・ポップアップとも隠れ、hero に戻ると開いていたポップアップも戻る
-- **後方互換**: ノートの無いデッキの書き出しHTMLには 🗒️・ポップアップ・スクリプトのいずれも入らない
-- **実装**: アプリは `NotesPopup.tsx`（`ControlCluster` の子）と `hooks.ts` の `N`／`Esc`。書き出しHTMLは新設の `packages/core/src/standalone/notesPopup.ts`（HTML断片と追加スクリプトを返すだけ）を、重複している `app/export/exporters.ts` と `cli/src/standalone.ts` の両方が取り込む。ランタイム統合は未実施のまま、二重実装を増やさない構成にした。DOM の id・クラスは両者共通で、CSS は `nav-controls.css` を共有（既存のCSS変数のみ）
-- ヘルプのショートカット一覧・`README.md`・`markdown-format-ext.md`・AI向け仕様（`markdownSpec.ts`）に読み方を追記
-- 設計プラン（`22_design-mdss-migrate/03_migration-plan/` の README・01・02）を、ポップアップ方式・v0.6.0 での先行実装に合わせて更新
-
-### 今回やらないこと
-
-- ページ指定ジャンプ（J）・Home / End・サムネ帯・一覧グリッド・`point` 吹き出しの重なり修正（02 の後続段階）
-- 一覧（list）表示でのノート表示と、PDF にノートを付ける操作の UI（`body[data-notes="on"]` を切り替える手段。01 の `print.css` のルールだけが先に入っている）
-- ランタイム統合（`exporters.ts` と `cli/src/standalone.ts` の二重管理の解消）。PNG除外・ノートポップアップとも両方に同じ内容で入れた
-
-### テスト
-
-- core（Vitest）: `notesPopup.test.ts`（出力条件の判定・ボタンとポップアップのHTML・スクリプトの文法）
-- CLI（`node --test`）: ノートがあるデッキにだけ 🗒️・ポップアップ・スクリプトが `.control-cluster` の中に入る／無いデッキには入らない／外部URLを含まない
-- E2E（Playwright）: `e2e/notes-popup.spec.ts` を新規追加（アプリと、アプリから書き出したHTMLの両方で、開閉・前へ／次へ・`←` `→`・`N`／`Esc`・list 切替・ノート無しスライド・ノート無しデッキ、さらに7パレット × ライト/ダークでの可読性と画面内への収まり）
-- 実機確認: `mdss-convert` で変換した HTML でもブラウザで開閉・移動・ダーク表示を確認
-- 注意: ポップアップのボタンはマウスでフォーカスを奪わない（`mousedown` の既定動作を止める）が、Chrome では `Space` の keydown を止めているため元々二重には動かず、この対策は E2E では判別できない（他ブラウザ向けの保険）
+### ファイル構成の変更
+```
+新規:
+  e2e/notes-popup.spec.ts
+  e2e/pdf-print.spec.ts
+  e2e/speaker-notes.spec.ts
+  packages/app/src/components/NotesPopup.tsx
+  packages/core/src/standalone/notesPopup.ts
+  packages/core/src/standalone/notesPopup.test.ts
+変更:
+  package.json
+  package-lock.json
+  packages/cli/package.json
+  README.md
+  docs/prompts/draft-slide-md.md
+  docs/references/markdown-format.md
+  docs/references/markdown-format-ext.md
+  packages/core/src/index.ts
+  packages/core/src/parser/slideHeader.ts
+  packages/core/src/parser/slideHeader.test.ts
+  packages/core/src/parser/types.ts
+  packages/core/src/prompt/draftAssistPrompt.ts
+  packages/core/src/spec/markdownSpec.ts
+  packages/app/src/App.tsx
+  packages/app/src/components/ControlCluster.tsx
+  packages/app/src/components/slides/SlideRenderer.tsx
+  packages/app/src/components/slides/common.tsx
+  packages/app/src/export/exporters.ts
+  packages/app/src/help/helpContent.ts
+  packages/app/src/hooks/hooks.ts
+  packages/app/src/samples/sample.md
+  packages/app/src/samples/sample.test.ts
+  packages/app/src/templates/slideTemplates.ts
+  packages/app/src/theme/nav-controls.css
+  packages/app/src/theme/print.css
+  packages/app/src/theme/steps.css
+  packages/cli/src/standalone.ts
+  packages/cli/test/smoke.test.mjs
+  packages/cli/src/generated/themeCss.ts（生成物・build.mjsで再生成）
+  packages/cli/src/generated/sampleMd.ts（生成物・build.mjsで再生成）
+```
 
 ---
 ## [v0.5.4] - 2026-11-08
