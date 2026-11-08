@@ -28,6 +28,8 @@ export function buildNotesButtonHtml(): string {
 
 /**
  * ノートのポップアップ本体（`.control-cluster` の子として置く）。
+ * 上部のヘッダーに「前へ／次へ」・ページ番号・閉じるを並べ、その下に本文を置く
+ * （ノートを読みながら視線を動かさずにページ移動できるよう、操作は上部にまとめる）。
  * 本文・ページ番号・前後ボタンの状態は JS（NOTES_POPUP_SCRIPT）が更新する。
  * メニュー（パレット・エクスポート）のドロップダウンより下に重なるよう、クラスタの先頭側に置く。
  */
@@ -35,15 +37,13 @@ export function buildNotesPopupHtml(): string {
   return [
     '  <div id="notes-popup" class="notes-popup" role="dialog" aria-label="スピーカーノート" hidden>',
     '    <div class="notes-header">',
-    '      <span class="notes-title">🗒️ ノート</span>',
+    '      <span class="notes-title" aria-hidden="true">🗒️</span>',
+    '      <button id="notes-prev" type="button" onclick="navigate(-1)">◀ 前へ</button>',
+    '      <button id="notes-next" type="button" onclick="navigate(1)">次へ ▶</button>',
     '      <span id="notes-page" class="notes-page"></span>',
     '      <button id="notes-close" type="button" onclick="closeNotes()" aria-label="ノートを閉じる" title="閉じる（Esc）">✕</button>',
     '    </div>',
     '    <div id="notes-body" class="notes-body"></div>',
-    '    <div class="notes-footer">',
-    '      <button id="notes-prev" type="button" onclick="navigate(-1)">◀ 前へ</button>',
-    '      <button id="notes-next" type="button" onclick="navigate(1)">次へ ▶</button>',
-    '    </div>',
     '  </div>',
   ].join('\n');
 }

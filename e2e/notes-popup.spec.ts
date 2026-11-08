@@ -156,6 +156,24 @@ test.describe('ノートポップアップ（アプリのプレビュー）', ()
     }
   });
 
+  test('「前へ／次へ」はポップアップの上部（本文より上）にある', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('textarea').fill(deck);
+    await expect(page.locator('.slide')).toHaveCount(4);
+    await toggle(page).click();
+    await expect(popup(page)).toBeVisible();
+    const prev = await page.locator('#notes-prev').boundingBox();
+    const next = await page.locator('#notes-next').boundingBox();
+    const body = await page.locator('#notes-body').boundingBox();
+    const box = await popup(page).boundingBox();
+    expect(prev && next && body && box).toBeTruthy();
+    // 本文より上、かつポップアップの最上部の帯（ヘッダー）の中にある
+    expect(prev!.y + prev!.height).toBeLessThanOrEqual(body!.y + 1);
+    expect(next!.y + next!.height).toBeLessThanOrEqual(body!.y + 1);
+    expect(prev!.y - box!.y).toBeLessThan(24);
+    expect(next!.y - box!.y).toBeLessThan(24);
+  });
+
   test('ポップアップは .control-cluster の中・右上ボタン群の下にあり、画面外にはみ出さない', async ({
     page,
   }) => {

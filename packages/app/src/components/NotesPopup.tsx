@@ -2,7 +2,7 @@
  * NotesPopup.tsx — スピーカーノート（note:）のポップアップ（右上 🗒️ ボタン）。
  *
  * hero ビューで、現在のスライドのノートを浮かぶパネル（非モーダル）で見せる。
- * パネル内の「前へ／次へ」でページ移動もできる。
+ * パネル上部の「前へ／次へ」でページ移動もできる。
  * 書き出しHTML側（core/standalone/notesPopup.ts）と DOM の id・クラス名・文言を揃え、
  * CSS（nav-controls.css）を共有する。設計: 02_viewer-ui-plan.md §4-6。
  *
@@ -27,7 +27,27 @@ export function NotesPopup({ notes, current, total, onNavigate, onClose }: Notes
   return (
     <div id="notes-popup" className="notes-popup" role="dialog" aria-label="スピーカーノート">
       <div className="notes-header">
-        <span className="notes-title">🗒️ ノート</span>
+        <span className="notes-title" aria-hidden="true">
+          🗒️
+        </span>
+        <button
+          id="notes-prev"
+          type="button"
+          onMouseDown={keepFocus}
+          onClick={() => onNavigate(-1)}
+          disabled={current === 0}
+        >
+          ◀ 前へ
+        </button>
+        <button
+          id="notes-next"
+          type="button"
+          onMouseDown={keepFocus}
+          onClick={() => onNavigate(1)}
+          disabled={current >= total - 1}
+        >
+          次へ ▶
+        </button>
         <span id="notes-page" className="notes-page">
           {current + 1} / {total}
         </span>
@@ -48,26 +68,6 @@ export function NotesPopup({ notes, current, total, onNavigate, onClose }: Notes
         ) : (
           <p className="notes-empty">（ノートなし）</p>
         )}
-      </div>
-      <div className="notes-footer">
-        <button
-          id="notes-prev"
-          type="button"
-          onMouseDown={keepFocus}
-          onClick={() => onNavigate(-1)}
-          disabled={current === 0}
-        >
-          ◀ 前へ
-        </button>
-        <button
-          id="notes-next"
-          type="button"
-          onMouseDown={keepFocus}
-          onClick={() => onNavigate(1)}
-          disabled={current >= total - 1}
-        >
-          次へ ▶
-        </button>
       </div>
     </div>
   );

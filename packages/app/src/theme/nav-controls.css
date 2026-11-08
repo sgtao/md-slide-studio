@@ -370,20 +370,24 @@
   display: none;
 }
 
+/* 上部のヘッダー: 🗒️ ／ ◀ 前へ ／ 次へ ▶ ／（右寄せ）ページ番号 ／ ✕ */
 .notes-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px 8px 14px;
+  gap: 6px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--border);
   font-size: 13px;
-  font-weight: 600;
+}
+
+.notes-title {
+  padding: 0 4px 0 2px;
 }
 
 .notes-page {
   margin-left: auto;
   color: var(--text-secondary);
-  font-weight: 400;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -409,24 +413,17 @@
   color: var(--text-secondary);
 }
 
-.notes-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
-  border-top: 1px solid var(--border);
-}
-
 /* .control-cluster button（36×36・暗い丸角）より具体的なセレクタで、ポップアップ内のボタンだけ上書きする */
 .control-cluster .notes-popup button {
   width: auto;
   height: auto;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg-surface);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 12px;
+  white-space: nowrap;
   line-height: 1.4;
   cursor: pointer;
 }
@@ -446,7 +443,7 @@
   cursor: default;
 }
 
-.control-cluster .notes-popup .notes-header button {
+.control-cluster .notes-popup #notes-close {
   padding: 2px 8px;
   border: none;
   background: transparent;
