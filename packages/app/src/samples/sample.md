@@ -7,6 +7,8 @@ converting-site: https://sgtao.github.io/md-slide-studio/
 # Markdownから、==スライドを生成する。==
 subtitle: MD Slide Studio — 内容はMarkdownで書き、見た目はレンダラが決める
 badges: [全17type網羅サンプル, React + TypeScript, websearch-slide-ja 移植]
+note: このデッキは、MD Slide Studio の記法を一通り見せるためのサンプルです。
+note: 各スライドの下に `note:` 行でスピーカーノートを書けます。スライドには出ず、発表者の原稿や配布時の補足に使います。
 ---
 <!-- slide: contrast -->
 badge: WHY
@@ -27,6 +29,8 @@ verdict:
   - { label: 弱点, text: 同じ結果に何度でも戻れない, tone: warn }
 ```
 point: 資料は==一度作って終わりではない==。差し替えと修正が何度も起きる
+note: ここで言いたいのは、LLM任せだと「同じ結果に戻れない」ことです。
+note: 次のスライドで、内容と見た目を分ける解決策を話します。
 ---
 <!-- slide: points -->
 ## だから、==役割を分ける==
@@ -36,6 +40,8 @@ lead: 内容は人が書き、見た目は機械が決める。この境界を�
 - **AI＝下書きまで**：仕上がりの再現性は、AIに預けない
 > 3原則 ─ MD＝唯一の情報源／落ちないパーサー／決定論的描画
 point: このスライド自体が、左のエディタのMDから生成されています
+note: 3原則は、MDが唯一の情報源・落ちないパーサー・決定論的描画の3つです。順に話します。
+note: ノートに書くのは、スライドに書ききれない根拠・数字の時点・話す順番です。スライド本文の繰り返しは避けます。
 ---
 <!-- slide: diagram-flow -->
 ## 「決定論的」の中身
@@ -154,6 +160,7 @@ items:
     tone: outline
 ```
 point: 直すのは常に==MDだけ==。HTMLに戻って直す作業は発生しない
+note: 4ステップを順番に実演します。2番目のLLMへの依頼が、いちばん時間がかかるところです。
 ---
 <!-- slide: steps, tone: dark -->
 ## 人の判断は、==3割に集約される==
@@ -322,3 +329,4 @@ source: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Chrysanthemu
 - [websearch-slide-ja スキル](https://github.com/sgtao/skill-websearch-slide-ja) — 本アプリの移植元スキル（スライドMD仕様 v0.7）
 - [MD Slide Studio リポジトリ](https://github.com/sgtao/md-slide-studio) — ソースコード・Issue はこちら
 - [MD Slide Studio デモアプリ](https://sgtao.github.io/md-slide-studio/) — デモアプリサイト
+note: 出典はすべて公開リポジトリとデモサイトです。質疑ではここに戻って説明します。

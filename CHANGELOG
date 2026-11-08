@@ -19,6 +19,12 @@
 - **名前の混同に注意**: `note:`（非表示）、本文末尾の `>` 引用（見える補足）、svg-figure の `notes:`（複数形・図の右側の補足）は別物。仕様書に対比表を載せた
 - deckLint にノート未記入の警告は追加しない（既存デッキで大量に警告が出るため）
 
+### 追加｜サンプル・テンプレートへの `note:`
+
+- `sample.md`: title・contrast・points・steps（HOW）・sources の5枚に `note:` を追加（計8行）。サンプルを開く／`mdss-convert` で変換すると5枚に `.slide-notes` が入る
+- テンプレート挿入の `points` に `note:` 行を追加
+- テスト: `sample.test.ts` にノート数の検証、CLI smoke の後方互換テストを「サンプルから `note:` 行を除いた同じMDにはノート要素が入らない」形に変更
+
 ### 今回やらないこと
 
 - ノート表示の切替UI（`body[data-notes]` を切り替えるボタン・キー操作）とノートパネル、サムネ帯での `.slide-notes` 除去は閲覧UIプラン（02）の担当

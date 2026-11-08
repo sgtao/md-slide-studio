@@ -40,7 +40,8 @@ image: https://example.com/hero.jpg`,
 badge: LABEL
 - **リード1**：説明
 - **リード2**：説明
-point: 要点`,
+point: 要点
+note: スピーカーノート（既定は非表示。何行でも書け、1行が1段落）`,
   },
   {
     id: 'summary',

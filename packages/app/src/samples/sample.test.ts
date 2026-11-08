@@ -11,6 +11,15 @@ describe('sample.md（v0.2.5 統合デッキ）', () => {
     expect(errors).toEqual([]);
   });
 
+  it('スピーカーノート（note:）が数枚に入っていて、本文の段落に漏れていない', () => {
+    const deck = parseSlideMarkdown(sampleMd);
+    const withNotes = deck.slides.filter((s) => s.speakerNotes && s.speakerNotes.length > 0);
+    expect(withNotes.length).toBeGreaterThanOrEqual(4);
+    expect(deck.slides[0].speakerNotes).toHaveLength(2);
+    expect(deck.slides[deck.slides.length - 1].speakerNotes).toHaveLength(1);
+    expect(deck.slides.every((s) => s.warnings.length === 0)).toBe(true);
+  });
+
   it('先頭スライドは title、最終スライドは sources', () => {
     const deck = parseSlideMarkdown(sampleMd);
     expect(deck.slides[0].type).toBe('title');
