@@ -42,8 +42,4 @@ describe('ノートポップアップの部品', () => {
     expect(NOTES_POPUP_SCRIPT).not.toContain('`');
     expect(NOTES_POPUP_SCRIPT).not.toContain('${');
   });
-
-  it('スクリプトは文法的に正しい（関数として構築できる）', () => {
-    expect(() => new Function(NOTES_POPUP_SCRIPT)).not.toThrow();
-  });
 });

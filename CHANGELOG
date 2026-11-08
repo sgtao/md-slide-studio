@@ -33,8 +33,8 @@
 - DOM の id・クラスはアプリと書き出しHTMLで共通で、CSS は `nav-controls.css` を共有（既存のCSS変数のみ）
 - ヘルプのショートカット一覧・`README.md`・`markdown-format-ext.md`・AI向け仕様（`markdownSpec.ts`）に読み方を追記
 - ポップアップ内のボタンはマウスで押してもフォーカスを奪わない（`mousedown` の既定動作を止める）。Chrome では `Space` の keydown を止めているため元々二重には動かず、他ブラウザ向けの保険
-- core: `notesPopup.test.ts`（出力条件の判定・ボタンとポップアップのHTML・スクリプトの文法）
-- CLI: `smoke.test.mjs` に、ノートがあるデッキにだけ 🗒️・ポップアップ・スクリプトが `.control-cluster` の中に入ること、外部URLを含まないことを追加
+- core: `notesPopup.test.ts`（出力条件の判定・ボタンとポップアップのHTML・スクリプトに埋め込めない文字を含まないこと）
+- CLI: `smoke.test.mjs` に、ノートがあるデッキにだけ 🗒️・ポップアップ・スクリプトが `.control-cluster` の中に入ること、外部URLを含まないこと、出力HTMLのインラインscriptが文法的に正しいこと（`vm.Script` で実行せずコンパイル）を追加
 - e2e: アプリと、アプリから書き出したHTMLの両方で、開閉・前へ／次へ・`←` `→`・`N`／`Esc`・list 切替・ノート無しスライド・ノート無しデッキ・「前へ／次へ」が本文より上にあること、7パレット × ライト/ダークでの可読性と画面内への収まりを追加（`e2e/notes-popup.spec.ts`）
 
 ### 変更｜`sample.md`・テンプレートに `note:` を追加

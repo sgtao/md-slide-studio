@@ -9,6 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { Script } from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
@@ -147,4 +148,15 @@ test('ノートポップアップは外部URLを読み込まない（S4）', () 
   const html = run(['-', '--quiet'], NOTES_MD);
   const popup = html.slice(html.indexOf('id="notes-popup"'), html.indexOf('id="notes-popup"') + 900);
   assert.ok(!/https?:\/\//.test(popup));
+});
+
+test('ノート付き出力のインラインscriptは文法的に正しい（実行せずコンパイルのみ・ポップアップ部分を含む）', () => {
+  const html = run(['-', '--quiet'], NOTES_MD);
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  assert.ok(scripts.length >= 1, 'インラインscriptが見つかる');
+  const inline = scripts[scripts.length - 1];
+  assert.ok(inline.includes('function refreshNotes()'), 'ノートポップアップのコードを含む');
+  assert.doesNotThrow(() => new Script(inline));
+  // 検出力の確認: 壊れたコードは落ちる
+  assert.throws(() => new Script(inline + '\nfunction ('));
 });
