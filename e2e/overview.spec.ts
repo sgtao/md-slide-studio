@@ -78,7 +78,7 @@ async function clusterButtons(page: Page) {
 
 /**
  * ボタンの数と位置はビュー（list / hero / グリッド）で変わらない。
- * hero 専用の 🗒️・🎞️ は隠さず、使えないビューでは disabled（薄く表示）になる。
+ * 🗒️・🎞️ も隠さず、どのビューでも押せる（無効になるのは「編集のみ」レイアウトだけ）。
  */
 async function exerciseFixedButtons(page: Page, hasNotes: boolean) {
   const expectedIds = [
@@ -98,19 +98,16 @@ async function exerciseFixedButtons(page: Page, hasNotes: boolean) {
   const hero = await clusterButtons(page);
   expect(hero.map((b) => b.id)).toEqual(expectedIds);
   expect(hero.every((b) => b.shown)).toBe(true);
-  const heroOnly = (bs: typeof hero) =>
-    bs.filter((b) => b.id === 'notes-toggle' || b.id === 'strip-toggle');
-  expect(heroOnly(hero).every((b) => !b.disabled)).toBe(true);
+  expect(hero.every((b) => !b.disabled)).toBe(true);
 
-  // list（V）: 数も位置も同じ。hero 専用の2つだけ disabled
+  // list（V）: 数も位置も同じ。全部押せる
   await page.keyboard.press('v');
   await expect(counter(page)).toBeHidden();
   const list = await clusterButtons(page);
   expect(list.map((b) => ({ id: b.id, x: b.x, shown: b.shown }))).toEqual(
     hero.map((b) => ({ id: b.id, x: b.x, shown: b.shown })),
   );
-  expect(heroOnly(list).every((b) => b.disabled)).toBe(true);
-  expect(list.filter((b) => !heroOnly(list).includes(b)).every((b) => !b.disabled)).toBe(true);
+  expect(list.every((b) => !b.disabled)).toBe(true);
 
   // グリッド（G）: 同じ
   await page.keyboard.press('g');
@@ -119,11 +116,7 @@ async function exerciseFixedButtons(page: Page, hasNotes: boolean) {
   expect(g.map((b) => ({ id: b.id, x: b.x, shown: b.shown }))).toEqual(
     hero.map((b) => ({ id: b.id, x: b.x, shown: b.shown })),
   );
-  expect(heroOnly(g).every((b) => b.disabled)).toBe(true);
-
-  // 無効のボタンを押しても何も起きない
-  await page.locator('#strip-toggle').click({ force: true });
-  await expect(strip(page)).toBeHidden();
+  expect(g.every((b) => !b.disabled)).toBe(true);
 
   // 戻す（Esc でグリッドを閉じ、V で hero へ）
   await page.keyboard.press('Escape');
@@ -132,6 +125,113 @@ async function exerciseFixedButtons(page: Page, hasNotes: boolean) {
   await expect(counter(page)).toBeVisible();
   const back = await clusterButtons(page);
   expect(back).toEqual(hero);
+}
+
+const popup = (page: Page) => page.locator('#notes-popup');
+const currentThumbNum = (page: Page) => strip(page).locator('.thumb.is-current .thumb-num');
+async function toList(page: Page) {
+  if ((await page.locator('#view-toggle').textContent())?.trim() === '☰')
+    await page.keyboard.press('v');
+  await expect(page.locator('#view-toggle')).toHaveText('▭');
+}
+async function toHero(page: Page) {
+  if ((await page.locator('#view-toggle').textContent())?.trim() !== '☰')
+    await page.keyboard.press('v');
+  await expect(page.locator('#view-toggle')).toHaveText('☰');
+}
+
+/**
+ * どのビューからでも、1回のキー／ボタンで目的に届く（ノートのあるデッキ）。
+ *  - list でもサムネ帯（T）を出せ、クリックでそのスライドまでスクロールする（1枚表示には切り替えない）
+ *  - list では「見えているスライド」が現在のスライドになる（サムネ帯の強調・Home/End・V・N・J の基準）
+ *  - list・グリッド中の N / J は hero に移って実行、グリッド中の T はグリッドを閉じて帯を開く
+ */
+async function exerciseOneStep(page: Page) {
+  const slideAt = (i: number) => page.locator('.slide-scaler .slide').nth(i);
+  await toList(page);
+
+  // list でサムネ帯を開く。クリックでそのスライドへスクロール（list のまま）
+  await expect(strip(page)).toBeHidden();
+  await page.keyboard.press('t');
+  await expect(strip(page)).toBeVisible();
+  await expect(strip(page)).toBeInViewport();
+  await strip(page).locator('.thumb[data-index="9"]').click();
+  await expect(slideAt(9)).toBeInViewport({ ratio: 0.5 });
+  await expect(currentThumbNum(page)).toHaveText('10');
+  await expect(page.locator('#view-toggle')).toHaveText('▭'); // list のまま
+
+  // スクロールに現在のスライドが追従する
+  await slideAt(20).evaluate((el) => el.scrollIntoView({ block: 'start' }));
+  await expect(currentThumbNum(page)).toHaveText('21');
+
+  // Home / End は list では先頭・末尾へスクロール
+  await page.keyboard.press('End');
+  await expect(currentThumbNum(page)).toHaveText(`${TOTAL}`);
+  await expect(slideAt(TOTAL - 1)).toBeInViewport({ ratio: 0.5 });
+  await page.keyboard.press('Home');
+  await expect(currentThumbNum(page)).toHaveText('1');
+  await expect(slideAt(0)).toBeInViewport({ ratio: 0.5 });
+
+  // V で hero に戻ると、list で見ていたスライドが開く
+  await strip(page).locator('.thumb[data-index="14"]').click();
+  await expect(currentThumbNum(page)).toHaveText('15');
+  await page.keyboard.press('v');
+  await expect(counter(page)).toHaveText(`15 / ${TOTAL}`);
+
+  // list で N: hero に移って、見ていたスライドのノートを開く（3枚目にだけノートがある）
+  await toList(page);
+  await strip(page).locator('.thumb[data-index="2"]').click();
+  await expect(currentThumbNum(page)).toHaveText('3');
+  await page.keyboard.press('n');
+  await expect(counter(page)).toHaveText(`3 / ${TOTAL}`);
+  await expect(popup(page)).toBeVisible();
+  await expect(popup(page)).toContainText('3枚目のノート');
+  await page.keyboard.press('n');
+  await expect(popup(page)).toBeHidden();
+
+  // list で 🗒️ ボタン: 同じ
+  await toList(page);
+  await page.locator('#notes-toggle').click();
+  await expect(popup(page)).toBeVisible();
+  await page.keyboard.press('n');
+  await expect(popup(page)).toBeHidden();
+
+  // list で J: hero に移って番号入力に入る
+  await toList(page);
+  await page.keyboard.press('j');
+  await expect(page.locator('#view-toggle')).toHaveText('☰');
+  await expect(page.locator('#slide-counter .counter-input')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#slide-counter .counter-input')).toHaveCount(0);
+
+  // グリッド中の T: グリッドを閉じて、直前のビューでサムネ帯を開く（帯は開いたまま）
+  await page.keyboard.press('g');
+  await expect(grid(page)).toBeVisible();
+  await page.keyboard.press('t');
+  await expect(grid(page)).toBeHidden();
+  await expect(strip(page)).toBeVisible();
+  await page.keyboard.press('t'); // 帯を閉じる
+
+  // グリッド中の N: hero に移ってノートを開く（グリッドの現在ページ＝3枚目）
+  await toHero(page);
+  await page.keyboard.press('Home');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await expect(counter(page)).toHaveText(`3 / ${TOTAL}`);
+  await page.keyboard.press('g');
+  await expect(grid(page)).toBeVisible();
+  await page.keyboard.press('n');
+  await expect(grid(page)).toBeHidden();
+  await expect(popup(page)).toBeVisible();
+  await page.keyboard.press('n');
+  await expect(popup(page)).toBeHidden();
+
+  // グリッド中の J: hero に移って番号入力に入る
+  await page.keyboard.press('g');
+  await expect(grid(page)).toBeVisible();
+  await page.keyboard.press('j');
+  await expect(grid(page)).toBeHidden();
+  await expect(page.locator('#slide-counter .counter-input')).toBeFocused();
 }
 
 /** ページ指定移動（J / Home / End / カウンタークリック）。hero で開始している前提 */
@@ -239,17 +339,15 @@ async function exerciseStrip(page: Page) {
   expect(cloneStyle.id).toBe('');
   expect(cloneStyle.active).toBe(false);
 
-  // T で閉じる。list（V）では帯は隠れ、ボタンは消えずに無効（薄く表示）になる
+  // T で閉じる。list（V）でも帯は出たままで、ボタンも押せる
   await page.keyboard.press('t');
   await expect(strip(page)).toBeHidden();
   await page.keyboard.press('t');
   await expect(strip(page)).toBeVisible();
   await page.keyboard.press('v');
-  await expect(strip(page)).toBeHidden();
-  await expect(page.locator('#strip-toggle')).toBeVisible();
-  await expect(page.locator('#strip-toggle')).toBeDisabled();
-  await page.keyboard.press('v');
+  await expect(strip(page)).toBeVisible();
   await expect(page.locator('#strip-toggle')).toBeEnabled();
+  await page.keyboard.press('v');
   await expect(strip(page)).toBeVisible();
   // ボタンでも開閉できる
   await page.locator('#strip-toggle').click();
@@ -333,6 +431,11 @@ async function exerciseGrid(page: Page) {
 }
 
 test.describe('閲覧UI（アプリのプレビュー）', () => {
+  test('どのビューからも1回のキー／ボタンで届く（list のサムネ帯・N・J・T）', async ({ page }) => {
+    await openApp(page, deckWithNotes);
+    await exerciseOneStep(page);
+  });
+
   test('右上ボタンの数と位置はビューで変わらない（ノートなし6個・あり7個）', async ({ page }) => {
     await openApp(page);
     await exerciseFixedButtons(page, false);
@@ -378,7 +481,7 @@ test.describe('閲覧UI（アプリのプレビュー）', () => {
     await page.keyboard.press('g');
     await expect(grid(page)).toBeVisible();
     await expect(page.locator('#notes-popup')).toBeHidden();
-    await expect(page.locator('#notes-toggle')).toBeDisabled(); // 消えず、無効（薄く表示）
+    await expect(page.locator('#notes-toggle')).toBeEnabled(); // 消えず、押せる（押すと hero へ移る）
     await page.keyboard.press('Escape');
     await expect(grid(page)).toBeHidden();
     await expect(page.locator('#notes-popup')).toBeVisible();
@@ -386,6 +489,14 @@ test.describe('閲覧UI（アプリのプレビュー）', () => {
 });
 
 test.describe('閲覧UI（書き出しHTML）', () => {
+  test('どのビューからも1回のキー／ボタンで届く（list のサムネ帯・N・J・T）', async ({
+    page,
+  }, testInfo) => {
+    const file = await exportHtml(page, testInfo, deckWithNotes);
+    await page.goto(`file://${file}`);
+    await exerciseOneStep(page);
+  });
+
   test('右上ボタンの数と位置はビューで変わらない（ノートなし6個・あり7個）', async ({
     page,
   }, testInfo) => {
@@ -474,7 +585,7 @@ test.describe('閲覧UI（書き出しHTML）', () => {
     await page.goto(`file://${file}`);
     await expect(page.locator('#grid-toggle')).toBeVisible();
     await expect(page.locator('#strip-toggle')).toBeVisible(); // list でも消えない
-    await expect(page.locator('#strip-toggle')).toBeDisabled(); // 無効（薄く表示）
+    await expect(page.locator('#strip-toggle')).toBeEnabled();
     await expect(strip(page)).toBeHidden();
     await expect(grid(page)).toBeHidden();
     // 閉じている間はサムネを1つも作らない

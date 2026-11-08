@@ -1,7 +1,7 @@
 /**
  * notesPopup.ts — 書き出しHTML用「ノートポップアップ」（右上 🗒️ ボタン）の部品。
  *
- * hero ビュー（V で切り替える1枚表示）で 🗒️ を押すと、現在のスライドのスピーカーノート
+ * 🗒️（または N）を押すと、現在のスライドのスピーカーノート
  * （`<aside class="slide-notes" hidden>`、`note:` 行）を浮かぶパネルで読める。
  * パネル内の「前へ／次へ」でページ移動もできる。設計: 22_design-mdss-migrate/03_migration-plan/
  * 02_viewer-ui-plan.md §4-6。
@@ -21,9 +21,9 @@ export function htmlHasSpeakerNotes(sectionsHtml: string): boolean {
   return /class="slide-notes"/.test(sectionsHtml);
 }
 
-/** `.control-cluster` の先頭に置く 🗒️ ボタン。hero ビュー以外では隠さず `disabled`（薄く表示）にする。 */
+/** `.control-cluster` の先頭に置く 🗒️ ボタン。どのビューでも隠さず、押すと hero に移ってノートを開く。 */
 export function buildNotesButtonHtml(): string {
-  return '  <button id="notes-toggle" type="button" onclick="toggleNotes()" title="ノート（N・1枚表示で使用）" aria-label="スピーカーノート" aria-expanded="false" disabled>🗒️</button>';
+  return '  <button id="notes-toggle" type="button" onclick="toggleNotes()" title="ノート（N）" aria-label="スピーカーノート" aria-expanded="false">🗒️</button>';
 }
 
 /**
@@ -68,7 +68,6 @@ function refreshNotes() {
   if (!btn || !pop) return;
   var hero = (currentView === 'hero');
   var html = currentNotesHtml();
-  btn.disabled = !hero;
   btn.classList.toggle('is-empty', !html);
   btn.setAttribute('aria-expanded', String(hero && notesOpen));
   pop.hidden = !(hero && notesOpen);
@@ -81,7 +80,13 @@ function refreshNotes() {
   document.getElementById('notes-next').disabled = (cur === total - 1);
 }
 function toggleNotes() {
-  if (currentView !== 'hero') return;
+  /* list・グリッド中: hero に移って（現在のスライドの）ノートを開く。1回のキー／クリックで届く */
+  if (currentView !== 'hero') {
+    notesOpen = true;
+    currentView = 'hero';
+    applyView();
+    return;
+  }
   notesOpen = !notesOpen;
   refreshNotes();
 }
@@ -107,7 +112,7 @@ document.addEventListener('keydown', function (e) {
   if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
   if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
   if (!e.shiftKey && (e.key === 'n' || e.key === 'N')) { toggleNotes(); return; }
-  if (e.key === 'Escape' && notesOpen) { closeNotes(); e.preventDefault(); }
+  if (e.key === 'Escape' && notesOpen && currentView === 'hero') { closeNotes(); e.preventDefault(); }
 });
 refreshNotes();
 `;

@@ -6,7 +6,7 @@
  * CSS 変数 --list-scale の設定に置き換え、デッキ単位の effect として移植。v0.6.1）。
  * 閲覧UI（サムネ帯・一覧グリッド・ページ番号入力）もここに載せる。
  */
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import type { SlideDeck as Deck } from '@mdss/core';
 import { SlideRenderer, slideSectionClass } from './slides/SlideRenderer';
 import { OverviewGrid, THUMB_STRIP_HEIGHT, ThumbStrip } from './Overview';
@@ -18,7 +18,12 @@ export interface SlideDeckHandle {
   getAllSlideEls: () => HTMLElement[];
   /** .slide-scaler 全体（HTMLエクスポート用） */
   getScalerEl: () => HTMLElement | null;
+  /** list ビューで、指定ページ（0始まり）のスライドが見える位置までスクロールする */
+  scrollToSlide: (index: number) => void;
 }
+
+/** list ビューのスクロール領域の上 padding（app.css の .slide-scaler と同じ値） */
+const LIST_TOP_PADDING = 56;
 
 interface Props {
   deck: Deck;
@@ -26,11 +31,13 @@ interface Props {
   view: 'hero' | 'list';
   /** 一覧グリッド（G）を開いているか。開いている間は全画面に重ねて表示する */
   grid?: boolean;
-  /** サムネ帯（T）を開いているか。hero のときだけ有効 */
+  /** サムネ帯（T）を開いているか。hero・list で表示する（グリッド中は出さない） */
   strip?: boolean;
   /** ページ番号の入力中か（カウンターが数字入力欄になる） */
   jumping?: boolean;
   onSelect: (index: number) => void;
+  /** list ビューで、画面の上寄りに見えているスライド（＝現在のスライド）が変わったとき（サムネ帯のクリックも含む） */
+  onTrack?: (index: number) => void;
   onNavigate: (dir: 1 | -1) => void;
   /** サムネ・グリッドのクリック／Enter。hero のそのページへ移動する */
   onPick?: (index: number) => void;
@@ -101,6 +108,7 @@ export const SlideDeckView = forwardRef<SlideDeckHandle, Props>(function SlideDe
     strip = false,
     jumping = false,
     onSelect,
+    onTrack,
     onNavigate,
     onPick,
     onStartJump,
@@ -111,20 +119,81 @@ export const SlideDeckView = forwardRef<SlideDeckHandle, Props>(function SlideDe
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scalerRef = useRef<HTMLDivElement>(null);
-  const showStrip = strip && view === 'hero' && !grid;
+  const showStrip = strip && !grid;
   const { scale, top } = useFitSlide(
     containerRef,
     view === 'hero',
-    showStrip ? THUMB_STRIP_HEIGHT : 0,
+    showStrip && view === 'hero' ? THUMB_STRIP_HEIGHT : 0,
   );
   const total = deck.slides.length;
+  const currentRef = useRef(current);
+  const onTrackRef = useRef(onTrack);
+  const expectedScrollTopRef = useRef(-1); // 自分で動かしたスクロール位置。この位置のスクロールは現在ページの追従に使わない
+  useEffect(() => {
+    currentRef.current = current;
+    onTrackRef.current = onTrack;
+  });
+
+  const scrollToSlide = useCallback((index: number) => {
+    const c = containerRef.current;
+    const s = scalerRef.current?.querySelectorAll<HTMLElement>('.slide')[index];
+    if (!c || !s) return;
+    const y = s.getBoundingClientRect().top - c.getBoundingClientRect().top + c.scrollTop;
+    c.scrollTop = Math.max(0, y - LIST_TOP_PADDING);
+    expectedScrollTopRef.current = c.scrollTop;
+  }, []);
 
   useImperativeHandle(ref, () => ({
     getActiveSlideEl: () => scalerRef.current?.querySelector<HTMLElement>('.slide.active') ?? null,
     getAllSlideEls: () =>
       Array.from(scalerRef.current?.querySelectorAll<HTMLElement>('.slide') ?? []),
     getScalerEl: () => scalerRef.current,
+    scrollToSlide,
   }));
+
+  // list ビュー: 画面の上から数えて半分より多く見えている最初のスライドを「現在のスライド」にする。
+  // サムネ帯の強調・N／J で hero に移るときの行き先・PNG の対象になる。
+  const listActive = view === 'list' && !grid;
+  useEffect(() => {
+    const c = containerRef.current;
+    const scaler = scalerRef.current;
+    if (!listActive || !c || !scaler) return;
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        if (Math.abs(c.scrollTop - expectedScrollTopRef.current) <= 2) return;
+        const els = scaler.querySelectorAll<HTMLElement>('.slide');
+        let idx: number;
+        if (c.scrollTop <= 1) idx = 0;
+        else if (c.scrollTop + c.clientHeight >= c.scrollHeight - 2) idx = els.length - 1;
+        else {
+          // 画面の上から数えて、半分より多く見えている最初のスライド
+          const top = c.getBoundingClientRect().top;
+          idx = els.length - 1;
+          for (let i = 0; i < els.length; i++) {
+            const r = els[i].getBoundingClientRect();
+            if (r.bottom - top > r.height * 0.5) {
+              idx = i;
+              break;
+            }
+          }
+        }
+        if (idx !== currentRef.current) onTrackRef.current?.(idx);
+      });
+    };
+    c.addEventListener('scroll', onScroll, { passive: true });
+    return () => c.removeEventListener('scroll', onScroll);
+  }, [listActive, deck]);
+
+  // list に入った（hero・グリッドから戻った）ら、現在のスライドが見える位置までスクロールする
+  useEffect(() => {
+    if (!listActive) return;
+    const id = requestAnimationFrame(() => scrollToSlide(currentRef.current));
+    return () => cancelAnimationFrame(id);
+  }, [listActive, scrollToSlide]);
 
   // list ビュー: 各スライドを 960×540 の箱ごと scale する。縮小率 --list-scale（= 表示幅 / 960）を
   // .slide-scaler に設定し、CSS（app.css）がスライドごと縮める（scaleListSlides 移植）。
@@ -213,7 +282,21 @@ export const SlideDeckView = forwardRef<SlideDeckHandle, Props>(function SlideDe
           </div>
         )}
       </div>
-      {showStrip && onPick && <ThumbStrip deck={deck} current={current} onPick={onPick} />}
+      {showStrip && onPick && (
+        <ThumbStrip
+          deck={deck}
+          current={current}
+          onPick={
+            view === 'list'
+              ? (i) => {
+                  // list では1枚表示へ切り替えず、そのスライドまでスクロールする
+                  scrollToSlide(i);
+                  onTrack?.(i);
+                }
+              : onPick
+          }
+        />
+      )}
       {grid && onPick && <OverviewGrid deck={deck} current={current} onPick={onPick} />}
     </div>
   );

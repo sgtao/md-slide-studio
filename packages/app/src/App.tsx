@@ -243,7 +243,7 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
   const [jumping, setJumping] = useState(false);
   const previewVisible = effectiveLayout !== 'editor' && !showAiPromptPanel;
   const gridActive = gridOpen && previewVisible;
-  const stripActive = stripOpen && view === 'hero' && previewVisible;
+  const stripActive = stripOpen && previewVisible; // hero・list で表示（グリッド中は SlideDeck が出さない）
   const jumpActive = jumping && view === 'hero' && !gridActive && previewVisible;
 
   const lastIndex = Math.max(0, deck.slides.length - 1);
@@ -255,20 +255,28 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
     },
     [view, gridActive, deck.slides.length],
   );
-  // 指定ページ（0始まり）へ。範囲外は先頭・末尾に丸める。hero のときだけ
+  // 指定ページ（0始まり）へ。範囲外は先頭・末尾に丸める。hero は表示を切り替え、list はスクロールする
   const goTo = useCallback(
     (index: number) => {
-      if (view !== 'hero' || gridActive) return;
-      setCurrent(Math.max(0, Math.min(lastIndex, index)));
+      if (gridActive) return;
+      const i = Math.max(0, Math.min(lastIndex, index));
+      setCurrent(i);
+      // list ではそのスライドまでスクロールする（Home / End・サムネ帯）
+      if (view === 'list') deckRef.current?.scrollToSlide(i);
     },
     [view, gridActive, lastIndex],
   );
   const goHome = useCallback(() => goTo(0), [goTo]);
   const goEnd = useCallback(() => goTo(lastIndex), [goTo, lastIndex]);
   const startJump = useCallback(() => {
-    if (view === 'hero' && !gridActive && previewVisible && deck.slides.length > 0)
-      setJumping(true);
-  }, [view, gridActive, previewVisible, deck.slides.length]);
+    if (!previewVisible || deck.slides.length === 0) return;
+    // list・グリッド中の J: hero に移ってから番号入力に入る（1回のキーで届く）
+    if (view !== 'hero' || gridActive) {
+      setView('hero');
+      setGridOpen(false);
+    }
+    setJumping(true);
+  }, [view, gridActive, previewVisible, deck.slides.length, setView]);
   const doJump = useCallback(
     (page: number) => {
       setJumping(false);
@@ -283,9 +291,15 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
     setGridOpen((o) => !o);
   }, [previewVisible, deck.slides.length]);
   const toggleStrip = useCallback(() => {
-    if (view !== 'hero' || gridActive || !previewVisible) return;
+    if (!previewVisible) return;
+    // グリッド中の T: グリッドを閉じて、直前のビュー（hero／list）でサムネ帯を開く
+    if (gridActive) {
+      setGridOpen(false);
+      setStripOpen(true);
+      return;
+    }
     setStripOpen((o) => !o);
-  }, [view, gridActive, previewVisible]);
+  }, [gridActive, previewVisible]);
   // サムネ・グリッドのクリック／Enter: hero のそのページを開く
   const pickSlide = useCallback(
     (index: number) => {
@@ -307,9 +321,16 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
   );
   // 'editor' レイアウト・AIプロンプトパネル表示中は .preview-pane が無く、🗒️ も出ない
   const toggleNotes = useCallback(() => {
-    if (view !== 'hero' || !hasAnyNotes || !previewVisible || gridActive) return;
+    if (!hasAnyNotes || !previewVisible) return;
+    // list・グリッド中の N: hero に移って（現在のスライドの）ノートを開く
+    if (view !== 'hero' || gridActive) {
+      setView('hero');
+      setGridOpen(false);
+      setNotesOpen(true);
+      return;
+    }
     setNotesOpen((o) => !o);
-  }, [view, hasAnyNotes, previewVisible, gridActive]);
+  }, [view, hasAnyNotes, previewVisible, gridActive, setView]);
   const closeNotes = useCallback(() => setNotesOpen(false), []);
   // Esc: 一覧グリッドを開いていればそれを閉じる（直前のビューへ戻る）。無ければノートポップアップを閉じる
   const onEscape = useCallback(() => {
@@ -558,6 +579,7 @@ export default function App({ mode }: { mode: 'edit' | 'present' }) {
                   setCurrent(i);
                   setView('hero');
                 }}
+                onTrack={setCurrent}
                 onNavigate={navigate}
                 onPick={pickSlide}
                 onStartJump={startJump}

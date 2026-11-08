@@ -2,8 +2,8 @@
  * ControlCluster.tsx — 右上コントロール（base-template.html の .control-cluster 移植）。
  * テーマ切替 / ビュー切替 / 一覧グリッド・サムネ帯 / パレット5色ドロップダウン / エクスポートメニュー。
  *
- * ボタンの数と位置はビューによって変えない（v0.6.1）。🗒️ ノート・🎞️ サムネ帯は hero 専用なので、
- * list・グリッドでは隠さず disabled（薄く表示）にする。🗒️ はノートのあるデッキだけ出す（デッキ単位の条件）。
+ * ボタンの数と位置はビューによって変えない（v0.6.1）。🗒️ ノート・🎞️ サムネ帯も list・グリッドで
+ * 隠さず、無効にもしない（押すと必要なビューへ移って実行する）。🗒️ はノートのあるデッキだけ出す。
  *
  * 配置を .preview-pane の内側から .workspace 直下へ移した。
  *   'editor' レイアウトでは .preview-pane 自体がアンマウントされるため、
@@ -39,10 +39,10 @@ interface Props {
   disabled?: boolean;
   onToggleTheme: () => void;
   onToggleView: () => void;
-  /** 一覧グリッド（G）を開いているか。開いている間は 🗒️ とサムネ帯ボタンを無効（薄く表示）にする */
+  /** 一覧グリッド（G）を開いているか。開いている間はノートのポップアップとサムネ帯を出さない */
   grid?: boolean;
   onToggleGrid?: () => void;
-  /** サムネ帯（T）を開いているか。ボタンは hero ビュー（グリッド以外）のときだけ押せる */
+  /** サムネ帯（T）を開いているか。hero・list で表示する */
   strip?: boolean;
   onToggleStrip?: () => void;
   onSetPalette: (p: Palette) => void;
@@ -53,7 +53,7 @@ interface Props {
   onExportMd: () => void;
   /**
    * スピーカーノートのポップアップ。デッキにノートが1つも無いときは渡さない（🗒️ を出さない）。
-   * 🗒️ は hero ビューのときだけ押せる（それ以外は薄く表示）。
+   * 🗒️ は list・グリッドで押すと、hero に移ってノートを開く。
    */
   notes?: {
     open: boolean;
@@ -81,8 +81,8 @@ export function ControlCluster(props: Props) {
   // 表示に使う値をレンダリング時に導出する（クリック操作の記録用stateとは分離する）。
   const visibleMenu = props.disabled ? null : openMenu;
 
-  // 🗒️・🎞️ とノートのポップアップは hero ビュー（1枚表示）のときだけ使える。
-  // list・一覧グリッドでは、ボタンは隠さず disabled にする（数と位置を固定する）。
+  // ノートのポップアップは hero ビュー（1枚表示）のときだけ出る。ボタンはどのビューでも押せる
+  // （list・グリッドで押すと App が hero に移ってから開く）。
   const heroActive = props.view === 'hero' && !props.grid;
 
   const toggle = (m: 'palette' | 'export') => {
@@ -98,11 +98,10 @@ export function ControlCluster(props: Props) {
           id="notes-toggle"
           type="button"
           onClick={props.notes.onToggle}
-          disabled={!heroActive}
           className={props.notes.popup.notes.length === 0 ? 'is-empty' : undefined}
           aria-expanded={heroActive && props.notes.open}
           aria-label="スピーカーノート"
-          title="ノート（N・1枚表示で使用）"
+          title="ノート（N）"
         >
           🗒️
         </button>
@@ -136,10 +135,10 @@ export function ControlCluster(props: Props) {
           id="strip-toggle"
           type="button"
           onClick={props.onToggleStrip}
-          disabled={props.disabled || !heroActive}
-          aria-expanded={heroActive && !!props.strip}
+          disabled={props.disabled}
+          aria-expanded={!props.grid && !!props.strip}
           aria-label="サムネ帯"
-          title={props.disabled ? DISABLED_TITLE : 'サムネ帯（T・1枚表示で使用）'}
+          title={props.disabled ? DISABLED_TITLE : 'サムネ帯（T）'}
         >
           🎞️
         </button>

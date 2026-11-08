@@ -98,7 +98,7 @@
   color: var(--nav-text);
 }
 
-/* ─── サムネ帯（hero の下部。既定は閉） ─── */
+/* ─── サムネ帯（hero・list の画面下部。既定は閉） ─── */
 .thumb-strip {
   position: fixed;
   left: 0;
@@ -152,6 +152,20 @@
 .deck-container .thumb-strip,
 .deck-container .overview-grid {
   position: absolute;
+}
+
+/* list でもサムネ帯を出す（v0.6.1）。
+   書き出しHTML: 画面下に固定（上の .thumb-strip）。最後のスライドが帯に隠れないよう下に余白を足す。
+   アプリ: list は .deck-container 内スクロールなので、帯はスクロール領域の底に貼り付ける（sticky）。
+   sticky は流れの末尾に自分の高さ分の場所を取るので、余白の追加は要らない。 */
+@media screen {
+  body[data-strip='on'][data-view='list'] .slide-scaler {
+    padding-bottom: calc(64px + 112px);
+  }
+  .deck-container[data-view='list'] .thumb-strip {
+    position: sticky;
+    bottom: 0;
+  }
 }
 
 /* ─── ページ番号の入力（#slide-counter をクリック／J） ─── */

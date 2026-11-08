@@ -20,12 +20,12 @@
 
 /**
  * `.control-cluster` の view-toggle の直後に置くボタン。
- * strip は hero 以外では隠さず `disabled`（薄く表示）にする: ビューを切り替えてもボタンの数・位置を変えない。
+ * どのビュー（list・hero・グリッド）でも隠さず、無効にもしない: どのビューからでも1回のキー／クリックで届く。
  */
 export function buildOverviewButtonsHtml(): string {
   return [
     '  <button id="grid-toggle" type="button" onclick="toggleGrid()" title="一覧グリッド（G）" aria-label="一覧グリッド" aria-expanded="false">▦</button>',
-    '  <button id="strip-toggle" type="button" onclick="toggleStrip()" title="サムネ帯（T・1枚表示で使用）" aria-label="サムネ帯" aria-expanded="false" disabled>🎞️</button>',
+    '  <button id="strip-toggle" type="button" onclick="toggleStrip()" title="サムネ帯（T）" aria-label="サムネ帯" aria-expanded="false">🎞️</button>',
   ].join('\n');
 }
 
@@ -53,6 +53,9 @@ var prevViewBeforeGrid = 'hero';
 var thumbBuilt = { strip: false, grid: false };
 var thumbObserver = null;
 var gridWasOpen = false;
+var prevAppliedView = null;
+var expectedScrollY = -1; /* 自分で動かしたスクロール位置。この位置のスクロールは現在ページの追従に使わない */
+var inPrint = false;
 
 function stripEl() { return document.getElementById('thumb-strip'); }
 function gridEl() { return document.getElementById('overview-grid'); }
@@ -175,14 +178,15 @@ function syncOverview() {
   var grid = gridEl();
   if (!strip || !grid) return;
   var hero = (currentView === 'hero');
-  var showStrip = hero && stripOpen;
+  var showStrip = stripOpen && (currentView === 'hero' || currentView === 'list');
   var showGrid = (currentView === 'grid');
   if (showStrip && !thumbBuilt.strip) { buildThumbs(strip, 's'); thumbBuilt.strip = true; }
   if (showGrid && !thumbBuilt.grid) { buildThumbs(grid, 'g'); thumbBuilt.grid = true; }
   strip.hidden = !showStrip;
   grid.hidden = !showGrid;
+  document.body.dataset.strip = showStrip ? 'on' : 'off';
   var st = document.getElementById('strip-toggle');
-  if (st) { st.disabled = !hero; st.setAttribute('aria-expanded', String(showStrip)); }
+  if (st) st.setAttribute('aria-expanded', String(showStrip));
   var gt = document.getElementById('grid-toggle');
   if (gt) gt.setAttribute('aria-expanded', String(showGrid));
   if (showStrip) { layoutThumbs(strip); markCurrentThumbs(); centerCurrentThumb(strip, true); }
@@ -195,6 +199,9 @@ function syncOverview() {
       if (cb) cb.focus({ preventScroll: true });
     }
   }
+  /* グリッドを閉じたとき、隠れたグリッド内のサムネにフォーカスが残ると、矢印・Space が
+     グリッド側に奪われてページ送りが効かなくなる。フォーカスを外す */
+  if (gridWasOpen && !showGrid && grid.contains(document.activeElement)) document.activeElement.blur();
   gridWasOpen = showGrid;
   if (hero) fitSlide();
 }
@@ -209,7 +216,14 @@ update = function () {
   syncOverview();
 };
 var overviewBaseApplyView = applyView;
-applyView = function () { overviewBaseApplyView(); syncOverview(); };
+applyView = function () {
+  var was = prevAppliedView;
+  overviewBaseApplyView();
+  syncOverview();
+  /* list に入ったら、現在のスライドが見える位置までスクロールする（hero／グリッドから戻ったとき） */
+  if (currentView === 'list' && was && was !== 'list') scheduleListScroll(cur);
+  prevAppliedView = currentView;
+};
 var overviewBaseNavigate = navigate;
 navigate = function (dir) {
   if (currentView === 'grid') return; /* グリッド中の矢印・Space はフォーカス移動に使う */
@@ -217,12 +231,13 @@ navigate = function (dir) {
 };
 window.addEventListener('resize', function () {
   if (currentView === 'grid' && gridEl()) layoutThumbs(gridEl());
-  if (currentView === 'hero' && stripOpen && stripEl()) layoutThumbs(stripEl());
+  if ((currentView === 'hero' || currentView === 'list') && stripOpen && stripEl()) layoutThumbs(stripEl());
 });
 
 /* ── 開閉・移動 ── */
 function toggleStrip() {
-  if (currentView !== 'hero') return;
+  /* グリッド中に T: グリッドを閉じて、直前のビュー（hero／list）でサムネ帯を開く */
+  if (currentView === 'grid') { stripOpen = true; closeGrid(); return; }
   stripOpen = !stripOpen;
   syncOverview();
 }
@@ -237,9 +252,58 @@ function closeGrid() {
   applyView();
 }
 function goTo(i) {
+  if (currentView === 'list') { listGo(i); return; }
   if (currentView !== 'hero') return;
   navigate(clampIndex(i) - cur);
 }
+
+/* ── list ビュー: 現在のスライドの追従とスクロール ──
+   list では「画面の上から数えて半分より多く見えている最初のスライド」を現在のスライド（cur）とする。
+   サムネ帯の強調・N／J で hero へ移るときの行き先・Shift+S の PNG の対象になる。 */
+function listScrollTo(i) {
+  var s = slides[i];
+  if (!s) return;
+  var y = s.getBoundingClientRect().top + window.pageYOffset - 72; /* .slide-scaler の上 padding */
+  window.scrollTo(0, Math.max(0, y));
+  expectedScrollY = window.pageYOffset;
+}
+function scheduleListScroll(i) {
+  requestAnimationFrame(function () { requestAnimationFrame(function () { listScrollTo(i); }); });
+}
+function afterListMove() {
+  markCurrentThumbs();
+  var strip = stripEl();
+  if (strip && !strip.hidden) centerCurrentThumb(strip, true);
+}
+function listGo(i) {
+  cur = clampIndex(i);
+  listScrollTo(cur);
+  afterListMove();
+}
+function listIndexAtScroll() {
+  var doc = document.documentElement;
+  if (window.pageYOffset <= 1) return 0;
+  if (window.pageYOffset + window.innerHeight >= doc.scrollHeight - 2) return total - 1;
+  /* 画面の上から数えて、半分より多く見えている最初のスライド */
+  for (var i = 0; i < total; i++) {
+    var r = slides[i].getBoundingClientRect();
+    if (r.bottom > r.height * 0.5) return i;
+  }
+  return total - 1;
+}
+var listScrollQueued = false;
+window.addEventListener('scroll', function () {
+  if (currentView !== 'list' || inPrint || listScrollQueued) return;
+  listScrollQueued = true;
+  requestAnimationFrame(function () {
+    listScrollQueued = false;
+    if (currentView !== 'list' || inPrint || Math.abs(window.pageYOffset - expectedScrollY) <= 2) return;
+    var i = listIndexAtScroll();
+    if (i !== cur) { cur = i; afterListMove(); }
+  });
+}, { passive: true });
+window.addEventListener('beforeprint', function () { inPrint = true; });
+window.addEventListener('afterprint', function () { inPrint = false; });
 function openFromGrid(i) {
   cur = clampIndex(i);
   currentView = 'hero';
@@ -248,7 +312,8 @@ function openFromGrid(i) {
 
 /* ── ページ指定移動: カウンターを数字入力欄に ── */
 function startJump() {
-  if (currentView !== 'hero') return;
+  /* list・グリッド中に J: hero に移ってから番号入力に入る（1回のキーで届く） */
+  if (currentView !== 'hero') { currentView = 'hero'; applyView(); }
   var counter = document.getElementById('slide-counter');
   if (!counter || counter.querySelector('input')) return;
   var input = document.createElement('input');
@@ -345,7 +410,7 @@ function gridColumns(grid) {
   return Math.max(1, n);
 }
 
-/* ── キー: G グリッド / T サムネ帯 / J 番号入力 / Home・End / Esc でグリッドを閉じる ── */
+/* ── キー: G グリッド / T サムネ帯 / J 番号入力 / Home・End / Esc でグリッドを閉じる。どのビューからでも1回のキーで届く ── */
 document.addEventListener('keydown', function (e) {
   var t = e.target;
   if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
@@ -357,9 +422,9 @@ document.addEventListener('keydown', function (e) {
   if (e.shiftKey) return;
   var k = e.key;
   if (k === 'g' || k === 'G') { toggleGrid(); return; }
-  if (currentView !== 'hero') return;
-  if (k === 'Home') { e.preventDefault(); goTo(0); }
-  else if (k === 'End') { e.preventDefault(); goTo(total - 1); }
+  /* Home / End: hero はページ移動、list は先頭・末尾へスクロール（グリッド中はグリッド側が処理） */
+  if (k === 'Home' && currentView !== 'grid') { e.preventDefault(); goTo(0); }
+  else if (k === 'End' && currentView !== 'grid') { e.preventDefault(); goTo(total - 1); }
   else if (k === 'j' || k === 'J') { e.preventDefault(); startJump(); }
   else if (k === 't' || k === 'T') { toggleStrip(); }
 });
