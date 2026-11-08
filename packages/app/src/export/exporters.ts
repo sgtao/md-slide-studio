@@ -242,9 +242,10 @@ function buildControlClusterHtml(palette: string, hasNotes = false): string {
     '<div class="control-cluster">',
     // ノートがあるデッキだけ 🗒️ ボタンとポップアップを出す（既存MDの出力を変えない）
     ...(hasNotes ? [buildNotesPopupHtml(), buildNotesButtonHtml()] : []),
-    '  <button id="theme-toggle" onclick="toggleTheme()" title="テーマ切替"><span id="theme-icon">🌙</span></button>',
     '  <button id="view-toggle" onclick="toggleView()" title="表示切替（V）">▭</button>',
     buildOverviewButtonsHtml(),
+    // テーマ（🌙/☀️）は右から3番目（🎨・📥 の左）
+    '  <button id="theme-toggle" onclick="toggleTheme()" title="テーマ切替"><span id="theme-icon">🌙</span></button>',
     '  <div class="palette-menu">',
     '    <button id="palette-toggle" onclick="togglePaletteMenu()" title="カラーパレット">🎨</button>',
     '    <div id="palette-dropdown" class="palette-dropdown" hidden role="menu">',

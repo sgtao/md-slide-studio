@@ -106,9 +106,6 @@ export function ControlCluster(props: Props) {
           🗒️
         </button>
       )}
-      <button id="theme-toggle" onClick={props.onToggleTheme} title="テーマ切替">
-        <span id="theme-icon">{props.theme === 'dark' ? '☀️' : '🌙'}</span>
-      </button>
       <button
         id="view-toggle"
         onClick={props.onToggleView}
@@ -143,6 +140,10 @@ export function ControlCluster(props: Props) {
           🎞️
         </button>
       )}
+      {/* テーマ（🌙/☀️）は右から3番目（🎨・📥 の左）。書き出しHTMLと同じ並び */}
+      <button id="theme-toggle" onClick={props.onToggleTheme} title="テーマ切替">
+        <span id="theme-icon">{props.theme === 'dark' ? '☀️' : '🌙'}</span>
+      </button>
       <div className="palette-menu">
         <button id="palette-toggle" onClick={() => toggle('palette')} title="カラーパレット">
           🎨

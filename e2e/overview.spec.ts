@@ -83,10 +83,10 @@ async function clusterButtons(page: Page) {
 async function exerciseFixedButtons(page: Page, hasNotes: boolean) {
   const expectedIds = [
     ...(hasNotes ? ['notes-toggle'] : []),
-    'theme-toggle',
     'view-toggle',
     'grid-toggle',
     'strip-toggle',
+    'theme-toggle',
     'palette-toggle',
     'export-toggle',
   ];
