@@ -102,9 +102,9 @@ test('note: 付きMD → .slide-notes が hidden の aside として入る（段
   assert.ok(html.includes('note: 全体の結論'), '元MD（DECK_MD）には note: 行がそのまま残る（往復）');
 });
 
-test('note: 付きサンプルは5枚にノートが入り、note: を除いた同じMDには入らない（後方互換）', () => {
+test('note: 付きサンプルは6枚にノートが入り、note: を除いた同じMDには入らない（後方互換）', () => {
   const withNotes = run([SAMPLE, '--quiet']);
-  assert.equal((withNotes.match(/<aside class="slide-notes"/g) ?? []).length, 5);
+  assert.equal((withNotes.match(/<aside class="slide-notes"/g) ?? []).length, 6);
   const stripped = readFileSync(SAMPLE, 'utf-8')
     .split('\n')
     .filter((l) => !l.startsWith('note:'))

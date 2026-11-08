@@ -21,7 +21,7 @@
 
 ### 追加｜サンプル・テンプレートへの `note:`
 
-- `sample.md`: title・contrast・points・steps（HOW）・sources の5枚に `note:` を追加（計8行）。サンプルを開く／`mdss-convert` で変換すると5枚に `.slide-notes` が入る
+- `sample.md`: title・contrast・points・steps（HOW）・svg-figure（journey）・sources の6枚に `note:` を追加（計9行）。サンプルを開く／`mdss-convert` で変換すると6枚に `.slide-notes` が入る。svg-figure の `notes:`（複数形・図の右に見える補足）との違いも、そのスライドのノートで説明している
 - テンプレート挿入の `points` に `note:` 行を追加
 - テスト: `sample.test.ts` にノート数の検証、CLI smoke の後方互換テストを「サンプルから `note:` 行を除いた同じMDにはノート要素が入らない」形に変更
 
