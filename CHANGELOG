@@ -3,6 +3,24 @@
 このプロジェクトの変更履歴です。バージョンは [Semantic Versioning](https://semver.org/) に準拠。
 
 ---
+## [v0.6.2] - 2026-11-11
+
+GitHub Pages のデプロイが、タグ（`v*`）の push で拒否・取り消される問題を直した
+
+### 修正
+
+- **タグを push すると Pages のデプロイが失敗し、`main` のデプロイも取り消されて公開が止まる**: `github-pages` 環境は `main` からのデプロイしか許可していないのに、`deploy.yml` はタグの push でも走っていた。タグでの実行をやめ、`main` への push（と手動実行）だけで公開する。アプリ本体・書き出しHTML・CLI の動作は変わらない
+
+### ファイル構成の変更
+```
+変更:
+  .github/workflows/deploy.yml
+  package.json
+  package-lock.json
+  packages/cli/package.json
+```
+
+---
 ## [v0.6.1] - 2026-11-08
 
 閲覧UI（サムネ帯・一覧グリッド・ページ指定移動・ショートカットヘルプ）を、アプリのプレビューと書き出したHTMLの両方に追加した。あわせて、list 表示で `point:` が本文に重なる不具合などを直した（設計: `22_design-mdss-migrate/03_migration-plan/02_viewer-ui-plan.md`）
